@@ -83,14 +83,6 @@ int main(int argc, char **argv)
                 if (Maps->isValidBlock(y+1,x-1,z)) Maps->ReadBlock40d(y+1,x-1,z,&backrightblock); else hasbackright = false;
                 if (Maps->isValidBlock(y-1,x+1,z)) Maps->ReadBlock40d(y-1,x+1,z,&frontleftblock); else hasfrontleft = false;
                 if (Maps->isValidBlock(y+1,x+1,z)) Maps->ReadBlock40d(y+1,x+1,z,&frontrightblock); else hasfrontright = false;
-                /*for (int j=0; j<16; j++)
-                {
-                    for (int i=0; i<16; i++)
-                    {
-                        cout << DFHack::isWallTerrain(backblock.tiletypes[i][j]);
-                    }
-                    cout << endl;
-                }*/
                 Vec3Array *bvu = new Vec3Array();
                 Vec3Array *bvr = new Vec3Array();
                 Vec3Array *bvd = new Vec3Array();
