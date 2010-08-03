@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1280628184 source:c:\overseer\overseer.cpp
+1280792800 source:c:\overseer\overseer.cpp
 	<osgViewer/Viewer>
 	<osg/Drawable>
 	<osg/Geometry>
@@ -932,7 +932,7 @@
 	"DFPragma.h"
 	"DFExport.h"
 
-1280034226 c:\dfhack\library\include\dfhack\dftiletypes.h
+1280630843 c:\dfhack\library\include\dfhack\dftiletypes.h
 	"DFPragma.h"
 
 1268498240 c:\program files (x86)\openscenegraph\include\osgga\statesetmanipulator

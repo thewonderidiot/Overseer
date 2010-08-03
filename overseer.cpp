@@ -19,14 +19,972 @@
 using namespace std;
 using namespace osg;
 
-enum {VWALL, HWALL, FLOOR};
+Group *root;
+Geode *blockGeode;
+Geometry *bg;
+Vec3Array *vertices;
+Vec3Array *normals;
+DrawElementsUInt* face;
+
+bool drawNorthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *northblock, bool doNorthBoundary)
+{
+    bool wallStarted = false;
+    for (int j = 0; j < 16; j++)
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            if (!(DFHack::isWallTerrain(block->tiletypes[i][j])||DFHack::isRampTerrain(block->tiletypes[i][j])) && ((j>0 && DFHack::isWallTerrain(block->tiletypes[i][j-1])) || (doNorthBoundary && j==0 && DFHack::isWallTerrain(northblock->tiletypes[i][15]))))
+            {
+                if (!wallStarted)
+                {
+                    vertices->push_back(Vec3(y+i,16-j-x,z));
+                    vertices->push_back(Vec3(y+i,16-j-x,z+1));
+                    normals->push_back(Vec3(0,-1,0));
+                    normals->push_back(Vec3(0,-1,0));
+                    wallStarted = true;
+                }
+                if (wallStarted && i==15)
+                {
+                    vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+                    vertices->push_back(Vec3(y+i+1,16-j-x,z));
+                    normals->push_back(Vec3(0,-1,0));
+                    normals->push_back(Vec3(0,-1,0));
+                    face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                    int s = vertices->size()-1;
+                    face->push_back(s);
+                    face->push_back(s-1);
+                    face->push_back(s-2);
+                    face->push_back(s-3);
+                    bg->addPrimitiveSet(face);
+                    wallStarted = false;
+                }
+
+            }
+            else if (wallStarted)
+            {
+                vertices->push_back(Vec3(y+i,16-j-x,z+1));
+                vertices->push_back(Vec3(y+i,16-j-x,z));
+                normals->push_back(Vec3(0,-1,0));
+                normals->push_back(Vec3(0,-1,0));
+                face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                int s = vertices->size()-1;
+                face->push_back(s);
+                face->push_back(s-1);
+                face->push_back(s-2);
+                face->push_back(s-3);
+                bg->addPrimitiveSet(face);
+                wallStarted = false;
+            }
+        }
+    }
+    return true;
+}
+
+bool drawSouthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *southblock, bool doSouthBoundary)
+{
+    bool wallStarted = false;
+    for (int j = 0; j < 16; j++)
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            if (!(DFHack::isWallTerrain(block->tiletypes[i][j])||DFHack::isRampTerrain(block->tiletypes[i][j])) && ((j<15 && DFHack::isWallTerrain(block->tiletypes[i][j+1])) || (doSouthBoundary && j==15 && DFHack::isWallTerrain(southblock->tiletypes[i][0]))))
+            {
+                if (!wallStarted)
+                {
+                    vertices->push_back(Vec3(y+i,15-j-x,z));
+					vertices->push_back(Vec3(y+i,15-j-x,z+1));
+                    normals->push_back(Vec3(0,1,0));
+                    normals->push_back(Vec3(0,1,0));
+                    wallStarted = true;
+                }
+                if (wallStarted && i==15)
+                {
+                    vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+                    vertices->push_back(Vec3(y+i+1,15-j-x,z));
+                    normals->push_back(Vec3(0,1,0));
+                    normals->push_back(Vec3(0,1,0));
+                    face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                    int s = vertices->size()-1;
+                    face->push_back(s);
+                    face->push_back(s-1);
+                    face->push_back(s-2);
+                    face->push_back(s-3);
+                    bg->addPrimitiveSet(face);
+                    wallStarted = false;
+                }
+
+            }
+            else if (wallStarted)
+            {
+                vertices->push_back(Vec3(y+i,15-j-x,z+1));
+                vertices->push_back(Vec3(y+i,15-j-x,z));
+                normals->push_back(Vec3(0,1,0));
+                normals->push_back(Vec3(0,1,0));
+                face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                int s = vertices->size()-1;
+                face->push_back(s);
+                face->push_back(s-1);
+                face->push_back(s-2);
+                face->push_back(s-3);
+                bg->addPrimitiveSet(face);
+                wallStarted = false;
+            }
+        }
+    }
+    return true;
+}
+
+bool drawWestWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *westblock, bool doWestBoundary)
+{
+    bool wallStarted = false;
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 16; j++)
+        {
+            if (!(DFHack::isWallTerrain(block->tiletypes[i][j])||DFHack::isRampTerrain(block->tiletypes[i][j])) && ((i>0 && DFHack::isWallTerrain(block->tiletypes[i-1][j])) || (doWestBoundary && i==0 && DFHack::isWallTerrain(westblock->tiletypes[15][j]))))
+            {
+                if (!wallStarted)
+                {
+                    vertices->push_back(Vec3(y+i,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i,16-j-x,z));
+                    normals->push_back(Vec3(1,0,0));
+                    normals->push_back(Vec3(1,0,0));
+                    wallStarted = true;
+                }
+                if (wallStarted && j==15)
+                {
+                    vertices->push_back(Vec3(y+i,15-j-x,z));
+                    vertices->push_back(Vec3(y+i,15-j-x,z+1));
+                    normals->push_back(Vec3(1,0,0));
+                    normals->push_back(Vec3(1,0,0));
+                    face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                    int s = vertices->size()-1;
+                    face->push_back(s);
+                    face->push_back(s-1);
+                    face->push_back(s-2);
+                    face->push_back(s-3);
+                    bg->addPrimitiveSet(face);
+                    wallStarted = false;
+                }
+
+            }
+            else if (wallStarted)
+            {
+                vertices->push_back(Vec3(y+i,16-j-x,z));
+                vertices->push_back(Vec3(y+i,16-j-x,z+1));
+                normals->push_back(Vec3(1,0,0));
+                normals->push_back(Vec3(1,0,0));
+                face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                int s = vertices->size()-1;
+                face->push_back(s);
+                face->push_back(s-1);
+                face->push_back(s-2);
+                face->push_back(s-3);
+                bg->addPrimitiveSet(face);
+                wallStarted = false;
+            }
+        }
+    }
+    return true;
+}
+bool drawEastWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *eastblock, bool doEastBoundary)
+{
+    bool wallStarted = false;
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 16; j++)
+        {
+            if (!(DFHack::isWallTerrain(block->tiletypes[i][j])||DFHack::isRampTerrain(block->tiletypes[i][j])) && ((i<15 && DFHack::isWallTerrain(block->tiletypes[i+1][j])) || (doEastBoundary && i==15 && DFHack::isWallTerrain(eastblock->tiletypes[0][j]))))
+            {
+                if (!wallStarted)
+                {
+                    vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+                    normals->push_back(Vec3(-1,0,0));
+                    normals->push_back(Vec3(-1,0,0));
+                    wallStarted = true;
+                }
+                if (wallStarted && j==15)
+                {
+                    vertices->push_back(Vec3(y+i+1,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+                    normals->push_back(Vec3(-1,0,0));
+                    normals->push_back(Vec3(-1,0,0));
+                    face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                    int s = vertices->size()-1;
+                    face->push_back(s);
+                    face->push_back(s-1);
+                    face->push_back(s-2);
+                    face->push_back(s-3);
+                    bg->addPrimitiveSet(face);
+                    wallStarted = false;
+                }
+
+            }
+            else if (wallStarted)
+            {
+                vertices->push_back(Vec3(y+i+1,16-j-x,z));
+				vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+                normals->push_back(Vec3(-1,0,0));
+                normals->push_back(Vec3(-1,0,0));
+                face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                int s = vertices->size()-1;
+                face->push_back(s);
+                face->push_back(s-1);
+                face->push_back(s-2);
+                face->push_back(s-3);
+                bg->addPrimitiveSet(face);
+                wallStarted = false;
+            }
+        }
+    }
+    return true;
+}
+
+bool drawFloors(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *downblock, bool doDownBoundary)
+{
+    bool floorStarted = false;
+    for (int j = 0; j < 16; j++)
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            if (DFHack::isFloorTerrain(block->tiletypes[i][j]) || (doDownBoundary && DFHack::isWallTerrain(block->tiletypes[i][j]) && (DFHack::isFloorTerrain(downblock->tiletypes[i][j]) || DFHack::isOpenTerrain(downblock->tiletypes[i][j]))))
+            {
+                if (!floorStarted)
+                {
+                    vertices->push_back(Vec3(y+i,16-j-x,z));
+					vertices->push_back(Vec3(y+i,15-j-x,z));
+                    normals->push_back(Vec3(0,0,1));
+                    normals->push_back(Vec3(0,0,1));
+                    floorStarted = true;
+                }
+                if (floorStarted && i==15)
+                {
+                    vertices->push_back(Vec3(y+i+1,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+                    normals->push_back(Vec3(0,0,1));
+                    normals->push_back(Vec3(0,0,1));
+                    face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                    int s = vertices->size()-1;
+                    face->push_back(s);
+                    face->push_back(s-1);
+                    face->push_back(s-2);
+                    face->push_back(s-3);
+                    bg->addPrimitiveSet(face);
+                    floorStarted = false;
+                }
+
+            }
+            else if (floorStarted)
+            {
+                vertices->push_back(Vec3(y+i,15-j-x,z));
+				vertices->push_back(Vec3(y+i,16-j-x,z));
+                normals->push_back(Vec3(0,0,1));
+                normals->push_back(Vec3(0,0,1));
+                face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                int s = vertices->size()-1;
+                face->push_back(s);
+                face->push_back(s-1);
+                face->push_back(s-2);
+                face->push_back(s-3);
+                bg->addPrimitiveSet(face);
+                floorStarted = false;
+            }
+        }
+    }
+    return true;
+}
+
+bool drawRamps(int y, int x, int z, DFHack::mapblock40d *block, //these should be changed to accept an array, so blocks[][][] and exists[][][] need to be reformatted for z,y,z
+			DFHack::mapblock40d *northwestblock, DFHack::mapblock40d *northblock, DFHack::mapblock40d *northeastblock, DFHack::mapblock40d *westblock, DFHack::mapblock40d *eastblock,
+			DFHack::mapblock40d *southwestblock, DFHack::mapblock40d *southblock, DFHack::mapblock40d *southeastblock,
+			bool doNorthwestBoundary, bool doNorthBoundary, bool doNortheastBoundary, bool doWestBoundary, bool doEastBoundary, bool doSouthwestBoundary, bool doSouthBoundary, bool doSoutheastBoundary)
+{
+	for (int j = 0; j < 16; j++)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			if (DFHack::isRampTerrain(block->tiletypes[i][j])) //I sincerely apologize for this. This NEEDS to be changed. I am disappoint with myself.
+			{
+				//starting off with corner situations
+				//northwest
+				if (((j>0 && DFHack::isRampTerrain(block->tiletypes[i][j-1]))||(j==0 && doNorthBoundary && DFHack::isRampTerrain(northblock->tiletypes[i][15]))) //north is a ramp
+				&& ((i>0 && DFHack::isRampTerrain(block->tiletypes[i-1][j]))||(i==0 && doWestBoundary && DFHack::isRampTerrain(westblock->tiletypes[15][j])))) //west is a ramp
+				{
+					if ((i>0 && j>0 && DFHack::isWallTerrain(block->tiletypes[i-1][j-1]))||(i==0 && j>0 && doWestBoundary && DFHack::isWallTerrain(westblock->tiletypes[15][j-1]))
+					|| (i>0 && j==0 && doNorthBoundary && DFHack::isWallTerrain(northblock->tiletypes[i-1][15])) || (i==0 && j==0 && doNorthwestBoundary && DFHack::isWallTerrain(northwestblock->tiletypes[15][15]))) //northwest is a wall
+					{
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,-1,1));
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+						int s = vertices->size()-1;
+						face->push_back(s-1);
+						face->push_back(s-3);
+						face->push_back(s-5);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+						face->push_back(s);
+						face->push_back(s-2);
+						face->push_back(s-4);
+						bg->addPrimitiveSet(face);
+					}
+					else //up-west is a floor
+					{
+						vertices->push_back(Vec3(y+i,16-j-x,z)); //bottom of crease
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1)); //top of crease
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1)); //top of left wing
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i,15-j-x,z+1)); //top of right wing
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i+1,15-j-x,z)); //below top of crease
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+
+						vertices->push_back(Vec3(y+i,15-j-x,z)); //sub-right wing
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+
+						vertices->push_back(Vec3(y+i+1,16-j-x,z)); //sub-left wing
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(-1,0,0));
+						normals->push_back(Vec3(0,1,0));
+
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(0,-1,0));
+						normals->push_back(Vec3(1,0,0));
+
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,1,0));
+						normals->push_back(Vec3(1,0,0));
+
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(-1,0,0));
+						normals->push_back(Vec3(0,-1,0));
+
+						normals->push_back(Vec3(0,-1,0));
+						normals->push_back(Vec3(1,0,0));
+
+						normals->push_back(Vec3(-1,0,0));
+						normals->push_back(Vec3(0,-1,0));
+
+						normals->push_back(Vec3(0,1,0));
+						normals->push_back(Vec3(1,0,0));
+
+						int s = vertices->size()-1;
+						face = new DrawElementsUInt(PrimitiveSet::QUADS,0); //right square wall
+						face->push_back(s-2);
+						face->push_back(s-5);
+						face->push_back(s-13);
+						face->push_back(s-6);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::QUADS,0); //left square wall
+						face->push_back(s);
+						face->push_back(s-4);
+						face->push_back(s-12);
+						face->push_back(s-9);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //right tri wall
+						face->push_back(s-3);
+						face->push_back(s-7);
+						face->push_back(s-17);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //left tri wall
+						face->push_back(s-1);
+						face->push_back(s-10);
+						face->push_back(s-16);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //right ramp wall
+						face->push_back(s-8);
+						face->push_back(s-14);
+						face->push_back(s-18);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //left ramp wall
+						face->push_back(s-11);
+						face->push_back(s-15);
+						face->push_back(s-19);
+						bg->addPrimitiveSet(face);
+					}
+				}
+				//northeast
+				else if (((j>0 && DFHack::isRampTerrain(block->tiletypes[i][j-1]))||(j==0 && doNorthBoundary && DFHack::isRampTerrain(northblock->tiletypes[i][15]))) //north is a ramp
+				&& ((i<15 && DFHack::isRampTerrain(block->tiletypes[i+1][j]))||(i==15 && doEastBoundary && DFHack::isRampTerrain(eastblock->tiletypes[0][j])))) //east is a ramp
+				{
+					if ((i<15 && j>0 && DFHack::isWallTerrain(block->tiletypes[i+1][j-1]))||(i==15 && j>0 && doEastBoundary && DFHack::isWallTerrain(eastblock->tiletypes[0][j-1]))
+					|| (i<15 && j==0 && doNorthBoundary && DFHack::isWallTerrain(northblock->tiletypes[i+1][15])) || (i==15 && j==0 && doNortheastBoundary && DFHack::isWallTerrain(northeastblock->tiletypes[0][15]))) //northeast is a wall
+					{
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(-1,0,1));
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+						int s = vertices->size()-1;
+						face->push_back(s-1);
+						face->push_back(s-3);
+						face->push_back(s-5);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+						face->push_back(s);
+						face->push_back(s-2);
+						face->push_back(s-4);
+						bg->addPrimitiveSet(face);
+					}
+					else //northeast is a floor
+					{
+						vertices->push_back(Vec3(y+i+1,16-j-x,z)); //bottom of crease
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+
+						vertices->push_back(Vec3(y+i,15-j-x,z+1)); //top of crease
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1)); //top of left wing
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i,16-j-x,z+1)); //top of right wing
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i,15-j-x,z)); //below top of crease
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+
+						vertices->push_back(Vec3(y+i,16-j-x,z)); //sub-right wing
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+
+						vertices->push_back(Vec3(y+i+1,15-j-x,z)); //sub-left wing
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,1,0));
+						normals->push_back(Vec3(1,0,0));
+
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(-1,0,0));
+						normals->push_back(Vec3(0,-1,0));
+
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(1,0,0));
+						normals->push_back(Vec3(0,-1,0));
+
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,1,0));
+						normals->push_back(Vec3(-1,0,0));
+
+						normals->push_back(Vec3(-1,0,0));
+						normals->push_back(Vec3(0,-1,0));
+
+						normals->push_back(Vec3(0,1,0));
+						normals->push_back(Vec3(-1,0,0));
+
+						normals->push_back(Vec3(1,0,0));
+						normals->push_back(Vec3(0,-1,0));
+
+						int s = vertices->size()-1;
+						face = new DrawElementsUInt(PrimitiveSet::QUADS,0); //right square wall
+						face->push_back(s-2);
+						face->push_back(s-5);
+						face->push_back(s-13);
+						face->push_back(s-6);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::QUADS,0); //left square wall
+						face->push_back(s);
+						face->push_back(s-4);
+						face->push_back(s-12);
+						face->push_back(s-9);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //right tri wall
+						face->push_back(s-3);
+						face->push_back(s-7);
+						face->push_back(s-17);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //left tri wall
+						face->push_back(s-1);
+						face->push_back(s-10);
+						face->push_back(s-16);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //right ramp wall
+						face->push_back(s-8);
+						face->push_back(s-14);
+						face->push_back(s-18);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //left ramp wall
+						face->push_back(s-11);
+						face->push_back(s-15);
+						face->push_back(s-19);
+						bg->addPrimitiveSet(face);
+					}
+				}
+				//southwest
+				else if (((j<15 && DFHack::isRampTerrain(block->tiletypes[i][j+1]))||(j==15 && doSouthBoundary && DFHack::isRampTerrain(southblock->tiletypes[i][0]))) //south is a ramp
+				&& ((i>0 && DFHack::isRampTerrain(block->tiletypes[i-1][j]))||(i==0 && doWestBoundary && DFHack::isRampTerrain(westblock->tiletypes[15][j])))) //west is a ramp
+				{
+					if ((i>0 && j<15 && DFHack::isWallTerrain(block->tiletypes[i-1][j+1]))||(i==0 && j<15 && doWestBoundary && DFHack::isWallTerrain(westblock->tiletypes[15][j+1]))
+					|| (i>0 && j==15 && doSouthBoundary && DFHack::isWallTerrain(southblock->tiletypes[i-1][0])) || (i==0 && j==15 && doSouthwestBoundary && DFHack::isWallTerrain(southwestblock->tiletypes[15][0]))) //southwest is a wall
+					{
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(1,0,1));
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+						int s = vertices->size()-1;
+						face->push_back(s-1);
+						face->push_back(s-3);
+						face->push_back(s-5);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+						face->push_back(s);
+						face->push_back(s-2);
+						face->push_back(s-4);
+						bg->addPrimitiveSet(face);
+					}
+					else //southwest is a floor
+					{
+
+						vertices->push_back(Vec3(y+i,15-j-x,z)); //bottom of crease
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1)); //top of crease
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+
+
+						vertices->push_back(Vec3(y+i,16-j-x,z+1)); //top of left wing
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1)); //top of right wing
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i+1,16-j-x,z)); //below top of crease
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+
+						vertices->push_back(Vec3(y+i+1,15-j-x,z)); //sub-right wing
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+
+						vertices->push_back(Vec3(y+i,16-j-x,z)); //sub-left wing
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,-1,0));
+						normals->push_back(Vec3(-1,0,0));
+
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(1,0,0));
+						normals->push_back(Vec3(0,1,0));
+
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(-1,0,0));
+						normals->push_back(Vec3(0,1,0));
+
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,-1,0));
+						normals->push_back(Vec3(1,0,0));
+
+						normals->push_back(Vec3(1,0,0));
+						normals->push_back(Vec3(0,1,0));
+
+						normals->push_back(Vec3(0,-1,0));
+						normals->push_back(Vec3(1,0,0));
+
+						normals->push_back(Vec3(-1,0,0));
+						normals->push_back(Vec3(0,1,0));
+
+						int s = vertices->size()-1;
+						face = new DrawElementsUInt(PrimitiveSet::QUADS,0); //right square wall
+						face->push_back(s-2);
+						face->push_back(s-5);
+						face->push_back(s-13);
+						face->push_back(s-6);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::QUADS,0); //left square wall
+						face->push_back(s);
+						face->push_back(s-4);
+						face->push_back(s-12);
+						face->push_back(s-9);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //right tri wall
+						face->push_back(s-3);
+						face->push_back(s-7);
+						face->push_back(s-17);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //left tri wall
+						face->push_back(s-1);
+						face->push_back(s-10);
+						face->push_back(s-16);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //right ramp wall
+						face->push_back(s-8);
+						face->push_back(s-14);
+						face->push_back(s-18);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //left ramp wall
+						face->push_back(s-11);
+						face->push_back(s-15);
+						face->push_back(s-19);
+						bg->addPrimitiveSet(face);
+					}
+				}
+				else if (((j<15 && DFHack::isRampTerrain(block->tiletypes[i][j+1]))||(j==15 && doSouthBoundary && DFHack::isRampTerrain(southblock->tiletypes[i][0]))) //south is a ramp
+				&& ((i<15 && DFHack::isRampTerrain(block->tiletypes[i+1][j]))||(i==15 && doEastBoundary && DFHack::isRampTerrain(eastblock->tiletypes[0][j])))) //east is a ramp
+				{
+					if ((i<15 && j<15 && DFHack::isWallTerrain(block->tiletypes[i+1][j+1]))||(i==15 && j<15 && doEastBoundary && DFHack::isWallTerrain(eastblock->tiletypes[0][j+1]))
+					|| (i<15 && j==15 && doSouthBoundary && DFHack::isWallTerrain(southblock->tiletypes[i+1][0])) || (i==15 && j==15 && doSoutheastBoundary && DFHack::isWallTerrain(southeastblock->tiletypes[0][0]))) //south-east is a wall
+					{
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,1,1));
+						normals->push_back(Vec3(-1,0,1));
+						normals->push_back(Vec3(0,1,1));
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+						int s = vertices->size()-1;
+						face->push_back(s-1);
+						face->push_back(s-3);
+						face->push_back(s-5);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+						face->push_back(s);
+						face->push_back(s-2);
+						face->push_back(s-4);
+						bg->addPrimitiveSet(face);
+					}
+					else//southeast is a floor
+					{
+						vertices->push_back(Vec3(y+i+1,15-j-x,z)); //bottom of crease
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+						vertices->push_back(Vec3(y+i+1,15-j-x,z));
+
+
+						vertices->push_back(Vec3(y+i,16-j-x,z+1)); //top of crease
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i,16-j-x,z+1));
+
+
+						vertices->push_back(Vec3(y+i,15-j-x,z+1)); //top of left wing
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+						vertices->push_back(Vec3(y+i,15-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1)); //top of right wing
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+						vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+
+						vertices->push_back(Vec3(y+i,16-j-x,z)); //below top of crease
+						vertices->push_back(Vec3(y+i,16-j-x,z));
+
+						vertices->push_back(Vec3(y+i+1,16-j-x,z)); //sub-right wing
+						vertices->push_back(Vec3(y+i+1,16-j-x,z));
+
+						vertices->push_back(Vec3(y+i,15-j-x,z)); //sub-left wing
+						vertices->push_back(Vec3(y+i,15-j-x,z));
+
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(1,0,0));
+						normals->push_back(Vec3(0,-1,0));
+
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(0,1,0));
+						normals->push_back(Vec3(-1,0,0));
+
+						normals->push_back(Vec3(1,0,1));
+						normals->push_back(Vec3(0,-1,0));
+						normals->push_back(Vec3(-1,0,0));
+
+						normals->push_back(Vec3(0,-1,1));
+						normals->push_back(Vec3(1,0,0));
+						normals->push_back(Vec3(0,1,0));
+
+						normals->push_back(Vec3(0,1,0));
+						normals->push_back(Vec3(-1,0,0));
+
+						normals->push_back(Vec3(1,0,0));
+						normals->push_back(Vec3(0,1,0));
+
+						normals->push_back(Vec3(0,-1,0));
+						normals->push_back(Vec3(-1,0,0));
+
+						int s = vertices->size()-1;
+						face = new DrawElementsUInt(PrimitiveSet::QUADS,0); //right square wall
+						face->push_back(s-2);
+						face->push_back(s-5);
+						face->push_back(s-13);
+						face->push_back(s-6);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::QUADS,0); //left square wall
+						face->push_back(s);
+						face->push_back(s-4);
+						face->push_back(s-12);
+						face->push_back(s-9);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //right tri wall
+						face->push_back(s-3);
+						face->push_back(s-7);
+						face->push_back(s-17);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //left tri wall
+						face->push_back(s-1);
+						face->push_back(s-10);
+						face->push_back(s-16);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //right ramp wall
+						face->push_back(s-8);
+						face->push_back(s-14);
+						face->push_back(s-18);
+						bg->addPrimitiveSet(face);
+						face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0); //left ramp wall
+						face->push_back(s-11);
+						face->push_back(s-15);
+						face->push_back(s-19);
+						bg->addPrimitiveSet(face);
+					}
+				}
+				else if (((j>0 && DFHack::isWallTerrain(block->tiletypes[i][j-1]))||(j==0 && doNorthBoundary && DFHack::isWallTerrain(northblock->tiletypes[i][15]))) //north is a wall
+				&& ((j<15 && !DFHack::isWallTerrain(block->tiletypes[i][j+1]))||(j==15 && doSouthBoundary && !DFHack::isWallTerrain(southblock->tiletypes[i][0]))||!doSouthBoundary)) //south isn't
+				{
+					vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i,15-j-x,z));
+					vertices->push_back(Vec3(y+i,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+					vertices->push_back(Vec3(y+i,16-j-x,z));
+					normals->push_back(Vec3(0,-1,1));
+					normals->push_back(Vec3(1,0,0));
+					normals->push_back(Vec3(0,-1,1));
+					normals->push_back(Vec3(-1,0,0));
+					normals->push_back(Vec3(0,-1,1));
+					normals->push_back(Vec3(-1,0,0));
+					normals->push_back(Vec3(0,-1,1));
+					normals->push_back(Vec3(1,0,0));
+					normals->push_back(Vec3(1,0,0));
+					normals->push_back(Vec3(-1,0,0));
+					int s = vertices->size()-1;
+					face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+					face->push_back(s-3);
+					face->push_back(s-5);
+					face->push_back(s-7);
+					face->push_back(s-9);
+					bg->addPrimitiveSet(face);
+					face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+					face->push_back(s-1);
+					face->push_back(s-2);
+					face->push_back(s-8);
+					bg->addPrimitiveSet(face);
+					face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+					face->push_back(s);
+					face->push_back(s-4);
+					face->push_back(s-6);
+					bg->addPrimitiveSet(face);
+				}
+				else if (((j<15 && DFHack::isWallTerrain(block->tiletypes[i][j+1]))||(j==15 && doSouthBoundary && DFHack::isWallTerrain(southblock->tiletypes[i][0]))) //south is a wall
+				&& ((j>0 && !DFHack::isWallTerrain(block->tiletypes[i][j-1]))||(j==0 && doNorthBoundary && !DFHack::isWallTerrain(northblock->tiletypes[i][15]))||!doNorthBoundary)) //north isn't
+				{
+					vertices->push_back(Vec3(y+i,15-j-x,z+1));
+					vertices->push_back(Vec3(y+i,15-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+					vertices->push_back(Vec3(y+i,16-j-x,z));
+					vertices->push_back(Vec3(y+i,16-j-x,z));
+					vertices->push_back(Vec3(y+i,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z));
+					normals->push_back(Vec3(0,1,1));
+					normals->push_back(Vec3(-1,0,0));
+					normals->push_back(Vec3(0,1,1));
+					normals->push_back(Vec3(1,0,0));
+					normals->push_back(Vec3(0,1,1));
+					normals->push_back(Vec3(1,0,0));
+					normals->push_back(Vec3(0,1,1));
+					normals->push_back(Vec3(-1,0,0));
+					normals->push_back(Vec3(-1,0,0));
+					normals->push_back(Vec3(1,0,0));
+					int s = vertices->size()-1;
+					face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+					face->push_back(s-3);
+					face->push_back(s-5);
+					face->push_back(s-7);
+					face->push_back(s-9);
+					bg->addPrimitiveSet(face);
+					face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+					face->push_back(s-1);
+					face->push_back(s-2);
+					face->push_back(s-8);
+					bg->addPrimitiveSet(face);
+					face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+					face->push_back(s);
+					face->push_back(s-4);
+					face->push_back(s-6);
+					bg->addPrimitiveSet(face);
+				}
+				else if (((i>0 && DFHack::isWallTerrain(block->tiletypes[i-1][j]))||(i==0 && doWestBoundary && DFHack::isWallTerrain(westblock->tiletypes[15][j]))) //west is a wall
+				&& ((i<15 && !DFHack::isWallTerrain(block->tiletypes[i+1][j]))||(i==15 && doEastBoundary && !DFHack::isWallTerrain(eastblock->tiletypes[0][j]))||!doEastBoundary)) //east isn't
+				{
+					vertices->push_back(Vec3(y+i,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i,15-j-x,z+1));
+					vertices->push_back(Vec3(y+i,15-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+					vertices->push_back(Vec3(y+i,16-j-x,z));
+					vertices->push_back(Vec3(y+i,15-j-x,z));
+					normals->push_back(Vec3(1,0,1));
+					normals->push_back(Vec3(0,1,0));
+					normals->push_back(Vec3(1,0,1));
+					normals->push_back(Vec3(0,-1,0));
+					normals->push_back(Vec3(1,0,1));
+					normals->push_back(Vec3(0,-1,0));
+					normals->push_back(Vec3(1,0,1));
+					normals->push_back(Vec3(0,1,0));
+					normals->push_back(Vec3(0,1,0));
+					normals->push_back(Vec3(0,-1,0));
+					int s = vertices->size()-1;
+					face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+					face->push_back(s-3);
+					face->push_back(s-5);
+					face->push_back(s-7);
+					face->push_back(s-9);
+					bg->addPrimitiveSet(face);
+					face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+					face->push_back(s-1);
+					face->push_back(s-2);
+					face->push_back(s-8);
+					bg->addPrimitiveSet(face);
+					face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+					face->push_back(s);
+					face->push_back(s-4);
+					face->push_back(s-6);
+					bg->addPrimitiveSet(face);
+				}
+				else if (((i<15 && DFHack::isWallTerrain(block->tiletypes[i+1][j]))||(i==15 && doEastBoundary && DFHack::isWallTerrain(eastblock->tiletypes[0][j]))) //east is a wall
+				&& ((i>0 && !DFHack::isWallTerrain(block->tiletypes[i-1][j]))||(i==0 && doWestBoundary && !DFHack::isWallTerrain(westblock->tiletypes[15][j]))||!doWestBoundary)) //west isn't
+				{
+					vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
+					vertices->push_back(Vec3(y+i,16-j-x,z));
+					vertices->push_back(Vec3(y+i,16-j-x,z));
+					vertices->push_back(Vec3(y+i,15-j-x,z));
+					vertices->push_back(Vec3(y+i,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,15-j-x,z));
+					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+					normals->push_back(Vec3(-1,0,1));
+					normals->push_back(Vec3(0,-1,0));
+					normals->push_back(Vec3(-1,0,1));
+					normals->push_back(Vec3(0,1,0));
+					normals->push_back(Vec3(-1,0,1));
+					normals->push_back(Vec3(0,1,0));
+					normals->push_back(Vec3(-1,0,1));
+					normals->push_back(Vec3(0,-1,0));
+					normals->push_back(Vec3(0,-1,0));
+					normals->push_back(Vec3(0,1,0));
+					int s = vertices->size()-1;
+					face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+					face->push_back(s-3);
+					face->push_back(s-5);
+					face->push_back(s-7);
+					face->push_back(s-9);
+					bg->addPrimitiveSet(face);
+					face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+					face->push_back(s-1);
+					face->push_back(s-2);
+					face->push_back(s-8);
+					bg->addPrimitiveSet(face);
+					face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+					face->push_back(s);
+					face->push_back(s-4);
+					face->push_back(s-6);
+					bg->addPrimitiveSet(face);
+				}
+				else //stumped...
+				{
+					//cerr << "Ramp error at x="<<x<<",y="<<y<<",z="<<z<<",i="<<i<<",j="<<j<<endl;
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+/*
+
+
+    }*/
+
+
+
 
 int main(int argc, char **argv)
 {
     osgViewer::Viewer viewer;
-    Group *root = new Group();
-    Geode *blockGeode;
-    Geometry *bg;
+    root = new Group();
     DFHack::ContextManager *DFMgr = new DFHack::ContextManager("Memory.xml");
 	DFHack::Context *DF;
 
@@ -52,428 +1010,62 @@ int main(int argc, char **argv)
     uint32_t xmax,ymax,zmax;
     Maps->getSize(xmax,ymax,zmax);
     cout << "Embark size: " << xmax << "x" << ymax << "x" << zmax << endl;
-    DFHack::mapblock40d block, upblock, downblock, leftblock, rightblock, frontblock, backblock,backleftblock,backrightblock,frontleftblock,frontrightblock;
-    bool hasup, hasdown, hasleft, hasright, hasback, hasfront, hasbackleft, hasbackright, hasfrontleft, hasfrontright;
+
+    cout << "mapblock40d size: " << sizeof(DFHack::mapblock40d) << endl;
+
+    DFHack::mapblock40d blocks[3][3][3];
+    bool exists[3][3][3] = {{false,false,false},{false,false,false},{false,false,false}};
+
+    //blocks[1][1][1] = new DFHack::mapblock40d;
     osgUtil::TriStripVisitor tri(new osgUtil::Optimizer());
-    for (int z = 161; z < 164; z++)
+
+    for (int z = 0; z < zmax; z++)
     {
-        cout << "Loading z-level " << z << endl;
-        for (int y = 11; y < 12; y++)
+        cout << "Drawing z-level " << z << "..." << endl;
+        for (int y = 0; y < ymax; y++)
         {
-            for (int x = 11; x < 12; x++)
+            for (int x = 0; x < xmax; x++)
             {
                 if (!Maps->isValidBlock(y,x,z)) continue;
-                int tx = x*16;
-                int ty = y*16;
-                int tz = z;
+
+                for (int k = 0; k <= 2; k++) //load our local 3x3 cube
+                {
+                    for (int i = 0; i <= 2; i++)
+                    {
+                        for (int j = 0; j <= 2; j++)
+                        {
+                            if (Maps->isValidBlock(y+j-1,x+i-1,z+k-1))
+                            {
+                                Maps->ReadBlock40d(y+j-1,x+i-1,z+k-1,&blocks[j][i][k]);
+                                exists[j][i][k] = true;
+                            }
+                            else
+                            {
+                                exists[j][i][k] = false;
+                            }
+                        }
+                    }
+                }
                 blockGeode = new Geode();
                 bg = new Geometry();
                 blockGeode->addDrawable(bg);
                 root->addChild(blockGeode);
-
-                Maps->ReadBlock40d(y,x,z,&block);
-                hasup = hasdown = hasleft = hasright = hasback = hasfront = hasbackleft = hasbackright = hasfrontleft = hasfrontright = true;
-                if (Maps->isValidBlock(y-1,x,z)) Maps->ReadBlock40d(y-1,x,z,&leftblock); else hasleft = false;
-                if (Maps->isValidBlock(y+1,x,z)) Maps->ReadBlock40d(y+1,x,z,&rightblock); else hasright = false;
-                if (Maps->isValidBlock(y,x-1,z)) Maps->ReadBlock40d(y,x-1,z,&backblock); else hasback = false;
-                if (Maps->isValidBlock(y,x+1,z)) Maps->ReadBlock40d(y,x+1,z,&frontblock); else hasfront = false;
-                if (Maps->isValidBlock(y,x,z-1)) Maps->ReadBlock40d(y,x,z-1,&downblock); else hasdown = false;
-                if (Maps->isValidBlock(y,x,z+1)) Maps->ReadBlock40d(y,x,z+1,&upblock); else hasup = false;
-                if (Maps->isValidBlock(y-1,x-1,z)) Maps->ReadBlock40d(y-1,x-1,z,&backleftblock); else hasbackleft = false;
-                if (Maps->isValidBlock(y+1,x-1,z)) Maps->ReadBlock40d(y+1,x-1,z,&backrightblock); else hasbackright = false;
-                if (Maps->isValidBlock(y-1,x+1,z)) Maps->ReadBlock40d(y-1,x+1,z,&frontleftblock); else hasfrontleft = false;
-                if (Maps->isValidBlock(y+1,x+1,z)) Maps->ReadBlock40d(y+1,x+1,z,&frontrightblock); else hasfrontright = false;
-                Vec3Array *bvu = new Vec3Array();
-                Vec3Array *bvr = new Vec3Array();
-                Vec3Array *bvd = new Vec3Array();
-                Vec3Array *bvl = new Vec3Array();
-                Vec3Array *bvf = new Vec3Array();
-                Vec3Array *bvulramps = new Vec3Array();
-                Vec3Array *bvurramps = new Vec3Array();
-                Vec3Array *bvdlramps = new Vec3Array();
-                Vec3Array *bvdrramps = new Vec3Array();
-                Vec3Array *bvuramps = new Vec3Array();
-                Vec3Array *bvframps = new Vec3Array();
-                Vec3Array *bvlramps = new Vec3Array();
-                Vec3Array *bvrramps = new Vec3Array();
-                int uwalls = 0, dwalls=0, rwalls=0, lwalls=0, floors=0, ulramps=0, urramps=0, uramps=0, framps=0;
-
-                Vec3Array *normals = new Vec3Array();
-                Vec3Array *rampnormals = new Vec3Array();
-                bool wallAStarted = false, wallBStarted = false, floorStarted = false;
-
-                for (int j = 0; j < 16; j++)
-                {
-                    for (int i = 0; i < 16; i++)
-                    {
-                        //if (DFHack::isWallTerrain(block.tiletypes[i][j])) cout << "O";
-                       // else if (DFHack::isFloorTerrain(block.tiletypes[i][j])) cout << "+";
-                        //else if (DFHack::isRampTerrain(block.tiletypes[i][j])) cout << "R";
-                        //else if (DFHack::isStairTerrain(block.tiletypes[i][j])) cout << "X";
-                        //else if (DFHack::isOpenTerrain(block.tiletypes[i][j])) cout << " ";
-                        //else cout << "?";
-
-                        if (!DFHack::isWallTerrain(block.tiletypes[i][j]) && ((j>0 && DFHack::isWallTerrain(block.tiletypes[i][j-1])) || (hasback && j==0 && DFHack::isWallTerrain(backblock.tiletypes[i][15]))))
-                        {
-                            if (!wallAStarted)
-                            {
-                                bvu->push_back(Vec3(ty+i,16-j-tx,tz));
-                                bvu->push_back(Vec3(ty+i,16-j-tx,tz+1));
-                                uwalls++;
-                                wallAStarted = true;
-                            }
-                            if (wallAStarted && i==15)
-                            {
-                                bvu->push_back(Vec3(ty+i+1,16-j-tx,tz+1));
-                                bvu->push_back(Vec3(ty+i+1,16-j-tx,tz));
-                                wallAStarted = false;
-                            }
-
-                        }
-                        else if (wallAStarted)
-                        {
-                            bvu->push_back(Vec3(ty+i,16-j-tx,tz+1));
-                            bvu->push_back(Vec3(ty+i,16-j-tx,tz));
-                            wallAStarted = false;
-                        }
-
-                        if (!DFHack::isWallTerrain(block.tiletypes[i][j]) && ((j<15 && DFHack::isWallTerrain(block.tiletypes[i][j+1])) || (hasfront && j==15 && DFHack::isWallTerrain(frontblock.tiletypes[i][0]))))
-                        {
-                            if (!wallBStarted)
-                            {
-                                bvd->push_back(Vec3(ty+i,15-j-tx,tz));
-                                bvd->push_back(Vec3(ty+i,15-j-tx,tz+1));
-                                dwalls++;
-                                wallBStarted = true;
-                            }
-                            if (wallBStarted && i==15)
-                            {
-                                bvd->push_back(Vec3(ty+i+1,15-j-tx,tz+1));
-                                bvd->push_back(Vec3(ty+i+1,15-j-tx,tz));
-                                wallBStarted = false;
-                            }
-
-                        }
-                        else if (wallBStarted)
-                        {
-                            bvd->push_back(Vec3(ty+i,15-j-tx,tz+1));
-                            bvd->push_back(Vec3(ty+i,15-j-tx,tz));
-                            wallBStarted = false;
-                        }
-                        //Floor in horizontal strips. Optimize later!
-                        if (DFHack::isFloorTerrain(block.tiletypes[i][j]) || (hasdown && DFHack::isWallTerrain(block.tiletypes[i][j]) && (DFHack::isFloorTerrain(downblock.tiletypes[i][j]) || DFHack::isOpenTerrain(downblock.tiletypes[i][j]))))
-                        {
-                            if (!floorStarted)
-                            {
-                                bvf->push_back(Vec3(ty+i,16-j-tx,tz));
-                                bvf->push_back(Vec3(ty+i,15-j-tx,tz));
-                                floors++;
-                                floorStarted=true;
-                            }
-                            if (floorStarted && i==15)
-                            {
-                                bvf->push_back(Vec3(ty+i+1,15-j-tx,tz));
-                                bvf->push_back(Vec3(ty+i+1,16-j-tx,tz));
-                                floorStarted=false;
-                            }
-                        }
-                        else if (floorStarted)
-                        {
-                            bvf->push_back(Vec3(ty+i,15-j-tx,tz));
-                            bvf->push_back(Vec3(ty+i,16-j-tx,tz));
-                            floorStarted=false;
-                        }
-                        //ramps are even worse --completely unoptimized! For most fortresses this is okay.
-                        if (DFHack::isRampTerrain(block.tiletypes[i][j])) //I sincerely apologize for this. This NEEDS to be changed. I am disappoint with myself.
-                        {
-                            //starting off with corner situations
-                            //top-left
-                            if (((j>0 && DFHack::isRampTerrain(block.tiletypes[i][j-1]))||(j==0 && hasback && DFHack::isRampTerrain(backblock.tiletypes[i][15]))) //up is a ramp
-                            && ((i>0 && DFHack::isRampTerrain(block.tiletypes[i-1][j]))||(i==0 && hasleft && DFHack::isRampTerrain(leftblock.tiletypes[15][j])))) //left is a ramp
-                            {
-                                ulramps++;
-                                if ((i>0 && j>0 && DFHack::isWallTerrain(block.tiletypes[i-1][j-1]))||(i==0 && j>0 && hasleft && DFHack::isWallTerrain(leftblock.tiletypes[15][j-1]))
-                                || (i>0 && j==0 && hasback && DFHack::isWallTerrain(backblock.tiletypes[i-1][15])) || (i==0 && j==0 && hasbackleft && DFHack::isWallTerrain(backleftblock.tiletypes[15][15]))) //up-left is a wall
-                                {
-                                    cout << "Q";
-                                    bvulramps->push_back(Vec3(ty+i,16-j-tx,tz+1));
-                                    bvulramps->push_back(Vec3(ty+i+1,15-j-tx,tz));
-                                    bvulramps->push_back(Vec3(ty+i+1,16-j-tx,tz));
-                                    bvulramps->push_back(Vec3(ty+i,15-j-tx,tz));
-                                }
-                                else //up-left is a floor
-                                {
-                                    cout << "q";
-                                    bvulramps->push_back(Vec3(ty+i,16-j-tx,tz));
-                                    bvulramps->push_back(Vec3(ty+i+1,15-j-tx,tz+1));
-                                    bvulramps->push_back(Vec3(ty+i+1,16-j-tx,tz+1));
-                                    bvulramps->push_back(Vec3(ty+i,15-j-tx,tz+1));
-                                }
-                            }
-                            //top-right
-                            else if (((j>0 && DFHack::isRampTerrain(block.tiletypes[i][j-1]))||(j==0 && hasback && DFHack::isRampTerrain(backblock.tiletypes[i][15]))) //up is a ramp
-                            && ((i<15 && DFHack::isRampTerrain(block.tiletypes[i+1][j]))||(i==15 && hasright && DFHack::isRampTerrain(rightblock.tiletypes[0][j])))) //right is a ramp
-                            {
-                                urramps++;
-                                if ((i<15 && j>0 && DFHack::isWallTerrain(block.tiletypes[i+1][j-1]))||(i==15 && j>0 && hasright && DFHack::isWallTerrain(rightblock.tiletypes[0][j-1]))
-                                || (i<15 && j==0 && hasback && DFHack::isWallTerrain(backblock.tiletypes[i+1][15])) || (i==15 && j==0 && hasbackright && DFHack::isWallTerrain(backrightblock.tiletypes[0][15]))) //up-right is a wall
-                                {
-                                    cout << "E";
-                                    bvurramps->push_back(Vec3(ty+i+1,16-j-tx,tz+1));
-                                    bvurramps->push_back(Vec3(ty+i,15-j-tx,tz));
-                                    bvurramps->push_back(Vec3(ty+i+1,15-j-tx,tz));
-                                    bvurramps->push_back(Vec3(ty+i,16-j-tx,tz));
-                                }
-                                else //up-right is a floor
-                                {
-                                    cout << "e";
-                                    bvurramps->push_back(Vec3(ty+i+1,16-j-tx,tz));
-                                    bvurramps->push_back(Vec3(ty+i,15-j-tx,tz+1));
-                                    bvurramps->push_back(Vec3(ty+i+1,15-j-tx,tz+1));
-                                    bvurramps->push_back(Vec3(ty+i,16-j-tx,tz+1));
-                                }
-                            }
-                            //bottom-left
-                            else if (((j<15 && DFHack::isRampTerrain(block.tiletypes[i][j+1]))||(j==15 && hasfront && DFHack::isRampTerrain(frontblock.tiletypes[i][0]))) //front is a ramp
-                            && ((i>0 && DFHack::isRampTerrain(block.tiletypes[i-1][j]))||(i==0 && hasleft && DFHack::isRampTerrain(leftblock.tiletypes[15][j])))) //left is a ramp
-                            {
-                                if ((i>0 && j<15 && DFHack::isWallTerrain(block.tiletypes[i-1][j+1]))||(i==0 && j<15 && hasleft && DFHack::isWallTerrain(leftblock.tiletypes[15][j+1]))
-                                || (i>0 && j==15 && hasfront && DFHack::isWallTerrain(frontblock.tiletypes[i-1][0])) || (i==0 && j==15 && hasfrontleft && DFHack::isWallTerrain(frontleftblock.tiletypes[15][0]))) //front-left is a wall
-                                {
-                                    cout << "Z";
-                                }
-                                else //front-left is a floor
-                                {
-                                    cout << "z";
-                                }
-                            }
-                            else if (((j<15 && DFHack::isRampTerrain(block.tiletypes[i][j+1]))||(j==15 && hasfront && DFHack::isRampTerrain(frontblock.tiletypes[i][0]))) //front is a ramp
-                            && ((i<15 && DFHack::isRampTerrain(block.tiletypes[i+1][j]))||(i==15 && hasright && DFHack::isRampTerrain(rightblock.tiletypes[0][j])))) //right is a ramp
-                            {
-                                if ((i<15 && j<15 && DFHack::isWallTerrain(block.tiletypes[i+1][j+1]))||(i==15 && j<15 && hasright && DFHack::isWallTerrain(rightblock.tiletypes[0][j+1]))
-                                || (i<15 && j==15 && hasfront && DFHack::isWallTerrain(frontblock.tiletypes[i+1][0])) || (i==15 && j==15 && hasfrontright && DFHack::isWallTerrain(frontrightblock.tiletypes[0][0]))) //front-right is a wall
-                                {
-                                    cout << "C";
-                                }
-                                else//front-right is a floor
-                                {
-                                    cout << "c";
-                                }
-                            }
-                            else if (((j>0 && DFHack::isWallTerrain(block.tiletypes[i][j-1]))||(j==0 && hasback && DFHack::isWallTerrain(backblock.tiletypes[i][15]))) //back is a wall
-                            && ((j<15 && !DFHack::isWallTerrain(block.tiletypes[i][j+1]))||(j==15 && hasfront && !DFHack::isWallTerrain(frontblock.tiletypes[i][0])))) //front isn't
-                            {
-                                cout << "W";
-                                uramps++;
-                                bvuramps->push_back(Vec3(ty+i+1,16-j-tx,tz+1));
-                                bvuramps->push_back(Vec3(ty+i,16-j-tx,tz+1));
-                                bvuramps->push_back(Vec3(ty+i,15-j-tx,tz));
-                                bvuramps->push_back(Vec3(ty+i+1,15-j-tx,tz));
-                                bvuramps->push_back(Vec3(ty+i+1,16-j-tx,tz));
-                                bvuramps->push_back(Vec3(ty+i,16-j-tx,tz));
-                            }
-                            else if (((j<15 && DFHack::isWallTerrain(block.tiletypes[i][j+1]))||(j==15 && hasfront && DFHack::isWallTerrain(frontblock.tiletypes[i][0]))) //front is a wall
-                            && ((j>0 && !DFHack::isWallTerrain(block.tiletypes[i][j-1]))||(j==0 && hasback && !DFHack::isWallTerrain(frontblock.tiletypes[i][15])))) //back isn't
-                            {
-                                cout << "X";
-                                framps++;
-                                bvframps->push_back(Vec3(ty+i,15-j-tx,tz+1));
-                                bvframps->push_back(Vec3(ty+i+1,15-j-tx,tz+1));
-                                bvframps->push_back(Vec3(ty+i+1,16-j-tx,tz));
-                                bvframps->push_back(Vec3(ty+i,16-j-tx,tz));
-                                bvframps->push_back(Vec3(ty+i,15-j-tx,tz));
-                                bvframps->push_back(Vec3(ty+i+1,15-j-tx,tz));
-                            }
-                            else if (((i>0 && DFHack::isWallTerrain(block.tiletypes[i-1][j]))||(i==0 && hasleft && DFHack::isWallTerrain(leftblock.tiletypes[15][j]))) //left is a wall
-                            && ((i<15 && !DFHack::isWallTerrain(block.tiletypes[i+1][j]))||(i==15 && hasright && !DFHack::isWallTerrain(rightblock.tiletypes[0][j])))) //right isn't
-                            {
-                                cout << "A";
-                            }
-                            else if (((i<15 && DFHack::isWallTerrain(block.tiletypes[i+1][j]))||(i==15 && hasright && DFHack::isWallTerrain(rightblock.tiletypes[0][j]))) //right is a wall
-                            && ((i>0 && !DFHack::isWallTerrain(block.tiletypes[i-1][j]))||(i==0 && hasleft && !DFHack::isWallTerrain(leftblock.tiletypes[15][j])))) //left isn't
-                            {
-                                cout << "D";
-                            }
-                            else //stumped...
-                            {
-                                cout << "?";
-                            }
-
-                        }
-                        else
-                        {
-                            if (DFHack::isWallTerrain(block.tiletypes[i][j])) cout << "O";
-                            else if (DFHack::isFloorTerrain(block.tiletypes[i][j])) cout << "+";
-                            else if (DFHack::isStairTerrain(block.tiletypes[i][j])) cout << "X";
-                            else if (DFHack::isOpenTerrain(block.tiletypes[i][j])) cout << " ";
-                        }
-                    }
-                   cout << endl;
-                }
-
-                for (int i = 0; i < 16; i++)
-                {
-                    for (int j = 0; j < 16; j++)
-                    {
-                        if (!DFHack::isWallTerrain(block.tiletypes[i][j]) && ((i>0 && DFHack::isWallTerrain(block.tiletypes[i-1][j])) || (hasleft && i==0 && DFHack::isWallTerrain(leftblock.tiletypes[15][j]))))
-                        {
-                            if (!wallAStarted)
-                            {
-                                bvl->push_back(Vec3(ty+i,16-j-tx,tz+1));
-                                bvl->push_back(Vec3(ty+i,16-j-tx,tz));
-                                lwalls++;
-                                wallAStarted = true;
-                            }
-                            if (wallAStarted && j==15)
-                            {
-                                bvl->push_back(Vec3(ty+i,15-j-tx,tz));
-                                bvl->push_back(Vec3(ty+i,15-j-tx,tz+1));
-                                wallAStarted = false;
-                            }
-
-                        }
-                        else if (wallAStarted)
-                        {
-                            bvl->push_back(Vec3(ty+i,16-j-tx,tz));
-                            bvl->push_back(Vec3(ty+i,16-j-tx,tz+1));
-                            wallAStarted = false;
-                        }
-
-                        if (!DFHack::isWallTerrain(block.tiletypes[i][j]) && ((i<15 && DFHack::isWallTerrain(block.tiletypes[i+1][j])) || (hasright && i==15 && DFHack::isWallTerrain(rightblock.tiletypes[0][j]))))
-                        {
-                            if (!wallBStarted)
-                            {
-                                bvr->push_back(Vec3(ty+i+1,16-j-tx,tz+1));
-                                bvr->push_back(Vec3(ty+i+1,16-j-tx,tz));
-                                rwalls++;
-                                wallBStarted = true;
-                            }
-                            if (wallBStarted && j==15)
-                            {
-                                bvr->push_back(Vec3(ty+i+1,15-j-tx,tz));
-                                bvr->push_back(Vec3(ty+i+1,15-j-tx,tz+1));
-                                wallBStarted = false;
-                            }
-
-                        }
-                        else if (wallBStarted)
-                        {
-                            bvr->push_back(Vec3(ty+i+1,16-j-tx,tz));
-                            bvr->push_back(Vec3(ty+i+1,16-j-tx,tz+1));
-                            wallBStarted = false;
-                        }
-                    }
-                }
-
-                bvu->insert(bvu->end(),bvd->begin(),bvd->end());
-                bvd->clear();
-                bvu->insert(bvu->end(),bvf->begin(),bvf->end());
-                bvf->clear();
-                bvu->insert(bvu->end(),bvr->begin(),bvr->end());
-                bvr->clear();
-                bvu->insert(bvu->end(),bvl->begin(),bvl->end());
-                bvl->clear();
-
-                bvulramps->insert(bvulramps->end(),bvurramps->begin(),bvurramps->end());
-                bvurramps->clear();
-                //bvu->insert(bvu->end(),bvulramps->begin(),bvulramps->end());
-                bvuramps->insert(bvuramps->end(),bvframps->begin(),bvframps->end());
-                bvu->insert(bvu->end(),bvuramps->begin(),bvuramps->end());
-                bg->setVertexArray(bvu);
-                for (int i = 0; i < 4*uwalls; i++) normals->push_back(Vec3(0,-1,0));
-                for (int i = 0; i < 4*dwalls; i++) normals->push_back(Vec3(0,1,0));
-                for (int i = 0; i < 4*floors; i++) normals->push_back(Vec3(0,0,1));
-                for (int i = 0; i < 4*rwalls; i++) normals->push_back(Vec3(-1,0,0));
-                for (int i = 0; i < 4*lwalls; i++) normals->push_back(Vec3(1,0,0));
-                /*for (int i = 0; i < ulramps; i++)
-                {
-                    normals->push_back(Vec3(.57735,-.57735,.57735));
-                    normals->push_back(Vec3(.57735,-.57735,.57735));
-                    normals->push_back(Vec3(0,-.70711,.70711));
-                    normals->push_back(Vec3(.70711,0,.70711));
-                }
-                for (int i = 0; i < urramps; i++)
-                {
-                    normals->push_back(Vec3(-.57735,-.57735,.57735));
-                    normals->push_back(Vec3(-.57735,-.57735,.57735));
-                    normals->push_back(Vec3(-.70711,0,.70711));
-                    normals->push_back(Vec3(0,.70711,.70711));
-                }*/
-                for (int i=0; i < uramps; i++)
-                {
-                    normals->push_back(Vec3(0,-1,1));
-                    normals->push_back(Vec3(0,-1,1));
-                    normals->push_back(Vec3(0,-1,1));
-                    normals->push_back(Vec3(0,-1,1));
-                    normals->push_back(Vec3(-1,0,0));
-                    normals->push_back(Vec3(1,0,0));
-                }
-                for (int i=0; i < uramps; i++)
-                {
-                    normals->push_back(Vec3(0,1,1));
-                    normals->push_back(Vec3(0,1,1));
-                    normals->push_back(Vec3(0,1,1));
-                    normals->push_back(Vec3(0,1,1));
-                    normals->push_back(Vec3(1,0,0));
-                    normals->push_back(Vec3(-1,0,0));
-                }
-                DrawElementsUInt* face;
-                for (int i = 3; i < bvu->size()-bvuramps->size(); i+=4)
-                {
-                    face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    face->push_back(i);
-                    face->push_back(i-1);
-                    face->push_back(i-2);
-                    face->push_back(i-3);
-                    bg->addPrimitiveSet(face);
-                }
-                for (int i=bvu->size()-bvuramps->size(); i<bvu->size(); i+=6)
-                {
-                    /*face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                    face->push_back(i);
-                    face->push_back(i+1);
-                    face->push_back(i+3);
-                    bg->addPrimitiveSet(face);
-                    face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                    face->push_back(i);
-                    face->push_back(i+2);
-                    face->push_back(i+1);
-                    bg->addPrimitiveSet(face);*/
-                    face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    face->push_back(i);
-                    face->push_back(i+1);
-                    face->push_back(i+2);
-                    face->push_back(i+3);
-                    bg->addPrimitiveSet(face);
-                    face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                    face->push_back(i+1);
-                    face->push_back(i+5);
-                    face->push_back(i+2);
-                    bg->addPrimitiveSet(face);
-                    face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                    face->push_back(i);
-                    face->push_back(i+3);
-                    face->push_back(i+4);
-                    bg->addPrimitiveSet(face);
-                }
-
-                if (normals->size() > 0)
-                {
-                   bg->setNormalArray(normals);
-                   bg->setNormalBinding(Geometry::BIND_PER_VERTEX);
-                }
-
-               // cout << bg->getVertexArray()->getNumElements() << " vs. " << normals->size() << endl;
-                //osgUtil::SmoothingVisitor sv;
-                //blockGeode->accept(sv);
-                //tri.stripify(*bg);
-                //blockGeode->accept(tri);
+                vertices = new Vec3Array();
+                normals = new Vec3Array();
+                // Draw the geometry. x and y are passed in as tile coordinates so they are corrected by a factor of 16
+                drawNorthWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[1][0][1],exists[1][0][1]);
+                drawSouthWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[1][2][1],exists[1][2][1]);
+                drawWestWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[0][1][1],exists[0][1][1]);
+                drawEastWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[2][1][1],exists[2][1][1]);
+                drawFloors(y*16,x*16,z,&blocks[1][1][1],&blocks[1][1][2],exists[1][1][2]);
+                drawRamps(y*16,x*16,z,&blocks[1][1][1],&blocks[0][0][1],&blocks[1][0][1],&blocks[2][0][1],&blocks[0][1][1],&blocks[2][1][1],&blocks[0][2][1],&blocks[1][2][1],&blocks[2][2][1],exists[0][0][1],exists[1][0][1],exists[2][0][1],exists[0][1][1],exists[2][1][1],exists[0][2][1],exists[1][2][1],exists[2][2][1]);
+                bg->setVertexArray(vertices);
+                bg->setNormalArray(normals);
+                bg->setNormalBinding(Geometry::BIND_PER_VERTEX);
             }
         }
     }
 
-
-    //viewer.addEventHandler(new osgGA::StateSetManipulator(viewer.getCamera()->getOrCreateStateSet()));
     viewer.setSceneData(root);
     viewer.setUpViewInWindow(20, 20, 1044, 788);
     viewer.realize();
