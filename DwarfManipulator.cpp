@@ -120,28 +120,28 @@ bool DwarfManipulator::handle(const GUIEventAdapter& ea,GUIActionAdapter& us)
         case(GUIEventAdapter::MOVE):
         {
             GUIEventAdapter *cea = new GUIEventAdapter(ea);
-            if (ea.getX()>ea.getXmax()-20)
+            if (ea.getX()>ea.getXmax()-100)
             {
-                us.requestWarpPointer(ea.getXmin()+20,ea.getY());
-                cea->setX(ea.getXmin()+20);
+                us.requestWarpPointer(ea.getXmin()+100,ea.getY());
+                cea->setX(ea.getXmin()+100);
                 warped = 2;
             }
-            if (ea.getX()<ea.getXmin()+20)
+            if (ea.getX()<ea.getXmin()+100)
             {
-                us.requestWarpPointer(ea.getXmax()-20,ea.getY());
-                cea->setX(ea.getXmax()-20);
+                us.requestWarpPointer(ea.getXmax()-100,ea.getY());
+                cea->setX(ea.getXmax()-100);
                 warped = 2;
             }
-            if (ea.getY()>ea.getYmax()-20)
+            if (ea.getY()>ea.getYmax()-100)
             {
-                us.requestWarpPointer(ea.getX(),ea.getYmin()+20);
-                cea->setY(ea.getYmin()+20);
+                us.requestWarpPointer(ea.getX(),ea.getYmin()+100);
+                cea->setY(ea.getYmin()+100);
                 warped = 2;
             }
-            if (ea.getY()<ea.getYmin()+20)
+            if (ea.getY()<ea.getYmin()+100)
             {
-                us.requestWarpPointer(ea.getX(),ea.getYmax()-20);
-                cea->setY(ea.getYmax()-20);
+                us.requestWarpPointer(ea.getX(),ea.getYmax()-100);
+                cea->setY(ea.getYmax()-100);
                 warped = 2;
             }
             addMouseEvent(ea);

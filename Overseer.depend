@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1280792800 source:c:\overseer\overseer.cpp
+1280885226 source:c:\overseer\overseer.cpp
 	<osgViewer/Viewer>
 	<osg/Drawable>
 	<osg/Geometry>
@@ -986,7 +986,7 @@
 	<osgGA/MatrixManipulator>
 	<osg/Quat>
 
-1280616244 source:c:\overseer\dwarfmanipulator.cpp
+1280887154 source:c:\overseer\dwarfmanipulator.cpp
 	"DwarfManipulator.h"
 	<osg/Notify>
 	<iostream>
