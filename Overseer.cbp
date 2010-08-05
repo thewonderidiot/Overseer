@@ -20,6 +20,8 @@
 					<Add library="C:\DFHack\mingw\libdfhack.dll.a" />
 					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgGA.dll.a" />
 					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgUtil.dll.a" />
+					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgFX.dll.a" />
+					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgDB.dll.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">

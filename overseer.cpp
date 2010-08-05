@@ -1,16 +1,15 @@
 #include <osgViewer/Viewer>
 #include <osg/Drawable>
 #include <osg/Geometry>
-#include <osgGA/GUIEventHandler>
 #include <osgGA/StateSetManipulator>
-#include <osgUtil/Simplifier>
-#include <osgUtil/Optimizer>
-#include <osgUtil/TriStripVisitor>
-#include <osgUtil/SmoothingVisitor>
 
 #include "DwarfManipulator.h"
 
 #include <osg/Material>
+#include <osg/Texture2D>
+#include <osgFX/BumpMapping>
+#include <osgDB/ReadFile>
+
 #include <DFHack.h>
 #include <dfhack/DFTileTypes.h>
 #include <iostream>
@@ -24,11 +23,13 @@ Geode *blockGeode;
 Geometry *bg;
 Vec3Array *vertices;
 Vec3Array *normals;
+Vec2Array *texcoords;
 DrawElementsUInt* face;
 
 bool drawNorthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *northblock, bool doNorthBoundary)
 {
     bool wallStarted = false;
+    short length = 0;
     for (int j = 0; j < 16; j++)
     {
         for (int i = 0; i < 16; i++)
@@ -39,16 +40,22 @@ bool drawNorthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::map
                 {
                     vertices->push_back(Vec3(y+i,16-j-x,z));
                     vertices->push_back(Vec3(y+i,16-j-x,z+1));
+                    texcoords->push_back(Vec2(0,0));
+                    texcoords->push_back(Vec2(0,1));
                     normals->push_back(Vec3(0,-1,0));
                     normals->push_back(Vec3(0,-1,0));
                     wallStarted = true;
+                    length = 0;
                 }
+                else length++;
                 if (wallStarted && i==15)
                 {
                     vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
                     vertices->push_back(Vec3(y+i+1,16-j-x,z));
                     normals->push_back(Vec3(0,-1,0));
                     normals->push_back(Vec3(0,-1,0));
+                    texcoords->push_back(Vec2(length,1));
+                    texcoords->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = vertices->size()-1;
                     face->push_back(s);
@@ -66,6 +73,8 @@ bool drawNorthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::map
                 vertices->push_back(Vec3(y+i,16-j-x,z));
                 normals->push_back(Vec3(0,-1,0));
                 normals->push_back(Vec3(0,-1,0));
+                texcoords->push_back(Vec2(length,1));
+				texcoords->push_back(Vec2(length,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = vertices->size()-1;
                 face->push_back(s);
@@ -83,6 +92,7 @@ bool drawNorthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::map
 bool drawSouthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *southblock, bool doSouthBoundary)
 {
     bool wallStarted = false;
+    short length = 0;
     for (int j = 0; j < 16; j++)
     {
         for (int i = 0; i < 16; i++)
@@ -93,16 +103,22 @@ bool drawSouthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::map
                 {
                     vertices->push_back(Vec3(y+i,15-j-x,z));
 					vertices->push_back(Vec3(y+i,15-j-x,z+1));
+					texcoords->push_back(Vec2(0,0));
+					texcoords->push_back(Vec2(0,1));
                     normals->push_back(Vec3(0,1,0));
                     normals->push_back(Vec3(0,1,0));
                     wallStarted = true;
+                    length = 0;
                 }
+                else length++;
                 if (wallStarted && i==15)
                 {
                     vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
                     vertices->push_back(Vec3(y+i+1,15-j-x,z));
                     normals->push_back(Vec3(0,1,0));
                     normals->push_back(Vec3(0,1,0));
+                    texcoords->push_back(Vec2(length,1));
+					texcoords->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = vertices->size()-1;
                     face->push_back(s);
@@ -120,6 +136,8 @@ bool drawSouthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::map
                 vertices->push_back(Vec3(y+i,15-j-x,z));
                 normals->push_back(Vec3(0,1,0));
                 normals->push_back(Vec3(0,1,0));
+                texcoords->push_back(Vec2(length,1));
+				texcoords->push_back(Vec2(length,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = vertices->size()-1;
                 face->push_back(s);
@@ -137,6 +155,7 @@ bool drawSouthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::map
 bool drawWestWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *westblock, bool doWestBoundary)
 {
     bool wallStarted = false;
+    short length = 0;
     for (int i = 0; i < 16; i++)
     {
         for (int j = 0; j < 16; j++)
@@ -149,14 +168,20 @@ bool drawWestWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapb
 					vertices->push_back(Vec3(y+i,16-j-x,z));
                     normals->push_back(Vec3(1,0,0));
                     normals->push_back(Vec3(1,0,0));
+                    texcoords->push_back(Vec2(0,1));
+					texcoords->push_back(Vec2(0,0));
                     wallStarted = true;
+                    length = 0;
                 }
+                else length++;
                 if (wallStarted && j==15)
                 {
                     vertices->push_back(Vec3(y+i,15-j-x,z));
                     vertices->push_back(Vec3(y+i,15-j-x,z+1));
                     normals->push_back(Vec3(1,0,0));
                     normals->push_back(Vec3(1,0,0));
+                    texcoords->push_back(Vec2(length,0));
+					texcoords->push_back(Vec2(length,1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = vertices->size()-1;
                     face->push_back(s);
@@ -174,6 +199,8 @@ bool drawWestWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapb
                 vertices->push_back(Vec3(y+i,16-j-x,z+1));
                 normals->push_back(Vec3(1,0,0));
                 normals->push_back(Vec3(1,0,0));
+                texcoords->push_back(Vec2(length,0));
+				texcoords->push_back(Vec2(length,1));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = vertices->size()-1;
                 face->push_back(s);
@@ -190,6 +217,7 @@ bool drawWestWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapb
 bool drawEastWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *eastblock, bool doEastBoundary)
 {
     bool wallStarted = false;
+    short length = 0;
     for (int i = 0; i < 16; i++)
     {
         for (int j = 0; j < 16; j++)
@@ -200,14 +228,20 @@ bool drawEastWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapb
                 {
                     vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
 					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+					texcoords->push_back(Vec2(0,1));
+					texcoords->push_back(Vec2(0,0));
                     normals->push_back(Vec3(-1,0,0));
                     normals->push_back(Vec3(-1,0,0));
                     wallStarted = true;
+                    length = 0;
                 }
+                else length++;
                 if (wallStarted && j==15)
                 {
                     vertices->push_back(Vec3(y+i+1,15-j-x,z));
 					vertices->push_back(Vec3(y+i+1,15-j-x,z+1));
+					texcoords->push_back(Vec2(length,0));
+					texcoords->push_back(Vec2(length,1));
                     normals->push_back(Vec3(-1,0,0));
                     normals->push_back(Vec3(-1,0,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
@@ -227,6 +261,8 @@ bool drawEastWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapb
 				vertices->push_back(Vec3(y+i+1,16-j-x,z+1));
                 normals->push_back(Vec3(-1,0,0));
                 normals->push_back(Vec3(-1,0,0));
+                texcoords->push_back(Vec2(length,0));
+				texcoords->push_back(Vec2(length,1));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = vertices->size()-1;
                 face->push_back(s);
@@ -244,6 +280,7 @@ bool drawEastWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapb
 bool drawFloors(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *downblock, bool doDownBoundary)
 {
     bool floorStarted = false;
+    short length = 0;
     for (int j = 0; j < 16; j++)
     {
         for (int i = 0; i < 16; i++)
@@ -254,14 +291,20 @@ bool drawFloors(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapbloc
                 {
                     vertices->push_back(Vec3(y+i,16-j-x,z));
 					vertices->push_back(Vec3(y+i,15-j-x,z));
+					texcoords->push_back(Vec2(0,1));
+					texcoords->push_back(Vec2(0,0));
                     normals->push_back(Vec3(0,0,1));
                     normals->push_back(Vec3(0,0,1));
                     floorStarted = true;
+                    length = 0;
                 }
+                else length++;
                 if (floorStarted && i==15)
                 {
                     vertices->push_back(Vec3(y+i+1,15-j-x,z));
 					vertices->push_back(Vec3(y+i+1,16-j-x,z));
+					texcoords->push_back(Vec2(length,0));
+					texcoords->push_back(Vec2(length,1));
                     normals->push_back(Vec3(0,0,1));
                     normals->push_back(Vec3(0,0,1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
@@ -281,6 +324,8 @@ bool drawFloors(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapbloc
 				vertices->push_back(Vec3(y+i,16-j-x,z));
                 normals->push_back(Vec3(0,0,1));
                 normals->push_back(Vec3(0,0,1));
+                texcoords->push_back(Vec2(length,0));
+				texcoords->push_back(Vec2(length,1));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = vertices->size()-1;
                 face->push_back(s);
@@ -1219,6 +1264,9 @@ int main(int argc, char **argv)
 {
     osgViewer::Viewer viewer;
     root = new Group();
+    osgFX::BumpMapping *bump = new osgFX::BumpMapping();
+    root->addChild(bump);
+
     DFHack::ContextManager *DFMgr = new DFHack::ContextManager("Memory.xml");
 	DFHack::Context *DF;
 
@@ -1250,8 +1298,19 @@ int main(int argc, char **argv)
     DFHack::mapblock40d blocks[3][3][3];
     bool exists[3][3][3] = {{false,false,false},{false,false,false},{false,false,false}};
 
-    //blocks[1][1][1] = new DFHack::mapblock40d;
-    osgUtil::TriStripVisitor tri(new osgUtil::Optimizer());
+    Texture2D *walltex = new Texture2D;
+    walltex->setDataVariance(Object::DYNAMIC);
+    Image *wallimg = osgDB::readImageFile("Test.dds");
+    walltex->setImage(wallimg);
+    walltex->setWrap(Texture::WRAP_S,Texture::REPEAT);
+    walltex->setWrap(Texture::WRAP_T,Texture::REPEAT);
+
+    Texture2D *wallnmap = new Texture2D;
+    wallnmap->setDataVariance(Object::DYNAMIC);
+    Image *wallnimg = osgDB::readImageFile("TestN.dds");
+    wallnmap->setImage(wallnimg);
+    wallnmap->setWrap(Texture::WRAP_S,Texture::REPEAT);
+    wallnmap->setWrap(Texture::WRAP_T,Texture::REPEAT);
 
     for (int z = 0; z < zmax; z++)
     {
@@ -1283,23 +1342,29 @@ int main(int argc, char **argv)
                 blockGeode = new Geode();
                 bg = new Geometry();
                 blockGeode->addDrawable(bg);
-                root->addChild(blockGeode);
+                //root->addChild(blockGeode);
+                bump->addChild(blockGeode);
                 vertices = new Vec3Array();
                 normals = new Vec3Array();
+                texcoords = new Vec2Array();
                 // Draw the geometry. x and y are passed in as tile coordinates so they are corrected by a factor of 16
                 drawNorthWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[1][0][1],exists[1][0][1]);
                 drawSouthWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[1][2][1],exists[1][2][1]);
                 drawWestWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[0][1][1],exists[0][1][1]);
-                drawEastWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[2][1][1],exists[2][1][1]);
+				drawEastWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[2][1][1],exists[2][1][1]);
                 drawFloors(y*16,x*16,z,&blocks[1][1][1],&blocks[1][1][0],exists[1][1][0]);
-                drawRamps(y*16,x*16,z,&blocks[1][1][1],&blocks[0][0][1],&blocks[1][0][1],&blocks[2][0][1],&blocks[0][1][1],&blocks[2][1][1],&blocks[0][2][1],&blocks[1][2][1],&blocks[2][2][1],exists[0][0][1],exists[1][0][1],exists[2][0][1],exists[0][1][1],exists[2][1][1],exists[0][2][1],exists[1][2][1],exists[2][2][1]);
+                //drawRamps(y*16,x*16,z,&blocks[1][1][1],&blocks[0][0][1],&blocks[1][0][1],&blocks[2][0][1],&blocks[0][1][1],&blocks[2][1][1],&blocks[0][2][1],&blocks[1][2][1],&blocks[2][2][1],exists[0][0][1],exists[1][0][1],exists[2][0][1],exists[0][1][1],exists[2][1][1],exists[0][2][1],exists[1][2][1],exists[2][2][1]);
                 bg->setVertexArray(vertices);
                 bg->setNormalArray(normals);
+                bg->setTexCoordArray(0,texcoords);
+                bg->setTexCoordArray(1,texcoords);
                 bg->setNormalBinding(Geometry::BIND_PER_VERTEX);
+                blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(1,walltex,StateAttribute::ON);
+				blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,wallnmap,StateAttribute::ON);
             }
         }
     }
-
+	bump->prepareChildren();
     viewer.setSceneData(root);
     viewer.setUpViewInWindow(20, 20, 1044, 788);
     viewer.realize();

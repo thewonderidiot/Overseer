@@ -1,16 +1,14 @@
 # depslib dependency file v1.0
-1280885226 source:c:\overseer\overseer.cpp
+1280968254 source:c:\overseer\overseer.cpp
 	<osgViewer/Viewer>
 	<osg/Drawable>
 	<osg/Geometry>
-	<osgGA/GUIEventHandler>
 	<osgGA/StateSetManipulator>
-	<osgUtil/Simplifier>
-	<osgUtil/Optimizer>
-	<osgUtil/TriStripVisitor>
-	<osgUtil/SmoothingVisitor>
 	"DwarfManipulator.h"
 	<osg/Material>
+	<osg/Texture2D>
+	<osgFX/BumpMapping>
+	<osgDB/ReadFile>
 	<DFHack.h>
 	<dfhack/DFTileTypes.h>
 	<iostream>
@@ -1020,4 +1018,123 @@
 	<osg/Matrixf>
 	<osg/Matrixd>
 	<osg/Plane>
+
+1268498222 c:\program files (x86)\openscenegraph\include\osgfx\bumpmapping
+	<osgFX/Export>
+	<osgFX/Effect>
+	<osg/ref_ptr>
+	<osg/Texture2D>
+
+1268498222 c:\program files (x86)\openscenegraph\include\osgfx\export
+
+1268498222 c:\program files (x86)\openscenegraph\include\osgfx\effect
+	<osgFX/Export>
+	<osgFX/Technique>
+	<osg/buffered_value>
+	<osg/ref_ptr>
+	<osg/Node>
+	<osg/Group>
+	<osg/Geode>
+	<osg/OccluderNode>
+	<vector>
+
+1268498222 c:\program files (x86)\openscenegraph\include\osgfx\technique
+	<osgFX/Export>
+	<osg/Referenced>
+	<osg/State>
+	<osg/Group>
+	<osg/NodeVisitor>
+	<vector>
+	<string>
+
+1268498238 c:\program files (x86)\openscenegraph\include\osgdb\readfile
+	<string>
+	<osg/Node>
+	<osg/Image>
+	<osg/ArgumentParser>
+	<osgDB/Export>
+	<osgDB/Registry>
+
+1269093526 c:\program files (x86)\openscenegraph\include\osgdb\registry
+	<OpenThreads/ReentrantMutex>
+	<osg/ref_ptr>
+	<osg/ArgumentParser>
+	<osg/KdTree>
+	<osgDB/DynamicLibrary>
+	<osgDB/ReaderWriter>
+	<osgDB/DotOsgWrapper>
+	<osgDB/DatabasePager>
+	<osgDB/FileCache>
+	<vector>
+	<map>
+	<string>
+
+1268498252 c:\program files (x86)\openscenegraph\include\openthreads\reentrantmutex
+	<OpenThreads/Thread>
+	<OpenThreads/Mutex>
+	<OpenThreads/ScopedLock>
+
+1268498232 c:\program files (x86)\openscenegraph\include\osg\kdtree
+	<osg/Shape>
+	<osg/Geometry>
+	<map>
+
+1268498238 c:\program files (x86)\openscenegraph\include\osgdb\dynamiclibrary
+	<osg/Referenced>
+	<osgDB/Export>
+	<string>
+
+1268498238 c:\program files (x86)\openscenegraph\include\osgdb\dotosgwrapper
+	<osg/ref_ptr>
+	<osg/Object>
+	<osgDB/Input>
+	<osgDB/Output>
+	<string>
+	<vector>
+
+1269093526 c:\program files (x86)\openscenegraph\include\osgdb\input
+	<osg/Image>
+	<osg/Shader>
+	<osg/Node>
+	<osg/Drawable>
+	<osg/StateAttribute>
+	<osg/ArgumentParser>
+	<osgDB/FieldReaderIterator>
+	<osgDB/ReaderWriter>
+	<map>
+	<string>
+
+1268498238 c:\program files (x86)\openscenegraph\include\osgdb\fieldreaderiterator
+	<osg/Vec2f>
+	<osg/Vec2f>
+	<osg/Vec4f>
+	<osg/Vec2d>
+	<osg/Vec2d>
+	<osg/Vec4d>
+	<osgDB/Field>
+	<osgDB/FieldReader>
+
+1268498238 c:\program files (x86)\openscenegraph\include\osgdb\field
+	<osgDB/Export>
+	<string>
+
+1268498238 c:\program files (x86)\openscenegraph\include\osgdb\fieldreader
+	<osgDB/Export>
+	<istream>
+
+1269093526 c:\program files (x86)\openscenegraph\include\osgdb\output
+	<osg/Object>
+	<osgDB/ReaderWriter>
+	<osgDB/fstream>
+	<string>
+	<map>
+
+1268498238 c:\program files (x86)\openscenegraph\include\osgdb\fstream
+	<osgDB/Export>
+	<osg/Export>
+	<fstream>
+
+1269093526 c:\program files (x86)\openscenegraph\include\osgdb\filecache
+	<osg/Node>
+	<osgDB/ReaderWriter>
 
