@@ -6,6 +6,7 @@ class DwarfManipulator : public osgGA::MatrixManipulator
 {
     public:
         DwarfManipulator();
+        DwarfManipulator(osg::Group *r, int ms);
         virtual ~DwarfManipulator();
         virtual void setByMatrix(const osg::Matrixd& matrix);
         virtual void setByInverseMatrix(const osg::Matrixd& matrix) { setByMatrix(osg::Matrixd::inverse(matrix)); }
@@ -38,5 +39,7 @@ class DwarfManipulator : public osgGA::MatrixManipulator
         double      _distance;
         double shiftspeed;
         short warped;
+        int mouseSensitivity;
+        osg::Group *root;
         osgGA::GUIEventAdapter::ScrollingMotion scroll;
 };

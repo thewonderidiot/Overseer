@@ -1,6 +1,7 @@
 #include "DwarfManipulator.h"
 #include <osg/Notify>
 #include <iostream>
+#include <osgDB/WriteFile>
 
 using namespace std;
 using namespace osg;
@@ -12,8 +13,19 @@ DwarfManipulator::DwarfManipulator()
     shiftspeed = 1;
     warped = 0;
     scroll = GUIEventAdapter::SCROLL_NONE;
+    mouseSensitivity = 2347;
+    root = new Group();
 }
 
+DwarfManipulator::DwarfManipulator(Group *r, int ms)
+{
+    _velocity.set(0,0,0);
+    shiftspeed = 1;
+    warped = 0;
+    scroll = GUIEventAdapter::SCROLL_NONE;
+    root = r;
+    mouseSensitivity = ms;
+}
 
 DwarfManipulator::~DwarfManipulator()
 {
@@ -181,6 +193,21 @@ bool DwarfManipulator::handle(const GUIEventAdapter& ea,GUIActionAdapter& us)
                 _velocity.set(5,_velocity.y(),_velocity.z());
                 return true;
             }
+            if (ea.getKey()=='r' || ea.getKey()=='R')
+            {
+                _velocity.set(_velocity.x(),5,_velocity.z());
+                return true;
+            }
+            if (ea.getKey()=='f' || ea.getKey()=='F')
+            {
+                _velocity.set(_velocity.x(),-5,_velocity.z());
+                return true;
+            }
+            if (ea.getKey()=='x' || ea.getKey()=='X')
+            {
+                osgDB::writeNodeFile(*root,"embark.obj");
+                return true;
+            }
             if (ea.getKey()==GUIEventAdapter::KEY_Shift_L || ea.getKey()==GUIEventAdapter::KEY_Shift_R)
             {
                 shiftspeed = 10;
@@ -200,6 +227,11 @@ bool DwarfManipulator::handle(const GUIEventAdapter& ea,GUIActionAdapter& us)
             {
                _velocity.set(0,_velocity.y(),_velocity.z());
                return true;
+            }
+            if (ea.getKey() == 'r' || ea.getKey() == 'R' || ea.getKey() == 'f' || ea.getKey() == 'F')
+            {
+                _velocity.set(_velocity.x(),0,_velocity.z());
+                return true;
             }
             if (ea.getKey()==GUIEventAdapter::KEY_Shift_L || ea.getKey()==GUIEventAdapter::KEY_Shift_R)
             {
@@ -296,8 +328,8 @@ bool DwarfManipulator::calcMovement()
     if (scroll == GUIEventAdapter::SCROLL_DOWN) roll = inDegrees(-1.0);
     if (scroll == GUIEventAdapter::SCROLL_UP) roll = inDegrees(1.0);
     scroll = GUIEventAdapter::SCROLL_NONE;
-    double yaw = inDegrees(dx*5000*dt);
-    double pitch = inDegrees(dy*5000*dt);
+    double yaw = inDegrees(dx*mouseSensitivity*dt);
+    double pitch = inDegrees(dy*mouseSensitivity*dt);
     osg::Quat yaw_rotate, pitch_rotate,roll_rotate;
     yaw_rotate.makeRotate(yaw,osg::Vec3(0,0,-1));
     pitch_rotate.makeRotate(pitch,osg::Vec3(1,0,0) * rotation_matrix);

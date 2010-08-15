@@ -15,13 +15,13 @@
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgViewer.dll.a" />
-					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosg.dll.a" />
-					<Add library="C:\DFHack\mingw\libdfhack.dll.a" />
-					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgGA.dll.a" />
-					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgUtil.dll.a" />
-					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgFX.dll.a" />
-					<Add library="C:\Program Files (x86)\OpenSceneGraph\lib\libosgDB.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgViewer.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosg.dll.a" />
+					<Add library="C:\DFHack\output\libdfhack.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgGA.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgUtil.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgFX.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgDB.dll.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -39,11 +39,12 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="C:\Program Files (x86)\OpenSceneGraph\include" />
+			<Add directory="C:\OpenSceneGraph\include" />
 			<Add directory="C:\DFHack\library\include" />
 		</Compiler>
 		<Unit filename="DwarfManipulator.cpp" />
 		<Unit filename="DwarfManipulator.h" />
+		<Unit filename="SimpleIni.h" />
 		<Unit filename="overseer.cpp" />
 		<Extensions>
 			<code_completion />
