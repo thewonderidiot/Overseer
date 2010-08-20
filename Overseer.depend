@@ -1,13 +1,13 @@
 # depslib dependency file v1.0
-1281848082 source:c:\overseer\overseer.cpp
+1282304448 source:c:\overseer\overseer.cpp
 	<osgViewer/Viewer>
 	<osgFX/BumpMapping>
 	<DFHack.h>
 	<dfhack/DFTileTypes.h>
 	<iostream>
 	"DwarfGeometry.h"
-	"DwarfManipulator.h"
 	"SimpleIni.h"
+	<sys/timeb.h>
 
 1268498250 c:\program files (x86)\openscenegraph\include\osgviewer\viewer
 	<osg/ArgumentParser>
@@ -979,14 +979,14 @@
 	<osgGA/MatrixManipulator>
 	<osg/Quat>
 
-1281742401 source:c:\overseer\dwarfmanipulator.cpp
+1282198247 source:c:\overseer\dwarfmanipulator.cpp
 	"DwarfManipulator.h"
 	<osg/Notify>
 	<iostream>
 	<osgDB/WriteFile>
 
-1281742179 c:\overseer\dwarfmanipulator.h
-	<osgGA/MatrixManipulator>
+1282035275 c:\overseer\dwarfmanipulator.h
+	<osgGA/StandardManipulator>
 	<osg/Quat>
 
 1280555035 c:\overseer\doomlikemanipulator.h
@@ -1144,7 +1144,7 @@
 	<osgGA/GUIEventAdapter>
 	<osgGA/GUIActionAdapter>
 
-1268498228 c:\openscenegraph\include\osg\node
+1282027215 c:\openscenegraph\include\osg\node
 	<osg/Object>
 	<osg/StateSet>
 	<osg/BoundingSphere>
@@ -1152,34 +1152,34 @@
 	<string>
 	<vector>
 
-1268498228 c:\openscenegraph\include\osg\object
+1282027215 c:\openscenegraph\include\osg\object
 	<osg/Referenced>
 	<osg/CopyOp>
 	<osg/ref_ptr>
 	<string>
 
-1268498232 c:\openscenegraph\include\osg\referenced
+1282027216 c:\openscenegraph\include\osg\referenced
 	<osg/Export>
 	<OpenThreads/ScopedLock>
 	<OpenThreads/Mutex>
 	<OpenThreads/Atomic>
 
-1268838724 c:\openscenegraph\include\osg\export
+1282027216 c:\openscenegraph\include\osg\export
 	<osg/Config>
 
-1281669528 c:\openscenegraph\include\osg\config
+1282027456 c:\openscenegraph\include\osg\config
 
-1268498252 c:\openscenegraph\include\openthreads\scopedlock
+1282027223 c:\openscenegraph\include\openthreads\scopedlock
 
-1268498252 c:\openscenegraph\include\openthreads\mutex
+1282027223 c:\openscenegraph\include\openthreads\mutex
 	<OpenThreads/Exports>
 
-1268498252 c:\openscenegraph\include\openthreads\exports
+1282027223 c:\openscenegraph\include\openthreads\exports
 	<OpenThreads/Config>
 
-1281669531 c:\openscenegraph\include\openthreads\config
+1282027461 c:\openscenegraph\include\openthreads\config
 
-1269289256 c:\openscenegraph\include\openthreads\atomic
+1282027223 c:\openscenegraph\include\openthreads\atomic
 	<OpenThreads/Config>
 	<OpenThreads/Exports>
 	<libkern/OSAtomic.h>
@@ -1189,13 +1189,13 @@
 	"Mutex"
 	"ScopedLock"
 
-1269290992 c:\openscenegraph\include\osg\copyop
+1282027216 c:\openscenegraph\include\osg\copyop
 	<osg/Export>
 
-1268498232 c:\openscenegraph\include\osg\ref_ptr
+1282027216 c:\openscenegraph\include\osg\ref_ptr
 	<osg/Config>
 
-1268498232 c:\openscenegraph\include\osg\stateset
+1282027216 c:\openscenegraph\include\osg\stateset
 	<osg/Object>
 	<osg/StateAttribute>
 	<osg/ref_ptr>
@@ -1205,25 +1205,34 @@
 	<vector>
 	<string>
 
-1268510168 c:\openscenegraph\include\osg\stateattribute
+1282027216 c:\openscenegraph\include\osg\stateattribute
 	<osg/Export>
 	<osg/Object>
 	<osg/StateAttributeCallback>
+	<osg/Shader>
 	<osg/GL>
 	<typeinfo>
 	<utility>
 	<vector>
 
-1268510168 c:\openscenegraph\include\osg\stateattributecallback
+1282027216 c:\openscenegraph\include\osg\stateattributecallback
 	<osg/Export>
 	<osg/Object>
 
-1268498230 c:\openscenegraph\include\osg\gl
+1282027216 c:\openscenegraph\include\osg\gl
+	<osg/Config>
+	<osg/Export>
+	"TargetConditionals.h"
+	<OpenGLES/ES1/gl.h>
+	<GLES/gl.h>
+	"TargetConditionals.h"
+	<OpenGLES/ES2/gl.h>
+	<GLES2/gl2.h>
+	<GL3/gl3.h>
 	<OpenGL/gl.h>
 	<GL/gl.h>
-	<GL/gl.h>
 
-1268498228 c:\openscenegraph\include\osg\uniform
+1282027215 c:\openscenegraph\include\osg\uniform
 	<osg/ref_ptr>
 	<osg/Array>
 	<osg/Vec2>
@@ -1234,7 +1243,7 @@
 	<string>
 	<vector>
 
-1269127242 c:\openscenegraph\include\osg\array
+1282027216 c:\openscenegraph\include\osg\array
 	<osg/MixinVector>
 	<osg/Vec2>
 	<osg/Vec3>
@@ -1249,20 +1258,21 @@
 	<osg/Vec2b>
 	<osg/Vec3b>
 	<osg/Vec4b>
+	<osg/Matrix>
 	<osg/BufferObject>
 	<osg/Object>
 	<osg/GL>
 
-1268498230 c:\openscenegraph\include\osg\mixinvector
+1282027216 c:\openscenegraph\include\osg\mixinvector
 	<vector>
 
-1268498228 c:\openscenegraph\include\osg\vec2
+1282027216 c:\openscenegraph\include\osg\vec2
 	<osg/Vec2f>
 
-1268498232 c:\openscenegraph\include\osg\vec2f
+1282027216 c:\openscenegraph\include\osg\vec2f
 	<osg/Math>
 
-1268498228 c:\openscenegraph\include\osg\math
+1282027215 c:\openscenegraph\include\osg\math
 	<math.h>
 	<osg/Export>
 	<cmath>
@@ -1270,89 +1280,93 @@
 	<float.h>
 	<float.h>
 
-1268498230 c:\openscenegraph\include\osg\vec3
+1282027216 c:\openscenegraph\include\osg\vec3
 	<osg/Vec3f>
 
-1268498232 c:\openscenegraph\include\osg\vec3f
+1282027216 c:\openscenegraph\include\osg\vec3f
 	<osg/Vec2f>
 	<osg/Math>
 
-1268498230 c:\openscenegraph\include\osg\vec4
+1282027216 c:\openscenegraph\include\osg\vec4
 	<osg/Vec4f>
 
-1268498232 c:\openscenegraph\include\osg\vec4f
+1282027216 c:\openscenegraph\include\osg\vec4f
 	<osg/Vec3f>
 
-1268498232 c:\openscenegraph\include\osg\vec2d
+1282027216 c:\openscenegraph\include\osg\vec2d
 	<osg/Vec2f>
 
-1268498232 c:\openscenegraph\include\osg\vec3d
+1282027216 c:\openscenegraph\include\osg\vec3d
 	<osg/Vec2d>
 	<osg/Vec3f>
 
-1268498232 c:\openscenegraph\include\osg\vec4d
+1282027216 c:\openscenegraph\include\osg\vec4d
 	<osg/Vec3d>
 	<osg/Vec4f>
 
-1268498228 c:\openscenegraph\include\osg\vec4ub
+1282027215 c:\openscenegraph\include\osg\vec4ub
 	<osg/Vec3>
 
-1268498232 c:\openscenegraph\include\osg\vec2s
+1282027216 c:\openscenegraph\include\osg\vec2s
 
-1268498232 c:\openscenegraph\include\osg\vec3s
+1282027216 c:\openscenegraph\include\osg\vec3s
 
-1268498232 c:\openscenegraph\include\osg\vec4s
+1282027216 c:\openscenegraph\include\osg\vec4s
 
-1268498232 c:\openscenegraph\include\osg\vec2b
+1282027216 c:\openscenegraph\include\osg\vec2b
 
-1268498232 c:\openscenegraph\include\osg\vec3b
+1282027216 c:\openscenegraph\include\osg\vec3b
 
-1268498232 c:\openscenegraph\include\osg\vec4b
+1282027216 c:\openscenegraph\include\osg\vec4b
 
-1268498228 c:\openscenegraph\include\osg\bufferobject
+1282027215 c:\openscenegraph\include\osg\bufferobject
 	<osg/GL>
 	<osg/Object>
 	<osg/buffered_value>
+	<osg/FrameStamp>
+	<list>
+	<map>
 
-1268498232 c:\openscenegraph\include\osg\buffered_value
+1282027216 c:\openscenegraph\include\osg\buffered_value
 	<osg/DisplaySettings>
 	<vector>
 
-1268498228 c:\openscenegraph\include\osg\displaysettings
+1282027215 c:\openscenegraph\include\osg\displaysettings
 	<osg/Referenced>
+	<osg/ref_ptr>
 	<string>
 	<vector>
 
-1268498230 c:\openscenegraph\include\osg\matrix
+1282027216 c:\openscenegraph\include\osg\matrix
 	<osg/Config>
 	<osg/Matrixd>
 	<osg/Matrixf>
 
-1268498230 c:\openscenegraph\include\osg\matrixd
+1282027216 c:\openscenegraph\include\osg\matrixd
 	<osg/Object>
 	<osg/Vec3d>
 	<osg/Vec4d>
 	<osg/Quat>
 
-1268498230 c:\openscenegraph\include\osg\quat
+1282027216 c:\openscenegraph\include\osg\quat
 	<osg/Export>
 	<osg/Vec3f>
 	<osg/Vec4f>
 	<osg/Vec3d>
 	<osg/Vec4d>
 
-1269127242 c:\openscenegraph\include\osg\matrixf
+1282027216 c:\openscenegraph\include\osg\matrixf
 	<osg/Object>
 	<osg/Vec3d>
 	<osg/Vec4d>
 	<osg/Quat>
 
-1268498230 c:\openscenegraph\include\osg\gl2extensions
+1282027216 c:\openscenegraph\include\osg\gl2extensions
 	<osg/Referenced>
 	<osg/GL>
 	<string>
 
-1268498232 c:\openscenegraph\include\osg\program
+1282027216 c:\openscenegraph\include\osg\program
 	<string>
 	<vector>
 	<map>
@@ -1362,41 +1376,42 @@
 	<osg/Shader>
 	<osg/StateAttribute>
 
-1268498230 c:\openscenegraph\include\osg\shader
+1282027216 c:\openscenegraph\include\osg\shader
 	<osg/GL2Extensions>
 	<osg/Object>
 	<osg/buffered_value>
 	<set>
+	<map>
 
-1268498228 c:\openscenegraph\include\osg\boundingsphere
+1282027215 c:\openscenegraph\include\osg\boundingsphere
 	<osg/Config>
 	<osg/Export>
 	<osg/Vec3f>
 	<osg/Vec3d>
 
-1268498230 c:\openscenegraph\include\osg\nodecallback
+1282027216 c:\openscenegraph\include\osg\nodecallback
 	<osg/Object>
 	<osg/ref_ptr>
 
-1268498230 c:\openscenegraph\include\osg\coordinatesystemnode
+1282027216 c:\openscenegraph\include\osg\coordinatesystemnode
 	<osg/Group>
 	<osg/Matrixd>
 
-1268498232 c:\openscenegraph\include\osg\group
+1282027216 c:\openscenegraph\include\osg\group
 	<osg/Node>
 	<osg/NodeVisitor>
 
-1269025624 c:\openscenegraph\include\osg\nodevisitor
+1282027215 c:\openscenegraph\include\osg\nodevisitor
 	<osg/Node>
 	<osg/Matrix>
 	<osg/FrameStamp>
 
-1268498230 c:\openscenegraph\include\osg\framestamp
+1282027216 c:\openscenegraph\include\osg\framestamp
 	<osg/Referenced>
 	<time.h>
 	<ctime>
 
-1268498222 c:\openscenegraph\include\osgutil\sceneview
+1282027212 c:\openscenegraph\include\osgutil\sceneview
 	<osg/Node>
 	<osg/StateSet>
 	<osg/Light>
@@ -1407,34 +1422,34 @@
 	<osg/Camera>
 	<osgUtil/CullVisitor>
 
-1268498228 c:\openscenegraph\include\osg\light
+1282027215 c:\openscenegraph\include\osg\light
 	<osg/StateAttribute>
 	<osg/Vec3>
 	<osg/Vec4>
 
-1268498230 c:\openscenegraph\include\osg\collectoccludersvisitor
+1282027216 c:\openscenegraph\include\osg\collectoccludersvisitor
 	<osg/NodeVisitor>
 	<osg/CullStack>
 	<set>
 
-1268498228 c:\openscenegraph\include\osg\cullstack
+1282027215 c:\openscenegraph\include\osg\cullstack
 	<osg/CullingSet>
 	<osg/CullSettings>
 	<osg/Viewport>
 	<osg/fast_back_stack>
 	<osg/Transform>
 
-1268498230 c:\openscenegraph\include\osg\cullingset
+1282027216 c:\openscenegraph\include\osg\cullingset
 	<osg/Polytope>
 	<osg/ShadowVolumeOccluder>
 	<osg/Viewport>
 	<math.h>
 
-1268498232 c:\openscenegraph\include\osg\polytope
+1282027216 c:\openscenegraph\include\osg\polytope
 	<osg/Plane>
 	<osg/fast_back_stack>
 
-1268498230 c:\openscenegraph\include\osg\plane
+1282027216 c:\openscenegraph\include\osg\plane
 	<osg/Config>
 	<osg/Export>
 	<osg/Vec3>
@@ -1444,47 +1459,47 @@
 	<osg/BoundingBox>
 	<vector>
 
-1268838722 c:\openscenegraph\include\osg\boundingbox
+1282027216 c:\openscenegraph\include\osg\boundingbox
 	<osg/Config>
 	<osg/Export>
 	<osg/Vec3>
 	<osg/Vec3d>
 	<float.h>
 
-1268498228 c:\openscenegraph\include\osg\fast_back_stack
+1282027215 c:\openscenegraph\include\osg\fast_back_stack
 	<vector>
 
-1268498228 c:\openscenegraph\include\osg\shadowvolumeoccluder
+1282027215 c:\openscenegraph\include\osg\shadowvolumeoccluder
 	<osg/Polytope>
 	<osg/ConvexPlanarOccluder>
 	<osg/Node>
 
-1268498232 c:\openscenegraph\include\osg\convexplanaroccluder
+1282027216 c:\openscenegraph\include\osg\convexplanaroccluder
 	<osg/ConvexPlanarPolygon>
 	<osg/Object>
 
-1268498234 c:\openscenegraph\include\osg\convexplanarpolygon
+1282027216 c:\openscenegraph\include\osg\convexplanarpolygon
 	<osg/Plane>
 	<vector>
 
-1268498228 c:\openscenegraph\include\osg\viewport
+1282027215 c:\openscenegraph\include\osg\viewport
 	<osg/StateAttribute>
 	<osg/Matrix>
 
-1268498230 c:\openscenegraph\include\osg\cullsettings
+1282027216 c:\openscenegraph\include\osg\cullsettings
 	<iosfwd>
 	<osg/Matrix>
 	<osg/ClearNode>
 
-1268498232 c:\openscenegraph\include\osg\clearnode
+1282027216 c:\openscenegraph\include\osg\clearnode
 	<osg/Group>
 	<osg/Vec4>
 
-1268498232 c:\openscenegraph\include\osg\transform
+1282027216 c:\openscenegraph\include\osg\transform
 	<osg/Group>
 	<osg/Matrix>
 
-1268498228 c:\openscenegraph\include\osg\camera
+1282027215 c:\openscenegraph\include\osg\camera
 	<osg/Transform>
 	<osg/Viewport>
 	<osg/ColorMask>
@@ -1495,11 +1510,11 @@
 	<osg/Stats>
 	<OpenThreads/Mutex>
 
-1268498230 c:\openscenegraph\include\osg\colormask
+1282027216 c:\openscenegraph\include\osg\colormask
 	<osg/Export>
 	<osg/StateAttribute>
 
-1268498228 c:\openscenegraph\include\osg\texture
+1282027215 c:\openscenegraph\include\osg\texture
 	<osg/GL>
 	<osg/Image>
 	<osg/StateAttribute>
@@ -1508,51 +1523,62 @@
 	<osg/Vec4>
 	<osg/Vec4d>
 	<osg/buffered_value>
+	<osg/GL2Extensions>
 	<list>
 	<map>
 
-1269002908 c:\openscenegraph\include\osg\image
+1282027216 c:\openscenegraph\include\osg\image
 	<osg/BufferObject>
 	<osg/Vec2>
 	<osg/Vec3>
 	<osg/Vec4>
 	<osg/FrameStamp>
+	<osg/StateAttribute>
 	<string>
 	<vector>
 
-1268498230 c:\openscenegraph\include\osg\graphicscontext
+1282027216 c:\openscenegraph\include\osg\graphicscontext
 	<osg/State>
 	<osg/GraphicsThread>
+	<osg/Timer>
 	<vector>
 
-1268498232 c:\openscenegraph\include\osg\state
+1282027216 c:\openscenegraph\include\osg\state
 	<osg/Export>
 	<osg/StateSet>
 	<osg/Matrix>
 	<osg/Uniform>
 	<osg/BufferObject>
-	<osg/observer_ptr>
+	<osg/Observer>
+	<osg/ShaderComposer>
 	<osg/FrameStamp>
 	<osg/DisplaySettings>
 	<osg/Polytope>
 	<osg/Viewport>
+	<osg/GLBeginEndAdapter>
+	<osg/ArrayDispatchers>
 	<vector>
 	<map>
 	<set>
 	<string>
 
-1268498228 c:\openscenegraph\include\osg\observer_ptr
+1282027215 c:\openscenegraph\include\osg\observer_ptr
 	<osg/Notify>
+	<osg/ref_ptr>
+	<osg/Observer>
+	<OpenThreads/ScopedLock>
+	<OpenThreads/Mutex>
 
-1268498230 c:\openscenegraph\include\osg\notify
+1282027216 c:\openscenegraph\include\osg\notify
 	<osg/Export>
+	<osg/Referenced>
 	<ostream>
 
-1268498232 c:\openscenegraph\include\osg\graphicsthread
+1282027216 c:\openscenegraph\include\osg\graphicsthread
 	<osg/OperationThread>
 	<osg/State>
 
-1268498230 c:\openscenegraph\include\osg\operationthread
+1282027216 c:\openscenegraph\include\osg\operationthread
 	<osg/observer_ptr>
 	<osg/Object>
 	<OpenThreads/Thread>
@@ -1562,24 +1588,24 @@
 	<list>
 	<set>
 
-1268498252 c:\openscenegraph\include\openthreads\thread
+1282027223 c:\openscenegraph\include\openthreads\thread
 	<sys/types.h>
 	<OpenThreads/Mutex>
 
-1268498252 c:\openscenegraph\include\openthreads\barrier
+1282027223 c:\openscenegraph\include\openthreads\barrier
 	<OpenThreads/Exports>
 
-1268498252 c:\openscenegraph\include\openthreads\condition
+1282027223 c:\openscenegraph\include\openthreads\condition
 	<OpenThreads/Exports>
 	<OpenThreads/Mutex>
 
-1268498252 c:\openscenegraph\include\openthreads\block
+1282027223 c:\openscenegraph\include\openthreads\block
 	<OpenThreads/Thread>
 	<OpenThreads/Barrier>
 	<OpenThreads/Condition>
 	<OpenThreads/ScopedLock>
 
-1268498232 c:\openscenegraph\include\osg\stats
+1282027216 c:\openscenegraph\include\osg\stats
 	<osg/Referenced>
 	<OpenThreads/Mutex>
 	<OpenThreads/ScopedLock>
@@ -1588,7 +1614,7 @@
 	<vector>
 	<ostream>
 
-1268498222 c:\openscenegraph\include\osgutil\cullvisitor
+1282027211 c:\openscenegraph\include\osgutil\cullvisitor
 	<map>
 	<vector>
 	<osg/NodeVisitor>
@@ -1606,21 +1632,21 @@
 	<osgUtil/RenderStage>
 	<osg/Vec3>
 
-1268498232 c:\openscenegraph\include\osg\drawable
+1282027216 c:\openscenegraph\include\osg\drawable
 	<osg/BoundingBox>
 	<osg/Shape>
 	<osg/BufferObject>
 	<osg/PrimitiveSet>
 	<osg/RenderInfo>
 
-1268498232 c:\openscenegraph\include\osg\shape
+1282027216 c:\openscenegraph\include\osg\shape
 	<osg/Object>
 	<osg/Vec3>
 	<osg/Quat>
 	<osg/Plane>
 	<osg/Array>
 
-1269003746 c:\openscenegraph\include\osg\primitiveset
+1282027216 c:\openscenegraph\include\osg\primitiveset
 	<osg/GL>
 	<osg/Object>
 	<osg/buffered_value>
@@ -1631,21 +1657,21 @@
 	<osg/Vec3d>
 	<osg/Vec4d>
 	<osg/MixinVector>
+	<osg/GL2Extensions>
 	<osg/BufferObject>
 	<vector>
 
-1268498228 c:\openscenegraph\include\osg\renderinfo
+1282027215 c:\openscenegraph\include\osg\renderinfo
 	<osg/State>
 	<osg/View>
-	<osg/observer_ptr>
 
-1268498232 c:\openscenegraph\include\osg\view
+1282027216 c:\openscenegraph\include\osg\view
 	<osg/Camera>
 	<osg/Light>
 	<osg/Stats>
 	<OpenThreads/Mutex>
 
-1268498222 c:\openscenegraph\include\osgutil\stategraph
+1282027212 c:\openscenegraph\include\osgutil\stategraph
 	<osg/Matrix>
 	<osg/Drawable>
 	<osg/StateSet>
@@ -1656,16 +1682,16 @@
 	<vector>
 	<algorithm>
 
-1268498222 c:\openscenegraph\include\osgutil\renderleaf
+1282027212 c:\openscenegraph\include\osgutil\renderleaf
 	<osg/ref_ptr>
 	<osg/Matrix>
 	<osg/Drawable>
 	<osg/State>
 	<osgUtil/Export>
 
-1268498222 c:\openscenegraph\include\osgutil\export
+1282027212 c:\openscenegraph\include\osgutil\export
 
-1268498222 c:\openscenegraph\include\osgutil\renderstage
+1282027212 c:\openscenegraph\include\osgutil\renderstage
 	<osg/ColorMask>
 	<osg/Viewport>
 	<osg/Texture>
@@ -1674,28 +1700,28 @@
 	<osgUtil/RenderBin>
 	<osgUtil/PositionalStateContainer>
 
-1268498228 c:\openscenegraph\include\osg\framebufferobject
+1282027215 c:\openscenegraph\include\osg\framebufferobject
 	<osg/GL>
 	<osg/Texture>
 	<osg/buffered_value>
 	<osg/Camera>
 
-1268498222 c:\openscenegraph\include\osgutil\renderbin
+1282027212 c:\openscenegraph\include\osgutil\renderbin
 	<osgUtil/StateGraph>
 	<map>
 	<vector>
 	<string>
 
-1268498222 c:\openscenegraph\include\osgutil\positionalstatecontainer
+1282027212 c:\openscenegraph\include\osgutil\positionalstatecontainer
 	<osg/Object>
 	<osg/Light>
 	<osg/State>
 	<osgUtil/RenderLeaf>
 	<osgUtil/StateGraph>
 
-1268498240 c:\openscenegraph\include\osgga\export
+1282027220 c:\openscenegraph\include\osgga\export
 
-1268498240 c:\openscenegraph\include\osgga\guieventhandler
+1282027220 c:\openscenegraph\include\osgga\guieventhandler
 	<vector>
 	<osg/NodeCallback>
 	<osg/Drawable>
@@ -1704,30 +1730,30 @@
 	<osgGA/GUIEventAdapter>
 	<osgGA/GUIActionAdapter>
 
-1268498228 c:\openscenegraph\include\osg\applicationusage
+1282027215 c:\openscenegraph\include\osg\applicationusage
 	<osg/Referenced>
 	<map>
 	<string>
 	<ostream>
 
-1268498240 c:\openscenegraph\include\osgga\guieventadapter
+1282027220 c:\openscenegraph\include\osgga\guieventadapter
 	<osg/Object>
 	<osg/Matrix>
 	<osg/GraphicsContext>
 	<osgGA/Export>
 
-1268498240 c:\openscenegraph\include\osgga\guiactionadapter
+1282027220 c:\openscenegraph\include\osgga\guiactionadapter
 	<osgGA/Export>
 	<osg/View>
 
-1268498250 c:\openscenegraph\include\osgviewer\viewer
+1282027222 c:\openscenegraph\include\osgviewer\viewer
 	<osg/ArgumentParser>
 	<osgGA/EventVisitor>
 	<osgUtil/UpdateVisitor>
 	<osgViewer/GraphicsWindow>
 	<osgViewer/View>
 
-1268498232 c:\openscenegraph\include\osg\argumentparser
+1282027216 c:\openscenegraph\include\osg\argumentparser
 	<osg/Export>
 	<osg/ref_ptr>
 	<osg/ApplicationUsage>
@@ -1735,7 +1761,7 @@
 	<string>
 	<ostream>
 
-1268498240 c:\openscenegraph\include\osgga\eventvisitor
+1282027220 c:\openscenegraph\include\osgga\eventvisitor
 	<osg/NodeVisitor>
 	<osg/Node>
 	<osg/Geode>
@@ -1750,45 +1776,45 @@
 	<osgGA/GUIActionAdapter>
 	<osgGA/EventQueue>
 
-1268498230 c:\openscenegraph\include\osg\geode
+1282027216 c:\openscenegraph\include\osg\geode
 	<osg/Node>
 	<osg/NodeVisitor>
 	<osg/Drawable>
 
-1268498228 c:\openscenegraph\include\osg\billboard
+1282027215 c:\openscenegraph\include\osg\billboard
 	<osg/Matrix>
 	<osg/Geode>
 
-1268498232 c:\openscenegraph\include\osg\lod
+1282027216 c:\openscenegraph\include\osg\lod
 	<osg/Group>
 
-1268498232 c:\openscenegraph\include\osg\switch
+1282027216 c:\openscenegraph\include\osg\switch
 	<osg/Group>
 
-1268498232 c:\openscenegraph\include\osg\lightsource
+1282027216 c:\openscenegraph\include\osg\lightsource
 	<osg/NodeVisitor>
 	<osg/Light>
 	<osg/Group>
 
-1268498234 c:\openscenegraph\include\osg\projection
+1282027216 c:\openscenegraph\include\osg\projection
 	<osg/Group>
 	<osg/Matrix>
 
-1268498230 c:\openscenegraph\include\osg\occludernode
+1282027216 c:\openscenegraph\include\osg\occludernode
 	<osg/Group>
 	<osg/ConvexPlanarOccluder>
 
-1268498240 c:\openscenegraph\include\osgga\eventqueue
+1282027220 c:\openscenegraph\include\osgga\eventqueue
 	<osgGA/GUIEventAdapter>
 	<osg/ref_ptr>
 	<osg/Timer>
 	<OpenThreads/Mutex>
 	<list>
 
-1268498230 c:\openscenegraph\include\osg\timer
+1282027216 c:\openscenegraph\include\osg\timer
 	<osg/Export>
 
-1268498222 c:\openscenegraph\include\osgutil\updatevisitor
+1282027212 c:\openscenegraph\include\osgutil\updatevisitor
 	<osg/NodeVisitor>
 	<osg/Node>
 	<osg/Geode>
@@ -1801,40 +1827,40 @@
 	<osg/OccluderNode>
 	<osgUtil/Export>
 
-1268498252 c:\openscenegraph\include\osgviewer\graphicswindow
+1282027222 c:\openscenegraph\include\osgviewer\graphicswindow
 	<osg/GraphicsContext>
 	<osg/Notify>
 	<osgGA/EventQueue>
 	<osgGA/GUIActionAdapter>
 	<osgViewer/Export>
 
-1268498250 c:\openscenegraph\include\osgviewer\export
+1282027222 c:\openscenegraph\include\osgviewer\export
 
-1268498252 c:\openscenegraph\include\osgviewer\view
+1282027222 c:\openscenegraph\include\osgviewer\view
 	<osg/View>
 	<osgUtil/PolytopeIntersector>
 	<osgUtil/LineSegmentIntersector>
 	<osgUtil/UpdateVisitor>
 	<osgUtil/SceneView>
-	<osgGA/MatrixManipulator>
+	<osgGA/CameraManipulator>
 	<osgGA/EventVisitor>
 	<osgGA/EventQueue>
 	<osgViewer/Scene>
 	<osgViewer/ViewerBase>
 
-1268498222 c:\openscenegraph\include\osgutil\polytopeintersector
+1282027212 c:\openscenegraph\include\osgutil\polytopeintersector
 	<osgUtil/IntersectionVisitor>
 
-1268498222 c:\openscenegraph\include\osgutil\intersectionvisitor
+1282027212 c:\openscenegraph\include\osgutil\intersectionvisitor
 	<osg/NodeVisitor>
 	<osg/Drawable>
 	<osgUtil/Export>
 	<list>
 
-1268498222 c:\openscenegraph\include\osgutil\linesegmentintersector
+1282027212 c:\openscenegraph\include\osgutil\linesegmentintersector
 	<osgUtil/IntersectionVisitor>
 
-1268848442 c:\openscenegraph\include\osgviewer\scene
+1282027222 c:\openscenegraph\include\osgviewer\scene
 	<osgGA/GUIEventHandler>
 	<osgGA/EventVisitor>
 	<osgDB/DatabasePager>
@@ -1842,38 +1868,40 @@
 	<osgViewer/Export>
 	<list>
 
-1269093526 c:\openscenegraph\include\osgdb\databasepager
+1282027218 c:\openscenegraph\include\osgdb\databasepager
 	<osg/NodeVisitor>
 	<osg/Group>
 	<osg/PagedLOD>
 	<osg/Drawable>
 	<osg/GraphicsThread>
 	<osg/FrameStamp>
+	<osg/ObserverNodePath>
+	<osg/observer_ptr>
 	<OpenThreads/Thread>
 	<OpenThreads/Mutex>
 	<OpenThreads/ScopedLock>
 	<OpenThreads/Condition>
 	<osgDB/SharedStateManager>
 	<osgDB/ReaderWriter>
-	<osgDB/Export>
+	<osgDB/Options>
 	<map>
 	<list>
 	<algorithm>
 	<functional>
 
-1269025624 c:\openscenegraph\include\osg\pagedlod
+1282027216 c:\openscenegraph\include\osg\pagedlod
 	<osg/LOD>
 
-1268498238 c:\openscenegraph\include\osgdb\sharedstatemanager
+1282027218 c:\openscenegraph\include\osgdb\sharedstatemanager
 	<osg/NodeVisitor>
 	<osg/Geode>
 	<osgDB/Export>
 	<OpenThreads/Mutex>
 	<set>
 
-1268498238 c:\openscenegraph\include\osgdb\export
+1282027218 c:\openscenegraph\include\osgdb\export
 
-1269093526 c:\openscenegraph\include\osgdb\readerwriter
+1282027218 c:\openscenegraph\include\osgdb\readerwriter
 	<osg/Image>
 	<osg/Shape>
 	<osg/Node>
@@ -1882,14 +1910,14 @@
 	<list>
 	<iosfwd>
 
-1268498238 c:\openscenegraph\include\osgdb\authenticationmap
+1282027218 c:\openscenegraph\include\osgdb\authenticationmap
 	<osg/Referenced>
 	<osg/ref_ptr>
 	<osgDB/Export>
 	<string>
 	<map>
 
-1269093526 c:\openscenegraph\include\osgdb\imagepager
+1282027218 c:\openscenegraph\include\osgdb\imagepager
 	<osg/Image>
 	<osg/NodeVisitor>
 	<osg/observer_ptr>
@@ -1897,17 +1925,18 @@
 	<osg/FrameStamp>
 	<OpenThreads/Mutex>
 	<osgDB/ReaderWriter>
+	<osgDB/Options>
 
-1268498252 c:\openscenegraph\include\osgviewer\viewerbase
+1282027222 c:\openscenegraph\include\osgviewer\viewerbase
 	<osg/Stats>
 	<osgUtil/UpdateVisitor>
-	<osgGA/MatrixManipulator>
+	<osgUtil/IncrementalCompileOperation>
 	<osgGA/EventVisitor>
 	<osgGA/EventQueue>
 	<osgViewer/Scene>
 	<osgViewer/GraphicsWindow>
 
-1268498228 c:\openscenegraph\include\osg\geometry
+1282027215 c:\openscenegraph\include\osg\geometry
 	<osg/Drawable>
 	<osg/Vec2>
 	<osg/Vec3>
@@ -1915,7 +1944,7 @@
 	<osg/Array>
 	<osg/PrimitiveSet>
 
-1268498240 c:\openscenegraph\include\osgga\statesetmanipulator
+1282027220 c:\openscenegraph\include\osgga\statesetmanipulator
 	<osgGA/Export>
 	<osgGA/GUIEventAdapter>
 	<osgGA/GUIActionAdapter>
@@ -1923,18 +1952,18 @@
 	<osg/StateSet>
 	<osg/PolygonMode>
 
-1268498234 c:\openscenegraph\include\osg\polygonmode
+1282027216 c:\openscenegraph\include\osg\polygonmode
 	<osg/StateAttribute>
 	<osg/GL>
 
-1268498222 c:\openscenegraph\include\osgutil\tristripvisitor
+1282027212 c:\openscenegraph\include\osgutil\tristripvisitor
 	<osg/NodeVisitor>
 	<osg/Geode>
 	<osg/Geometry>
 	<osgUtil/Optimizer>
 	<set>
 
-1268498222 c:\openscenegraph\include\osgutil\optimizer
+1282027212 c:\openscenegraph\include\osgutil\optimizer
 	<osg/NodeVisitor>
 	<osg/Matrix>
 	<osg/Geometry>
@@ -1943,22 +1972,22 @@
 	<osgUtil/Export>
 	<set>
 
-1268498228 c:\openscenegraph\include\osg\texture2d
+1282027215 c:\openscenegraph\include\osg\texture2d
 	<osg/Texture>
 
-1268498230 c:\openscenegraph\include\osg\material
+1282027216 c:\openscenegraph\include\osg\material
 	<osg/Vec4>
 	<osg/StateAttribute>
 
-1268498222 c:\openscenegraph\include\osgfx\bumpmapping
+1282027211 c:\openscenegraph\include\osgfx\bumpmapping
 	<osgFX/Export>
 	<osgFX/Effect>
 	<osg/ref_ptr>
 	<osg/Texture2D>
 
-1268498222 c:\openscenegraph\include\osgfx\export
+1282027211 c:\openscenegraph\include\osgfx\export
 
-1268498222 c:\openscenegraph\include\osgfx\effect
+1282027211 c:\openscenegraph\include\osgfx\effect
 	<osgFX/Export>
 	<osgFX/Technique>
 	<osg/buffered_value>
@@ -1969,7 +1998,7 @@
 	<osg/OccluderNode>
 	<vector>
 
-1268498222 c:\openscenegraph\include\osgfx\technique
+1282027211 c:\openscenegraph\include\osgfx\technique
 	<osgFX/Export>
 	<osg/Referenced>
 	<osg/State>
@@ -1978,7 +2007,7 @@
 	<vector>
 	<string>
 
-1268498238 c:\openscenegraph\include\osgdb\readfile
+1282027218 c:\openscenegraph\include\osgdb\readfile
 	<string>
 	<osg/Node>
 	<osg/Image>
@@ -1986,36 +2015,38 @@
 	<osgDB/Export>
 	<osgDB/Registry>
 
-1269093526 c:\openscenegraph\include\osgdb\registry
+1282027218 c:\openscenegraph\include\osgdb\registry
 	<OpenThreads/ReentrantMutex>
 	<osg/ref_ptr>
 	<osg/ArgumentParser>
 	<osg/KdTree>
 	<osgDB/DynamicLibrary>
 	<osgDB/ReaderWriter>
+	<osgDB/Options>
 	<osgDB/DotOsgWrapper>
+	<osgDB/ObjectWrapper>
 	<osgDB/DatabasePager>
 	<osgDB/FileCache>
 	<vector>
 	<map>
 	<string>
 
-1268498252 c:\openscenegraph\include\openthreads\reentrantmutex
+1282027223 c:\openscenegraph\include\openthreads\reentrantmutex
 	<OpenThreads/Thread>
 	<OpenThreads/Mutex>
 	<OpenThreads/ScopedLock>
 
-1268498232 c:\openscenegraph\include\osg\kdtree
+1282027216 c:\openscenegraph\include\osg\kdtree
 	<osg/Shape>
 	<osg/Geometry>
 	<map>
 
-1268498238 c:\openscenegraph\include\osgdb\dynamiclibrary
+1282027218 c:\openscenegraph\include\osgdb\dynamiclibrary
 	<osg/Referenced>
 	<osgDB/Export>
 	<string>
 
-1268498238 c:\openscenegraph\include\osgdb\dotosgwrapper
+1282027218 c:\openscenegraph\include\osgdb\dotosgwrapper
 	<osg/ref_ptr>
 	<osg/Object>
 	<osgDB/Input>
@@ -2023,15 +2054,15 @@
 	<string>
 	<vector>
 
-1269093526 c:\openscenegraph\include\osgdb\input
+1282027218 c:\openscenegraph\include\osgdb\input
 	<osg/Image>
 	<osg/Shader>
 	<osg/Node>
 	<osg/Drawable>
 	<osg/StateAttribute>
 	<osg/ArgumentParser>
-	<osgDB/FieldReaderIterator>
 	<osgDB/ReaderWriter>
+	<osgDB/Options>
 	<map>
 	<string>
 
@@ -2053,23 +2084,25 @@
 	<osgDB/Export>
 	<istream>
 
-1269093526 c:\openscenegraph\include\osgdb\output
+1282027218 c:\openscenegraph\include\osgdb\output
 	<osg/Object>
 	<osgDB/ReaderWriter>
 	<osgDB/fstream>
 	<string>
 	<map>
 
-1268498238 c:\openscenegraph\include\osgdb\fstream
+1282027218 c:\openscenegraph\include\osgdb\fstream
 	<osgDB/Export>
 	<osg/Export>
 	<fstream>
 
-1269093526 c:\openscenegraph\include\osgdb\filecache
+1282027218 c:\openscenegraph\include\osgdb\filecache
 	<osg/Node>
 	<osgDB/ReaderWriter>
+	<osgDB/DatabaseRevisions>
+	<set>
 
-1269093526 c:\openscenegraph\include\osgdb\writefile
+1282027218 c:\openscenegraph\include\osgdb\writefile
 	<osg/Image>
 	<osg/Shape>
 	<osg/Node>
@@ -2077,7 +2110,7 @@
 	<osgDB/Registry>
 	<string>
 
-1281848105 c:\overseer\dwarfgeometry.h
+1282307567 c:\overseer\dwarfgeometry.h
 
 1271681878 c:\overseer\simpleini.h
 	<cstring>
@@ -2094,4 +2127,136 @@
 	<unicode/ucnv.h>
 	<windows.h>
 	<mbstring.h>
+
+1282307811 source:c:\overseer\dwarfgeometry.cpp
+	<DFHack.h>
+	<dfhack/DFTileTypes.h>
+	<osg/Drawable>
+	<osg/Geometry>
+	<osgGA/StateSetManipulator>
+	<osgUtil/TriStripVisitor>
+	<osgUtil/Optimizer>
+	<osgDB/ReadFile>
+	<osg/Material>
+	<osg/Texture2D>
+	<vector>
+	"DwarfGeometry.h"
+
+1282027220 c:\openscenegraph\include\osgga\standardmanipulator
+	<osgGA/CameraManipulator>
+
+1282027220 c:\openscenegraph\include\osgga\cameramanipulator
+	<osg/Node>
+	<osg/Matrixd>
+	<osg/CoordinateSystemNode>
+	<osgUtil/SceneView>
+	<osgGA/Export>
+	<osgGA/GUIEventHandler>
+	<osgGA/GUIEventAdapter>
+	<osgGA/GUIActionAdapter>
+
+1282027215 c:\openscenegraph\include\osg\observer
+	<OpenThreads/Mutex>
+	<osg/Referenced>
+	<set>
+
+1282027216 c:\openscenegraph\include\osg\shadercomposer
+	<osg/Object>
+	<osg/StateAttribute>
+	<osg/Program>
+
+1282027216 c:\openscenegraph\include\osg\glbeginendadapter
+	<osg/ref_ptr>
+	<osg/Array>
+	<osg/Matrixd>
+
+1282027216 c:\openscenegraph\include\osg\arraydispatchers
+	<osg/ref_ptr>
+	<osg/Array>
+	<osg/Matrixd>
+	<osg/GLBeginEndAdapter>
+
+1282027218 c:\openscenegraph\include\osgdb\options
+	<osgDB/Callbacks>
+	<deque>
+	<list>
+	<iosfwd>
+
+1282027218 c:\openscenegraph\include\osgdb\callbacks
+	<osgDB/AuthenticationMap>
+	<osgDB/ReaderWriter>
+	<osgDB/FileCache>
+	<deque>
+	<list>
+	<iosfwd>
+
+1282027218 c:\openscenegraph\include\osgdb\databaserevisions
+	<osg/Node>
+	<osgDB/ReaderWriter>
+	<set>
+
+1282027218 c:\openscenegraph\include\osgdb\objectwrapper
+	<osgDB/Serializer>
+
+1282027218 c:\openscenegraph\include\osgdb\serializer
+	<osg/ref_ptr>
+	<osg/Notify>
+	<osg/Object>
+	<osgDB/InputStream>
+	<osgDB/OutputStream>
+	<string>
+	<sstream>
+
+1282027218 c:\openscenegraph\include\osgdb\inputstream
+	<osg/Endian>
+	<osg/Vec2>
+	<osg/Vec3>
+	<osg/Vec4>
+	<osg/Quat>
+	<osg/Matrix>
+	<osg/Array>
+	<osg/PrimitiveSet>
+	<osgDB/ReaderWriter>
+	<osgDB/StreamOperator>
+	<iostream>
+	<sstream>
+
+1282027216 c:\openscenegraph\include\osg\endian
+	<algorithm>
+
+1282027218 c:\openscenegraph\include\osgdb\streamoperator
+	<iostream>
+	<sstream>
+	<osgDB/DataTypes>
+
+1282027218 c:\openscenegraph\include\osgdb\datatypes
+	<string>
+
+1282027218 c:\openscenegraph\include\osgdb\outputstream
+	<osg/Vec2>
+	<osg/Vec3>
+	<osg/Vec4>
+	<osg/Quat>
+	<osg/Matrix>
+	<osg/Array>
+	<osg/PrimitiveSet>
+	<osgDB/ReaderWriter>
+	<osgDB/StreamOperator>
+	<iostream>
+	<sstream>
+
+1282027216 c:\openscenegraph\include\osg\observernodepath
+	<osg/Node>
+	<osg/observer_ptr>
+	<vector>
+
+1282027212 c:\openscenegraph\include\osgutil\incrementalcompileoperation
+	<osgUtil/GLObjectsVisitor>
+
+1282027212 c:\openscenegraph\include\osgutil\globjectsvisitor
+	<OpenThreads/Mutex>
+	<osg/NodeVisitor>
+	<osg/Geode>
+	<osg/State>
+	<osgUtil/Export>
 

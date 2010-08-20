@@ -2,6 +2,7 @@
 #include <osg/Notify>
 #include <iostream>
 #include <osgDB/WriteFile>
+#include <osgGA/StandardManipulator>
 
 using namespace std;
 using namespace osg;
@@ -205,7 +206,7 @@ bool DwarfManipulator::handle(const GUIEventAdapter& ea,GUIActionAdapter& us)
             }
             if (ea.getKey()=='x' || ea.getKey()=='X')
             {
-                osgDB::writeNodeFile(*root,"embark.obj");
+                osgDB::writeNodeFile(*root,"embark.pov");
                 return true;
             }
             if (ea.getKey()==GUIEventAdapter::KEY_Shift_L || ea.getKey()==GUIEventAdapter::KEY_Shift_R)
@@ -280,6 +281,33 @@ osg::Matrixd DwarfManipulator::getInverseMatrix() const
     return osg::Matrixd::translate(-_eye)*osg::Matrixd::rotate(_rotation.inverse());
 }
 
+void DwarfManipulator::setTransformation(const osg::Vec3d& eye, const osg::Quat& rot)
+{
+    _eye = eye;
+    _rotation = rot;
+}
+void DwarfManipulator::setTransformation(const osg::Vec3d& eye, const osg::Vec3d& center, const osg::Vec3d& up)
+{
+    _eye = eye;
+    _center = center;
+    _up = up;
+}
+void DwarfManipulator::getTransformation(osg::Vec3d& eye, osg::Quat& rot) const
+{
+    eye = _eye;
+    rot = _rotation;
+}
+void DwarfManipulator::getTransformation(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) const
+{
+    eye = _eye;
+    center = _center;
+    up = _up;
+}
+
+void DwarfManipulator::allocAnimationData()
+{
+}
+
 void DwarfManipulator::computePosition(const osg::Vec3& eye,const osg::Vec3& center,const osg::Vec3& up)
 {
     osg::Vec3d lv = center-eye;
@@ -332,10 +360,10 @@ bool DwarfManipulator::calcMovement()
     double pitch = inDegrees(dy*mouseSensitivity*dt);
     osg::Quat yaw_rotate, pitch_rotate,roll_rotate;
     yaw_rotate.makeRotate(yaw,osg::Vec3(0,0,-1));
-    pitch_rotate.makeRotate(pitch,osg::Vec3(1,0,0) * rotation_matrix);
+    pitch_rotate.makeRotate(pitch,osg::Vec3(1,0,0)*rotation_matrix);
     roll_rotate.makeRotate(roll,osg::Vec3(0,0,1)*rotation_matrix);
     _eye += _velocity*rotation_matrix*dt*shiftspeed;
-    _rotation = _rotation*yaw_rotate*pitch_rotate*roll_rotate;
+    _rotation = _rotation*roll_rotate*pitch_rotate*yaw_rotate;
 
     return true;
 }

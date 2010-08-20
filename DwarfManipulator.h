@@ -1,8 +1,8 @@
-#include <osgGA/MatrixManipulator>
+#include <osgGA/StandardManipulator>
 #include <osg/Quat>
 
 
-class DwarfManipulator : public osgGA::MatrixManipulator
+class DwarfManipulator : public osgGA::StandardManipulator
 {
     public:
         DwarfManipulator();
@@ -18,6 +18,11 @@ class DwarfManipulator : public osgGA::MatrixManipulator
         virtual void setNode(osg::Node*);
         virtual const osg::Node* getNode() const;
         virtual osg::Node* getNode();
+        virtual void setTransformation(const osg::Vec3d& eye, const osg::Quat& rot);
+        virtual void setTransformation(const osg::Vec3d& eye, const osg::Vec3d& center, const osg::Vec3d& up);
+        virtual void getTransformation(osg::Vec3d& eye, osg::Quat& rot) const;
+        virtual void getTransformation(osg::Vec3d& eye, osg::Vec3d& center, osg::Vec3d& up) const;
+        virtual void allocAnimationData();
 
     private:
         void flushMouseEventStack();
@@ -36,6 +41,7 @@ class DwarfManipulator : public osgGA::MatrixManipulator
         osg::Vec3d _velocity;
         double _modelScale;
         osg::Vec3d  _eye;
+        osg::Vec3d _up;
         double      _distance;
         double shiftspeed;
         short warped;

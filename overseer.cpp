@@ -5,8 +5,8 @@
 #include <iostream>
 
 #include "DwarfGeometry.h"
-#include "DwarfManipulator.h"
 #include "SimpleIni.h"
+#include <sys/timeb.h>
 
 using namespace std;
 using namespace osg;
@@ -70,8 +70,9 @@ int main(int argc, char **argv)
     cout << "Connected to Dwarf Fortress!" << endl;
 
     DwarfGeometry *dg = new DwarfGeometry(Maps, geometryGroup, startz, enableRamps, tristrip);
-    dg->drawGeometry();
+    dg->start();
 
+    dg->drawGeometry();
 
 	if (!enableRamps) bump->prepareChildren();
 
@@ -90,10 +91,10 @@ int main(int argc, char **argv)
 
     if (!fullscreen) viewer.setUpViewInWindow(20, 20, 1044, 788);
     viewer.realize();
-    viewer.setCameraManipulator(new DwarfManipulator(root, mouseSensitivity));
+//    viewer.setCameraManipulator(new DwarfManipulator(root, mouseSensitivity));
     osgViewer::Viewer::Windows windows;
     viewer.getWindows(windows);
-    for (osgViewer::Viewer::Windows::iterator itr = windows.begin(); itr!=windows.end(); itr++) (*itr)->useCursor(false);
+    //for (osgViewer::Viewer::Windows::iterator itr = windows.begin(); itr!=windows.end(); itr++) (*itr)->useCursor(false);
     DF->Detach();
     viewer.run();
 }

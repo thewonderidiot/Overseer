@@ -15,13 +15,25 @@
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add library="C:\OpenSceneGraph\lib\libosgViewer.dll.a" />
-					<Add library="C:\OpenSceneGraph\lib\libosg.dll.a" />
 					<Add library="C:\DFHack\output\libdfhack.dll.a" />
-					<Add library="C:\OpenSceneGraph\lib\libosgGA.dll.a" />
-					<Add library="C:\OpenSceneGraph\lib\libosgUtil.dll.a" />
-					<Add library="C:\OpenSceneGraph\lib\libosgFX.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libOpenThreads.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosg.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgAnimation.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgDB.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgFX.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgGA.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgManipulator.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgParticle.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgPresentation.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgQt.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgShadow.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgSim.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgTerrain.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgText.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgUtil.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgViewer.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgVolume.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libosgWidget.dll.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -42,8 +54,8 @@
 			<Add directory="C:\OpenSceneGraph\include" />
 			<Add directory="C:\DFHack\library\include" />
 		</Compiler>
-		<Unit filename="DwarfManipulator.cpp" />
-		<Unit filename="DwarfManipulator.h" />
+		<Unit filename="DwarfGeometry.cpp" />
+		<Unit filename="DwarfGeometry.h" />
 		<Unit filename="SimpleIni.h" />
 		<Unit filename="overseer.cpp" />
 		<Extensions>

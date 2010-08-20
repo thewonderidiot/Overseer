@@ -1,32 +1,68 @@
+enum RampType
+{
+    NONE,
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
+    NW_UP,
+    NW_DOWN,
+    NE_UP,
+    NE_DOWN,
+    SW_UP,
+    SW_DOWN,
+    SE_UP,
+    SE_DOWN,
+    HILL,
+    UNKNOWN
+};
+
+typedef struct
+{
+    int16_t tiletype;
+    DFHack::t_designation designation;
+    DFHack::t_occupancy occupancy;
+    struct
+    {
+        uint16_t type;
+        uint32_t index;
+    } material;
+    RampType ramptype;
+} Tile;
+
 class DwarfGeometry
 {
     public:
         DwarfGeometry();
         DwarfGeometry(DFHack::Maps *m, osg::Group *g, int sz, bool er, bool ts);
+        bool drawGeometryOld();
         bool drawGeometry();
+        bool start();
     private:
-        bool drawNorthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *northblock, bool doNorthBoundary);
-        bool drawSouthWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *southblock, bool doSouthBoundary);
-        bool drawWestWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *westblock, bool doWestBoundary);
-        bool drawEastWalls(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *eastblock, bool doEastBoundary);
-        bool drawFloors(int y, int x, int z, DFHack::mapblock40d *block, DFHack::mapblock40d *downblock, bool doDownBoundary);
-        void drawNorthRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *northblock, DFHack::mapblock40d *southblock, bool doNorthBoundary, bool doSouthBoundary);
-        void drawSouthRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *southblock, DFHack::mapblock40d *northblock, bool doSouthBoundary, bool doNorthBoundary);
-        void drawWestRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *westblock, DFHack::mapblock40d *eastblock, bool doWestBoundary, bool doEastBoundary);
-        void drawEastRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *eastblock, DFHack::mapblock40d *westblock, bool doEastBoundary, bool doWestBoundary);
-        bool drawRamps(int y, int x, int z, DFHack::mapblock40d *block, //these should be changed to accept an array, so blocks[][][] and exists[][][] need to be reformatted for z,y,z
-                    DFHack::mapblock40d *northwestblock, DFHack::mapblock40d *northblock, DFHack::mapblock40d *northeastblock, DFHack::mapblock40d *westblock, DFHack::mapblock40d *eastblock,
-                    DFHack::mapblock40d *southwestblock, DFHack::mapblock40d *southblock, DFHack::mapblock40d *southeastblock,
-                    bool doNorthwestBoundary, bool doNorthBoundary, bool doNortheastBoundary, bool doWestBoundary, bool doEastBoundary, bool doSouthwestBoundary, bool doSouthBoundary, bool doSoutheastBoundary);
+        bool drawNorthWalls(uint32_t z);
+        bool drawSouthWalls(uint32_t z);
+        bool drawWestWalls(uint32_t z);
+        bool drawEastWalls(uint32_t z);
+        bool drawFloors(uint32_t z);
+        bool drawCeilings(uint32_t z);
+        //void drawNorthRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *northblock, DFHack::mapblock40d *southblock, bool doNorthBoundary, bool doSouthBoundary);
+        //void drawSouthRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *southblock, DFHack::mapblock40d *northblock, bool doSouthBoundary, bool doNorthBoundary);
+        //void drawWestRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *westblock, DFHack::mapblock40d *eastblock, bool doWestBoundary, bool doEastBoundary);
+        //void drawEastRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *eastblock, DFHack::mapblock40d *westblock, bool doEastBoundary, bool doWestBoundary);
+        void processRamps();
+        bool drawRamps(int x, int y, int z);
+        void drawBlock(int x, int y, int z);
         bool enableRamps;
         bool tristrip;
-        DFHack::Maps *Maps;
-        osg::Group *geometryGroup;
+        DFHack::Maps *Map;
+        osg::ref_ptr<osg::Group> geometryGroup;
         int startz;
-        osg::Geode *blockGeode;
-        osg::Geometry *bg;
-        osg::Vec3Array *vertices;
-        osg::Vec3Array *normals;
-        osg::Vec2Array *texcoords;
-        osg::DrawElementsUInt* face;
+        osg::ref_ptr<osg::Geode> blockGeode;
+        osg::ref_ptr<osg::Geometry> bg;
+        osg::ref_ptr<osg::Vec3Array> vertices;
+        osg::ref_ptr<osg::Vec3Array> normals;
+        osg::ref_ptr<osg::Vec2Array> texcoords;
+        osg::ref_ptr<osg::DrawElementsUInt> face;
+        std::vector<std::vector<std::vector<Tile> > > tiles;
+        uint32_t xmax,ymax,zmax;
 };
