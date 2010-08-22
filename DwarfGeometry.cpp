@@ -1,15 +1,3 @@
-#include <DFHack.h>
-#include <dfhack/DFTileTypes.h>
-#include <osg/Drawable>
-#include <osg/Geometry>
-#include <osgGA/StateSetManipulator>
-#include <osgUtil/TriStripVisitor>
-#include <osgUtil/Optimizer>
-#include <osgDB/ReadFile>
-#include <osg/Material>
-#include <osg/Texture2D>
-#include <vector>
-
 #include "DwarfGeometry.h"
 using namespace std;
 using namespace osg;
@@ -24,6 +12,7 @@ DwarfGeometry::DwarfGeometry(DFHack::Maps *m, osg::Group *g, int sz, bool er, bo
     Map = m;
     geometryGroup = g;
     startz = sz;
+    geomax = 0;
 }
 
 
@@ -1391,8 +1380,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 if (wallStarted && wallmat != tiles[z][y][x].material.index)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y,z));
-                    vertices->push_back(Vec3(x,y,z));
+                    vertices->push_back(Vec3(x+1,y,z+.01));
+                    vertices->push_back(Vec3(x,y,z+.01));
                     normals->push_back(Vec3(0,0,1));
                     normals->push_back(Vec3(0,0,1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
@@ -1407,8 +1396,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 {
                     wallStarted = true;
                     wallmat = tiles[z][y][x].material.index;
-                    vertices->push_back(Vec3(x,y,z));
-                    vertices->push_back(Vec3(x+1,y,z));
+                    vertices->push_back(Vec3(x,y,z+.01));
+                    vertices->push_back(Vec3(x+1,y,z+.01));
                     normals->push_back(Vec3(0,0,1));
                     normals->push_back(Vec3(0,0,1));
                     length = 1;
@@ -1417,8 +1406,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 if (y == ymax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y+1,z));
-                    vertices->push_back(Vec3(x,y+1,z));
+                    vertices->push_back(Vec3(x+1,y+1,z+.01));
+                    vertices->push_back(Vec3(x,y+1,z+.01));
                     normals->push_back(Vec3(0,0,1));
                     normals->push_back(Vec3(0,0,1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
@@ -1433,8 +1422,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
             else if (wallStarted)
             {
                 wallStarted = false;
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x,y,z));
+                vertices->push_back(Vec3(x+1,y,z+.01));
+                vertices->push_back(Vec3(x,y,z+.01));
                 normals->push_back(Vec3(0,0,1));
                 normals->push_back(Vec3(0,0,1));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
@@ -1464,8 +1453,8 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                 if (wallStarted && wallmat != tiles[z+1][y][x].material.index)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y,z+.99));
-                    vertices->push_back(Vec3(x,y,z+.99));
+                    vertices->push_back(Vec3(x+1,y,z+1));
+                    vertices->push_back(Vec3(x,y,z+1));
                     normals->push_back(Vec3(0,0,-1));
                     normals->push_back(Vec3(0,0,-1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
@@ -1480,8 +1469,8 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                 {
                     wallStarted = true;
                     wallmat = tiles[z+1][y][x].material.index;
-                    vertices->push_back(Vec3(x,y,z+.99));
-                    vertices->push_back(Vec3(x+1,y,z+.99));
+                    vertices->push_back(Vec3(x,y,z+1));
+                    vertices->push_back(Vec3(x+1,y,z+1));
                     normals->push_back(Vec3(0,0,-1));
                     normals->push_back(Vec3(0,0,-1));
                     length = 1;
@@ -1490,8 +1479,8 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                 if (y == ymax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y+1,z+.99));
-                    vertices->push_back(Vec3(x,y+1,z+.99));
+                    vertices->push_back(Vec3(x+1,y+1,z+1));
+                    vertices->push_back(Vec3(x,y+1,z+1));
                     normals->push_back(Vec3(0,0,-1));
                     normals->push_back(Vec3(0,0,-1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
@@ -1506,8 +1495,8 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
             else if (wallStarted)
             {
                 wallStarted = false;
-                vertices->push_back(Vec3(x+1,y,z+.99));
-                vertices->push_back(Vec3(x,y,z+.99));
+                vertices->push_back(Vec3(x+1,y,z+1));
+                vertices->push_back(Vec3(x,y,z+1));
                 normals->push_back(Vec3(0,0,-1));
                 normals->push_back(Vec3(0,0,-1));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
@@ -1542,10 +1531,11 @@ bool DwarfGeometry::start()
             tiles[z][y].resize(16*xmax);
         }
     }
-
+    bool hasgeo;
     cout << "Reading embark data...";
     for (uint32_t z=startz; z<zmax; z++)
     {
+        hasgeo = false;
         for (uint32_t y=0; y<ymax; y++)
         {
             for (uint32_t x=0; x<xmax; x++)
@@ -1577,6 +1567,7 @@ bool DwarfGeometry::start()
                                     tiles[z][16*y+j][16*x+i].material.index = veins[v].type;
                                 }
                             }
+                            if (!DFHack::isOpenTerrain(block.tiletypes[i][j])) hasgeo = true;
                         }
                     }
                 }
@@ -1592,6 +1583,7 @@ bool DwarfGeometry::start()
                 }
             }
         }
+        if (hasgeo == false && geomax == 0) geomax = z;
     }
     xmax*=16;
     ymax*=16;
@@ -1600,6 +1592,10 @@ bool DwarfGeometry::start()
     return true;
 }
 
+int DwarfGeometry::getGeometryMax()
+{
+    return geomax;
+}
 
 bool DwarfGeometry::drawGeometry()
 {
@@ -1617,6 +1613,7 @@ bool DwarfGeometry::drawGeometry()
         drawWestWalls(z);
         drawEastWalls(z);
         drawFloors(z);
+        drawCeilings(z);
         bg->setVertexArray(vertices.get());
         bg->setNormalArray(normals.get());
         bg->setNormalBinding(Geometry::BIND_PER_VERTEX);

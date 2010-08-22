@@ -1,3 +1,15 @@
+#include <DFHack.h>
+#include <dfhack/DFTileTypes.h>
+#include <osg/Drawable>
+#include <osg/Geometry>
+#include <osgGA/StateSetManipulator>
+#include <osgUtil/TriStripVisitor>
+#include <osgUtil/Optimizer>
+#include <osgDB/ReadFile>
+#include <osg/Material>
+#include <osg/Texture2D>
+#include <vector>
+
 enum RampType
 {
     NONE,
@@ -38,6 +50,7 @@ class DwarfGeometry
         bool drawGeometryOld();
         bool drawGeometry();
         bool start();
+        int getGeometryMax();
     private:
         bool drawNorthWalls(uint32_t z);
         bool drawSouthWalls(uint32_t z);
@@ -65,4 +78,5 @@ class DwarfGeometry
         osg::ref_ptr<osg::DrawElementsUInt> face;
         std::vector<std::vector<std::vector<Tile> > > tiles;
         uint32_t xmax,ymax,zmax;
+        int geomax;
 };

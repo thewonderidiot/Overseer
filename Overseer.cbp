@@ -34,6 +34,7 @@
 					<Add library="C:\OpenSceneGraph\lib\libosgViewer.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgVolume.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgWidget.dll.a" />
+					<Add library="C:\OpenSceneGraph\lib\libOIS.dll.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -56,8 +57,10 @@
 		</Compiler>
 		<Unit filename="DwarfGeometry.cpp" />
 		<Unit filename="DwarfGeometry.h" />
+		<Unit filename="Overseer.cpp" />
+		<Unit filename="Overseer.h" />
 		<Unit filename="SimpleIni.h" />
-		<Unit filename="overseer.cpp" />
+		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

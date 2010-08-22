@@ -1,13 +1,14 @@
 # depslib dependency file v1.0
-1282304448 source:c:\overseer\overseer.cpp
+1282438095 source:c:\overseer\overseer.cpp
 	<osgViewer/Viewer>
-	<osgFX/BumpMapping>
-	<DFHack.h>
+	<osgViewer/ViewerEventHandlers>
+	<osgGA/StateSetManipulator>
+	<osgGA/TrackballManipulator>
 	<dfhack/DFTileTypes.h>
 	<iostream>
-	"DwarfGeometry.h"
 	"SimpleIni.h"
-	<sys/timeb.h>
+	<osgViewer/GraphicsHandleWin32>
+	"Overseer.h"
 
 1268498250 c:\program files (x86)\openscenegraph\include\osgviewer\viewer
 	<osg/ArgumentParser>
@@ -2110,7 +2111,18 @@
 	<osgDB/Registry>
 	<string>
 
-1282307567 c:\overseer\dwarfgeometry.h
+1282436210 c:\overseer\dwarfgeometry.h
+	<DFHack.h>
+	<dfhack/DFTileTypes.h>
+	<osg/Drawable>
+	<osg/Geometry>
+	<osgGA/StateSetManipulator>
+	<osgUtil/TriStripVisitor>
+	<osgUtil/Optimizer>
+	<osgDB/ReadFile>
+	<osg/Material>
+	<osg/Texture2D>
+	<vector>
 
 1271681878 c:\overseer\simpleini.h
 	<cstring>
@@ -2128,18 +2140,7 @@
 	<windows.h>
 	<mbstring.h>
 
-1282307811 source:c:\overseer\dwarfgeometry.cpp
-	<DFHack.h>
-	<dfhack/DFTileTypes.h>
-	<osg/Drawable>
-	<osg/Geometry>
-	<osgGA/StateSetManipulator>
-	<osgUtil/TriStripVisitor>
-	<osgUtil/Optimizer>
-	<osgDB/ReadFile>
-	<osg/Material>
-	<osg/Texture2D>
-	<vector>
+1282438114 source:c:\overseer\dwarfgeometry.cpp
 	"DwarfGeometry.h"
 
 1282027220 c:\openscenegraph\include\osgga\standardmanipulator
@@ -2259,4 +2260,151 @@
 	<osg/Geode>
 	<osg/State>
 	<osgUtil/Export>
+
+1282027222 c:\openscenegraph\include\osgviewer\viewereventhandlers
+	<osg/AnimationPath>
+	<osgText/Text>
+	<osgGA/GUIEventHandler>
+	<osgGA/AnimationPathManipulator>
+	<osgViewer/GraphicsWindow>
+	<osgViewer/Viewer>
+	<osgDB/fstream>
+
+1282027216 c:\openscenegraph\include\osg\animationpath
+	<map>
+	<istream>
+	<float.h>
+	<osg/Matrixf>
+	<osg/Matrixd>
+	<osg/Quat>
+	<osg/NodeCallback>
+
+1282027217 c:\openscenegraph\include\osgtext\text
+	<osg/Drawable>
+	<osg/Quat>
+	<osgText/TextBase>
+	<osgText/Font>
+
+1282027217 c:\openscenegraph\include\osgtext\textbase
+	<osg/Drawable>
+	<osgText/String>
+	<osgText/KerningType>
+
+1282027217 c:\openscenegraph\include\osgtext\string
+	<vector>
+	<set>
+	<string>
+	<osgText/Export>
+
+1282027217 c:\openscenegraph\include\osgtext\export
+
+1282027217 c:\openscenegraph\include\osgtext\kerningtype
+
+1282027217 c:\openscenegraph\include\osgtext\font
+	<string>
+	<istream>
+	<osg/Vec2>
+	<osg/Image>
+	<osg/Texture2D>
+	<osg/StateSet>
+	<osg/buffered_value>
+	<osg/TexEnv>
+	<osgDB/ReaderWriter>
+	<osgText/Export>
+	<osgText/KerningType>
+	<OpenThreads/Mutex>
+
+1282027216 c:\openscenegraph\include\osg\texenv
+	<osg/GL>
+	<osg/StateAttribute>
+	<osg/Vec4>
+
+1282027220 c:\openscenegraph\include\osgga\animationpathmanipulator
+	<osg/AnimationPath>
+	<osg/Notify>
+	<osgGA/CameraManipulator>
+
+1282027221 c:\openscenegraph\include\osgviewer\graphicshandlewin32
+	<osgViewer/Export>
+	<windows.h>
+
+1167600676 c:\openscenegraph\include\ois\oisevents.h
+	"OISPrereqs.h"
+
+1202952816 c:\openscenegraph\include\ois\oisprereqs.h
+	<vector>
+	<string>
+	<map>
+	"OISConfig.h"
+
+1169675358 c:\openscenegraph\include\ois\oisconfig.h
+
+1190508782 c:\openscenegraph\include\ois\oisinputmanager.h
+	"OISPrereqs.h"
+
+1169314766 c:\openscenegraph\include\ois\oiskeyboard.h
+	"OISObject.h"
+	"OISEvents.h"
+
+1167945856 c:\openscenegraph\include\ois\oisobject.h
+	"OISPrereqs.h"
+	"OISInterface.h"
+
+1167600676 c:\openscenegraph\include\ois\oisinterface.h
+	"OISPrereqs.h"
+
+1169314766 c:\openscenegraph\include\ois\oismouse.h
+	"OISObject.h"
+	"OISEvents.h"
+
+1282469063 c:\overseer\overseer.h
+	<OIS/OIS.h>
+	<OIS/OISEvents.h>
+	<OIS/OISInputManager.h>
+	<OIS/OISKeyboard.h>
+	<OIS/OISMouse.h>
+	<DFHack.h>
+	"DwarfGeometry.h"
+
+1167711870 c:\openscenegraph\include\ois\ois.h
+	"OISPrereqs.h"
+	"OISObject.h"
+	"OISMouse.h"
+	"OISKeyboard.h"
+	"OISJoyStick.h"
+	"OISInputManager.h"
+	"OISFactoryCreator.h"
+	"OISException.h"
+	"OISEvents.h"
+	"OISEffect.h"
+	"OISInterface.h"
+	"OISForceFeedback.h"
+
+1169314766 c:\openscenegraph\include\ois\oisjoystick.h
+	"OISObject.h"
+	"OISEvents.h"
+
+1167945856 c:\openscenegraph\include\ois\oisfactorycreator.h
+	"OISPrereqs.h"
+
+1195328668 c:\openscenegraph\include\ois\oisexception.h
+	"OISPrereqs.h"
+	<exception>
+
+1167932264 c:\openscenegraph\include\ois\oiseffect.h
+	"OISPrereqs.h"
+
+1167600676 c:\openscenegraph\include\ois\oisforcefeedback.h
+	"OISPrereqs.h"
+	"OISInterface.h"
+	"OISEffect.h"
+
+1282393297 source:c:\overseer\main.cpp
+	"Overseer.h"
+
+1282027220 c:\openscenegraph\include\osgga\trackballmanipulator
+	<osgGA/OrbitManipulator>
+
+1282027220 c:\openscenegraph\include\osgga\orbitmanipulator
+	<osgGA/StandardManipulator>
 
