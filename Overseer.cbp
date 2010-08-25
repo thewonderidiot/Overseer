@@ -55,12 +55,14 @@
 			<Add directory="C:\OpenSceneGraph\include" />
 			<Add directory="C:\DFHack\library\include" />
 		</Compiler>
-		<Unit filename="DwarfGeometry.cpp" />
-		<Unit filename="DwarfGeometry.h" />
-		<Unit filename="Overseer.cpp" />
-		<Unit filename="Overseer.h" />
-		<Unit filename="SimpleIni.h" />
-		<Unit filename="main.cpp" />
+		<Unit filename="src\DwarfEvents.cpp" />
+		<Unit filename="src\DwarfGeometry.cpp" />
+		<Unit filename="src\include\DwarfEvents.h" />
+		<Unit filename="src\include\DwarfGeometry.h" />
+		<Unit filename="src\include\Overseer.h" />
+		<Unit filename="src\include\SimpleIni.h" />
+		<Unit filename="src\main.cpp" />
+		<Unit filename="src\overseer.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

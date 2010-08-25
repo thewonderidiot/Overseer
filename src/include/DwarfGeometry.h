@@ -40,13 +40,14 @@ typedef struct
         uint32_t index;
     } material;
     RampType ramptype;
+    bool ceiling;
 } Tile;
 
 class DwarfGeometry
 {
     public:
         DwarfGeometry();
-        DwarfGeometry(DFHack::Maps *m, osg::Group *g, int sz, bool er, bool ts);
+        DwarfGeometry(DFHack::Maps *m, osg::Group *g, int sz, bool ts);
         bool drawGeometryOld();
         bool drawGeometry();
         bool start();
@@ -58,14 +59,30 @@ class DwarfGeometry
         bool drawEastWalls(uint32_t z);
         bool drawFloors(uint32_t z);
         bool drawCeilings(uint32_t z);
-        //void drawNorthRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *northblock, DFHack::mapblock40d *southblock, bool doNorthBoundary, bool doSouthBoundary);
-        //void drawSouthRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *southblock, DFHack::mapblock40d *northblock, bool doSouthBoundary, bool doNorthBoundary);
-        //void drawWestRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *westblock, DFHack::mapblock40d *eastblock, bool doWestBoundary, bool doEastBoundary);
-        //void drawEastRamp(int y, int x, int z, int i, int j, DFHack::mapblock40d *block, DFHack::mapblock40d *eastblock, DFHack::mapblock40d *westblock, bool doEastBoundary, bool doWestBoundary);
+        bool drawRamps(uint32_t z);
+        void drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z);
+
+        void drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z);
+
+        void drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z);
+
+        void drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z);
+
+        void drawCeilingBorders(uint32_t z);
+
         void processRamps();
-        bool drawRamps(int x, int y, int z);
-        void drawBlock(int x, int y, int z);
-        bool enableRamps;
+        inline bool isCeiling(int16_t t, int16_t up)
+        {
+            return !DFHack::isWallTerrain(t) && (DFHack::isRampTerrain(up) || DFHack::isFloorTerrain(up) || DFHack::isWallTerrain(up));
+        }
         bool tristrip;
         DFHack::Maps *Map;
         osg::ref_ptr<osg::Group> geometryGroup;
@@ -79,4 +96,5 @@ class DwarfGeometry
         std::vector<std::vector<std::vector<Tile> > > tiles;
         uint32_t xmax,ymax,zmax;
         int geomax;
+        float ceilingHeight;
 };

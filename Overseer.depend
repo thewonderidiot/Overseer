@@ -926,7 +926,7 @@
 	"DFPragma.h"
 	"DFExport.h"
 
-1280083772 c:\dfhack\library\include\dfhack\dftiletypes.h
+1282564760 c:\dfhack\library\include\dfhack\dftiletypes.h
 	"DFPragma.h"
 
 1268498240 c:\program files (x86)\openscenegraph\include\osgga\statesetmanipulator
@@ -2407,4 +2407,61 @@
 
 1282027220 c:\openscenegraph\include\osgga\orbitmanipulator
 	<osgGA/StandardManipulator>
+
+1282722576 source:c:\overseer\src\overseer.cpp
+	<osgViewer/Viewer>
+	<osgViewer/ViewerEventHandlers>
+	<osgGA/StateSetManipulator>
+	<osgGA/TrackballManipulator>
+	<dfhack/DFTileTypes.h>
+	<osgDB/WriteFile>
+	<osgUtil/TriStripVisitor>
+	<iostream>
+	"SimpleIni.h"
+	<osgViewer/GraphicsHandleWin32>
+	"Overseer.h"
+	<windows.h>
+
+1282722487 source:c:\overseer\src\dwarfgeometry.cpp
+	"DwarfGeometry.h"
+
+1282461570 c:\overseer\src\include\simpleini.h
+	<cstring>
+	<string>
+	<map>
+	<list>
+	<algorithm>
+	<stdio.h>
+	<iostream>
+	<cassert>
+	<unicode/ustring.h>
+	<wchar.h>
+	"ConvertUTF.h"
+	<unicode/ucnv.h>
+	<windows.h>
+	<mbstring.h>
+
+1282721863 c:\overseer\src\include\overseer.h
+	<DFHack.h>
+	<osgGA/TrackballManipulator>
+	<osgDB/ReadFile>
+	<OIS/OIS.h>
+	<iostream>
+	"DwarfGeometry.h"
+
+1282722230 c:\overseer\src\include\dwarfgeometry.h
+	<DFHack.h>
+	<dfhack/DFTileTypes.h>
+	<osg/Drawable>
+	<osg/Geometry>
+	<osgGA/StateSetManipulator>
+	<osgUtil/TriStripVisitor>
+	<osgUtil/Optimizer>
+	<osgDB/ReadFile>
+	<osg/Material>
+	<osg/Texture2D>
+	<vector>
+
+1282715325 source:c:\overseer\src\main.cpp
+	"Overseer.h"
 

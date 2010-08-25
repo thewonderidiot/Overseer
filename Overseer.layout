@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="DwarfGeometry.cpp" open="1" top="0" tabpos="4">
+	<File name="src\include\Overseer.h" open="1" top="1" tabpos="2">
+		<Cursor position="181" topLine="0" />
+	</File>
+	<File name="src\main.cpp" open="1" top="0" tabpos="1">
 		<Cursor position="0" topLine="0" />
-	</File>
-	<File name="DwarfGeometry.h" open="1" top="0" tabpos="5">
-		<Cursor position="305" topLine="0" />
-	</File>
-	<File name="Overseer.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="146" topLine="0" />
-	</File>
-	<File name="Overseer.h" open="1" top="0" tabpos="2">
-		<Cursor position="886" topLine="3" />
-	</File>
-	<File name="main.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="103" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>
