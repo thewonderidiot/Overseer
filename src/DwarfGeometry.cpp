@@ -130,417 +130,423 @@ void DwarfGeometry::processRamps()
 
 bool DwarfGeometry::drawRamps(uint32_t z)
 {
+    uint32_t wallmat = 0;
     for (uint32_t x = 0; x < xmax; x++)
     {
         for (uint32_t y = 0; y < ymax; y++)
         {
+            if (tiles[z][y][x].ramptype == NONE) continue;
+            if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
+            if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+            if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
             int s;
             Vec3 norm;
+            wallmat = tiles[z][y][x].material.index;
             switch (tiles[z][y][x].ramptype)
             {
             case NORTH:
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y+1,z));
-                vertices->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                 norm.set(1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
-                drawNorthRampEastBoundaries(x,y,z);
-                drawNorthRampWestBoundaries(x,y,z);
-                drawNorthRampSouthBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawNorthRampEastBoundaries(x,y,z,wallmat);
+                drawNorthRampWestBoundaries(x,y,z,wallmat);
+                drawNorthRampSouthBoundaries(x,y,z,wallmat);
                 break;
             case SOUTH:
-                vertices->push_back(Vec3(x+1,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x,y,z));
-                vertices->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                 norm.set(-1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
-                drawSouthRampWestBoundaries(x,y,z);
-                drawSouthRampEastBoundaries(x,y,z);
-                drawSouthRampNorthBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawSouthRampWestBoundaries(x,y,z,wallmat);
+                drawSouthRampEastBoundaries(x,y,z,wallmat);
+                drawSouthRampNorthBoundaries(x,y,z,wallmat);
                 break;
             case WEST:
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x,y+1,z));
-                vertices->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
                 norm.set(0,1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
-                drawWestRampNorthBoundaries(x,y,z);
-                drawWestRampSouthBoundaries(x,y,z);
-                drawWestRampEastBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawWestRampNorthBoundaries(x,y,z,wallmat);
+                drawWestRampSouthBoundaries(x,y,z,wallmat);
+                drawWestRampEastBoundaries(x,y,z,wallmat);
                 break;
             case EAST:
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                 norm.set(0,-1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
-                drawEastRampNorthBoundaries(x,y,z);
-                drawEastRampSouthBoundaries(x,y,z);
-                drawEastRampWestBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawEastRampNorthBoundaries(x,y,z,wallmat);
+                drawEastRampSouthBoundaries(x,y,z,wallmat);
+                drawEastRampWestBoundaries(x,y,z,wallmat);
                 break;
             case NW_UP:
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x+1,y+1,z));
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x,y+1,z));
-                vertices->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
                 norm.set(1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(0,1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
-                drawWestRampNorthBoundaries(x,y,z);
-                drawWestRampEastBoundaries(x,y,z);
-                drawNorthRampWestBoundaries(x,y,z);
-                drawNorthRampSouthBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawWestRampNorthBoundaries(x,y,z,wallmat);
+                drawWestRampEastBoundaries(x,y,z,wallmat);
+                drawNorthRampWestBoundaries(x,y,z,wallmat);
+                drawNorthRampSouthBoundaries(x,y,z,wallmat);
                 break;
             case NE_UP:
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x,y,z));
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y+1,z));
-                vertices->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                 norm.set(0,-1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
-                drawNorthRampEastBoundaries(x,y,z);
-                drawNorthRampSouthBoundaries(x,y,z);
-                drawEastRampNorthBoundaries(x,y,z);
-                drawEastRampWestBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawNorthRampEastBoundaries(x,y,z,wallmat);
+                drawNorthRampSouthBoundaries(x,y,z,wallmat);
+                drawEastRampNorthBoundaries(x,y,z,wallmat);
+                drawEastRampWestBoundaries(x,y,z,wallmat);
                 break;
             case SW_UP:
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x,y+1,z));
-                vertices->push_back(Vec3(x+1,y+1,z));
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x,y,z));
-                vertices->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                 norm.set(0,1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(-1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
-                drawSouthRampWestBoundaries(x,y,z);
-                drawSouthRampNorthBoundaries(x,y,z);
-                drawWestRampSouthBoundaries(x,y,z);
-                drawWestRampEastBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawSouthRampWestBoundaries(x,y,z,wallmat);
+                drawSouthRampNorthBoundaries(x,y,z,wallmat);
+                drawWestRampSouthBoundaries(x,y,z,wallmat);
+                drawWestRampEastBoundaries(x,y,z,wallmat);
                 break;
             case SE_UP:
-                vertices->push_back(Vec3(x+1,y+1,z+1));
-                vertices->push_back(Vec3(x,y,z));
-                vertices->push_back(Vec3(x,y+1,z));
-                vertices->push_back(Vec3(x+1,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                 norm.set(-1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(0,-1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
-                drawSouthRampEastBoundaries(x,y,z);
-                drawSouthRampNorthBoundaries(x,y,z);
-                drawEastRampSouthBoundaries(x,y,z);
-                drawEastRampWestBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawSouthRampEastBoundaries(x,y,z,wallmat);
+                drawSouthRampNorthBoundaries(x,y,z,wallmat);
+                drawEastRampSouthBoundaries(x,y,z,wallmat);
+                drawEastRampWestBoundaries(x,y,z,wallmat);
                 break;
             case NW_DOWN:
-                vertices->push_back(Vec3(x+1,y+1,z+1));
-                vertices->push_back(Vec3(x,y,z));
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                 norm.set(0,-1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(-1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
-                drawSouthRampWestBoundaries(x,y,z);
-                drawEastRampNorthBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawSouthRampWestBoundaries(x,y,z,wallmat);
+                drawEastRampNorthBoundaries(x,y,z,wallmat);
                 break;
             case NE_DOWN:
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x,y+1,z));
-                vertices->push_back(Vec3(x+1,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                 norm.set(-1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(0,1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
-                drawWestRampNorthBoundaries(x,y,z);
-                drawSouthRampEastBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawWestRampNorthBoundaries(x,y,z,wallmat);
+                drawSouthRampEastBoundaries(x,y,z,wallmat);
                 break;
             case SW_DOWN:
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                 norm.set(1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(0,-1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
-                drawNorthRampWestBoundaries(x,y,z);
-                drawEastRampSouthBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawNorthRampWestBoundaries(x,y,z,wallmat);
+                drawEastRampSouthBoundaries(x,y,z,wallmat);
                 break;
             case SE_DOWN:
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x+1,y+1,z));
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
                 norm.set(0,1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
-                drawWestRampSouthBoundaries(x,y,z);
-                drawNorthRampEastBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawWestRampSouthBoundaries(x,y,z,wallmat);
+                drawNorthRampEastBoundaries(x,y,z,wallmat);
                 break;
             case HILL:
-                vertices->push_back(Vec3(x+.5,y+.5,z+.5));
-                vertices->push_back(Vec3(x+1,y+1,z));
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x+.5,y+.5,z+.5));
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x,y,z));
-                vertices->push_back(Vec3(x+.5,y+.5,z+.5));
-                vertices->push_back(Vec3(x,y,z));
-                vertices->push_back(Vec3(x,y+1,z));
-                vertices->push_back(Vec3(x+.5,y+.5,z+.5));
-                vertices->push_back(Vec3(x,y+1,z));
-                vertices->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+.5,y+.5,z+.5));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+.5,y+.5,z+.5));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+.5,y+.5,z+.5));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+.5,y+.5,z+.5));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
                 norm.set(1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(0,-1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(-1,0,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 norm.set(0,1,1);
                 norm.normalize();
-                normals->push_back(norm);
-                normals->push_back(norm);
-                normals->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
+                (*normals)[wallmat]->push_back(norm);
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-3);
                 face->push_back(s-4);
                 face->push_back(s-5);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-                s = vertices->size()-1;
+                s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s-6);
                 face->push_back(s-7);
                 face->push_back(s-8);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 face->push_back(s-9);
                 face->push_back(s-10);
                 face->push_back(s-11);
-                bg->addPrimitiveSet(face.get());
-                drawNorthRampSouthBoundaries(x,y,z);
-                drawSouthRampNorthBoundaries(x,y,z);
-                drawEastRampWestBoundaries(x,y,z);
-                drawWestRampEastBoundaries(x,y,z);
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
+                drawNorthRampSouthBoundaries(x,y,z,wallmat);
+                drawSouthRampNorthBoundaries(x,y,z,wallmat);
+                drawEastRampWestBoundaries(x,y,z,wallmat);
+                drawWestRampEastBoundaries(x,y,z,wallmat);
                 break;
             default:
                 break;
@@ -550,499 +556,499 @@ bool DwarfGeometry::drawRamps(uint32_t z)
     }
     return true;
 }
-void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (y > 0) //west cases
     {
-        if (DFHack::isWallTerrain(tiles[z][y-1][x].tiletype) || /*tiles[z][y-1][x].ramptype==EAST ||*/ tiles[z][y-1][x].ramptype==NW_DOWN || tiles[z][y-1][x].ramptype==SW_DOWN) //wall cases
+        if (DFHack::isWallTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==NW_DOWN || tiles[z][y-1][x].ramptype==SW_DOWN) //wall cases
         {
-            vertices->push_back(Vec3(x+1,y,z+1));
-            vertices->push_back(Vec3(x,y,z+1));
-            vertices->push_back(Vec3(x+1,y,z));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (DFHack::isFloorTerrain(tiles[z][y-1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==WEST || tiles[z][y-1][x].ramptype==NW_UP || tiles[z][y-1][x].ramptype==SW_UP || tiles[z][y-1][x].ramptype==HILL) //open cases
         {
-            vertices->push_back(Vec3(x,y,z+1));
-            vertices->push_back(Vec3(x+1,y,z));
-            vertices->push_back(Vec3(x,y,z));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (tiles[z][y-1][x].ramptype==SOUTH || tiles[z][y-1][x].ramptype==SE_UP || tiles[z][y-1][x].ramptype==NE_DOWN) //intersect cases
         {
-            vertices->push_back(Vec3(x,y,z+1));
-            vertices->push_back(Vec3(x+.5,y,z+.5));
-            vertices->push_back(Vec3(x,y,z));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+.5,y,z+.5));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
     }
 }
-void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (y < ymax-1)
     {
-        if (DFHack::isWallTerrain(tiles[z][y+1][x].tiletype) || /*tiles[z][y-1][x].ramptype==WEST ||*/ tiles[z][y+1][x].ramptype==NE_DOWN || tiles[z][y+1][x].ramptype==SE_DOWN) //wall cases
+        if (DFHack::isWallTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==NE_DOWN || tiles[z][y+1][x].ramptype==SE_DOWN) //wall cases
         {
-            vertices->push_back(Vec3(x+1,y+1,z+1));
-            vertices->push_back(Vec3(x,y+1,z+1));
-            vertices->push_back(Vec3(x+1,y+1,z));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (DFHack::isFloorTerrain(tiles[z][y+1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==EAST || tiles[z][y+1][x].ramptype==NE_UP || tiles[z][y+1][x].ramptype==SE_UP || tiles[z][y+1][x].ramptype==HILL) //open cases
         {
-            vertices->push_back(Vec3(x,y+1,z+1));
-            vertices->push_back(Vec3(x+1,y+1,z));
-            vertices->push_back(Vec3(x,y+1,z));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (tiles[z][y+1][x].ramptype==SOUTH || tiles[z][y+1][x].ramptype==SW_UP || tiles[z][y+1][x].ramptype==NW_DOWN) //intersect cases
         {
-            vertices->push_back(Vec3(x,y+1,z+1));
-            vertices->push_back(Vec3(x+.5,y+1,z+.5));
-            vertices->push_back(Vec3(x,y+1,z));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+.5,y+1,z+.5));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
     }
 }
-void DwarfGeometry::drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (x < xmax-1 && DFHack::isWallTerrain(tiles[z][y][x+1].tiletype)) //opposite case
     {
-        vertices->push_back(Vec3(x+1,y+1,z+1));
-        vertices->push_back(Vec3(x+1,y,z+1));
-        vertices->push_back(Vec3(x+1,y,z));
-        vertices->push_back(Vec3(x+1,y+1,z));
-        normals->push_back(Vec3(-1,0,0));
-        normals->push_back(Vec3(-1,0,0));
-        normals->push_back(Vec3(-1,0,0));
-        normals->push_back(Vec3(-1,0,0));
+        (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+        (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+        (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+        (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+        (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+        (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+        (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+        (*normals)[wallmat]->push_back(Vec3(-1,0,0));
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-        int s = vertices->size()-1;
+        int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
         face->push_back(s-1);
         face->push_back(s-2);
         face->push_back(s-3);
-        bg->addPrimitiveSet(face.get());
+        (*bg)[wallmat]->addPrimitiveSet(face.get());
     }
 }
 
-void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (y > 0) //west cases
     {
-        if (DFHack::isWallTerrain(tiles[z][y-1][x].tiletype) || /*tiles[z][y-1][x].ramptype==EAST ||*/ tiles[z][y-1][x].ramptype==NW_DOWN || tiles[z][y-1][x].ramptype==SW_DOWN) //wall cases
+        if (DFHack::isWallTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==NW_DOWN || tiles[z][y-1][x].ramptype==SW_DOWN) //wall cases
         {
-            vertices->push_back(Vec3(x+1,y,z+1));
-            vertices->push_back(Vec3(x,y,z+1));
-            vertices->push_back(Vec3(x,y,z));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (DFHack::isFloorTerrain(tiles[z][y-1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==WEST || tiles[z][y-1][x].ramptype==NW_UP || tiles[z][y-1][x].ramptype==SW_UP || tiles[z][y-1][x].ramptype==HILL) //open cases
         {
-            vertices->push_back(Vec3(x+1,y,z+1));
-            vertices->push_back(Vec3(x,y,z));
-            vertices->push_back(Vec3(x+1,y,z));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (tiles[z][y-1][x].ramptype==NORTH || tiles[z][y-1][x].ramptype==NE_UP || tiles[z][y-1][x].ramptype==SE_DOWN) //intersect cases
         {
-            vertices->push_back(Vec3(x+1,y,z+1));
-            vertices->push_back(Vec3(x+1,y,z));
-            vertices->push_back(Vec3(x+.5,y,z+.5));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+.5,y,z+.5));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
     }
 }
-void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (y < ymax-1) //east cases
     {
-        if (DFHack::isWallTerrain(tiles[z][y+1][x].tiletype) || /*tiles[z][y-1][x].ramptype==WEST ||*/ tiles[z][y+1][x].ramptype==NE_DOWN || tiles[z][y+1][x].ramptype==SE_DOWN) //wall cases
+        if (DFHack::isWallTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==NE_DOWN || tiles[z][y+1][x].ramptype==SE_DOWN) //wall cases
         {
-            vertices->push_back(Vec3(x,y+1,z+1));
-            vertices->push_back(Vec3(x+1,y+1,z+1));
-            vertices->push_back(Vec3(x,y+1,z));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
-            normals->push_back(Vec3(0,-1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (DFHack::isFloorTerrain(tiles[z][y+1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==EAST || tiles[z][y+1][x].ramptype==NE_UP || tiles[z][y+1][x].ramptype==SE_UP || tiles[z][y+1][x].ramptype==HILL) //open cases
         {
-            vertices->push_back(Vec3(x+1,y+1,z+1));
-            vertices->push_back(Vec3(x,y+1,z));
-            vertices->push_back(Vec3(x+1,y+1,z));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (tiles[z][y+1][x].ramptype==NORTH || tiles[z][y+1][x].ramptype==NW_UP || tiles[z][y+1][x].ramptype==SW_DOWN) //intersect cases
         {
-            vertices->push_back(Vec3(x+1,y+1,z+1));
-            vertices->push_back(Vec3(x+.5,y+1,z+.5));
-            vertices->push_back(Vec3(x+1,y+1,z));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
-            normals->push_back(Vec3(0,1,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+.5,y+1,z+.5));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*normals)[wallmat]->push_back(Vec3(0,1,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
     }
 }
-void DwarfGeometry::drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (x > 0 && DFHack::isWallTerrain(tiles[z][y][x-1].tiletype)) //opposite case
     {
-        vertices->push_back(Vec3(x,y,z+1));
-        vertices->push_back(Vec3(x,y+1,z+1));
-        vertices->push_back(Vec3(x,y+1,z));
-        vertices->push_back(Vec3(x,y,z));
-        normals->push_back(Vec3(1,0,0));
-        normals->push_back(Vec3(1,0,0));
-        normals->push_back(Vec3(1,0,0));
-        normals->push_back(Vec3(1,0,0));
+        (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+        (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+        (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+        (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+        (*normals)[wallmat]->push_back(Vec3(1,0,0));
+        (*normals)[wallmat]->push_back(Vec3(1,0,0));
+        (*normals)[wallmat]->push_back(Vec3(1,0,0));
+        (*normals)[wallmat]->push_back(Vec3(1,0,0));
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-        int s = vertices->size()-1;
+        int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
         face->push_back(s-1);
         face->push_back(s-2);
         face->push_back(s-3);
-        bg->addPrimitiveSet(face.get());
+        (*bg)[wallmat]->addPrimitiveSet(face.get());
     }
 }
 
-void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (x > 0) //north cases
     {
-        if (DFHack::isWallTerrain(tiles[z][y][x-1].tiletype) || /*tiles[z][y-1][x].ramptype==SOUTH ||*/ tiles[z][y][x-1].ramptype==NE_DOWN || tiles[z][y][x-1].ramptype==NW_DOWN) //wall cases
+        if (DFHack::isWallTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NE_DOWN || tiles[z][y][x-1].ramptype==NW_DOWN) //wall cases
         {
-            vertices->push_back(Vec3(x,y,z+1));
-            vertices->push_back(Vec3(x,y+1,z+1));
-            vertices->push_back(Vec3(x,y+1,z));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (DFHack::isFloorTerrain(tiles[z][y][x-1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NORTH || tiles[z][y][x-1].ramptype==NW_UP || tiles[z][y][x-1].ramptype==NE_UP || tiles[z][y][x-1].ramptype==HILL) //open cases
         {
-            vertices->push_back(Vec3(x,y,z+1));
-            vertices->push_back(Vec3(x,y,z));
-            vertices->push_back(Vec3(x,y+1,z));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (tiles[z][y][x-1].ramptype==EAST || tiles[z][y][x-1].ramptype==SE_UP || tiles[z][y][x-1].ramptype==SW_DOWN) //intersect cases
         {
-            vertices->push_back(Vec3(x,y,z+1));
-            vertices->push_back(Vec3(x,y,z));
-            vertices->push_back(Vec3(x,y+.5,z+.5));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+.5,z+.5));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
     }
 }
-void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (x < xmax-1) //south cases
     {
-        if (DFHack::isWallTerrain(tiles[z][y][x+1].tiletype) || /*tiles[z][y-1][x].ramptype==NORTH ||*/ tiles[z][y][x+1].ramptype==SW_DOWN || tiles[z][y][x+1].ramptype==SE_DOWN) //wall cases
+        if (DFHack::isWallTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SW_DOWN || tiles[z][y][x+1].ramptype==SE_DOWN) //wall cases
         {
-            vertices->push_back(Vec3(x+1,y,z+1));
-            vertices->push_back(Vec3(x+1,y+1,z));
-            vertices->push_back(Vec3(x+1,y+1,z+1));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (DFHack::isFloorTerrain(tiles[z][y][x+1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SOUTH || tiles[z][y][x+1].ramptype==SW_UP || tiles[z][y][x+1].ramptype==SE_UP || tiles[z][y][x+1].ramptype==HILL) //open cases
         {
-            vertices->push_back(Vec3(x+1,y,z+1));
-            vertices->push_back(Vec3(x+1,y+1,z));
-            vertices->push_back(Vec3(x+1,y,z));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (tiles[z][y][x+1].ramptype==EAST || tiles[z][y][x+1].ramptype==NE_UP || tiles[z][y][x+1].ramptype==NW_DOWN) //intersect cases
         {
-            vertices->push_back(Vec3(x+1,y,z+1));
-            vertices->push_back(Vec3(x+1,y+.5,z+.5));
-            vertices->push_back(Vec3(x+1,y,z));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+.5,z+.5));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
     }
 }
-void DwarfGeometry::drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (y < ymax-1 && DFHack::isWallTerrain(tiles[z][y+1][x].tiletype)) //opposite case
     {
-        vertices->push_back(Vec3(x,y+1,z+1));
-        vertices->push_back(Vec3(x+1,y+1,z+1));
-        vertices->push_back(Vec3(x+1,y+1,z));
-        vertices->push_back(Vec3(x,y+1,z));
-        normals->push_back(Vec3(0,-1,0));
-        normals->push_back(Vec3(0,-1,0));
-        normals->push_back(Vec3(0,-1,0));
-        normals->push_back(Vec3(0,-1,0));
+        (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+        (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+        (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+        (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+        (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+        (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+        (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+        (*normals)[wallmat]->push_back(Vec3(0,-1,0));
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-        int s = vertices->size()-1;
+        int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
         face->push_back(s-1);
         face->push_back(s-2);
         face->push_back(s-3);
-        bg->addPrimitiveSet(face.get());
+        (*bg)[wallmat]->addPrimitiveSet(face.get());
     }
 }
 
-void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (x > 0) //north cases
     {
-        if (DFHack::isWallTerrain(tiles[z][y][x-1].tiletype) || /*tiles[z][y-1][x].ramptype==SOUTH ||*/ tiles[z][y][x-1].ramptype==NW_DOWN || tiles[z][y][x-1].ramptype==NE_DOWN) //wall cases
+        if (DFHack::isWallTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NW_DOWN || tiles[z][y][x-1].ramptype==NE_DOWN) //wall cases
         {
-            vertices->push_back(Vec3(x,y,z+1));
-            vertices->push_back(Vec3(x,y+1,z+1));
-            vertices->push_back(Vec3(x,y,z));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (DFHack::isFloorTerrain(tiles[z][y][x-1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NORTH || tiles[z][y][x-1].ramptype==NW_UP || tiles[z][y][x-1].ramptype==NE_UP || tiles[z][y][x-1].ramptype==HILL) //open cases
         {
-            vertices->push_back(Vec3(x,y+1,z+1));
-            vertices->push_back(Vec3(x,y+1,z));
-            vertices->push_back(Vec3(x,y,z));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (tiles[z][y][x-1].ramptype==WEST || tiles[z][y][x-1].ramptype==SW_UP || tiles[z][y][x-1].ramptype==SE_DOWN) //intersect cases
         {
-            vertices->push_back(Vec3(x,y+1,z+1));
-            vertices->push_back(Vec3(x,y+1,z));
-            vertices->push_back(Vec3(x,y+.5,z+.5));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+.5,z+.5));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
     }
 }
-void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (x < xmax-1) //south cases
     {
-        if (DFHack::isWallTerrain(tiles[z][y][x+1].tiletype) || /*tiles[z][y-1][x].ramptype==NORTH ||*/ tiles[z][y][x+1].ramptype==SE_DOWN || tiles[z][y][x+1].ramptype==SW_DOWN) //wall cases
+        if (DFHack::isWallTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SE_DOWN || tiles[z][y][x+1].ramptype==SW_DOWN) //wall cases
         {
-            vertices->push_back(Vec3(x+1,y,z+1));
-            vertices->push_back(Vec3(x+1,y,z));
-            vertices->push_back(Vec3(x+1,y+1,z+1));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
-            normals->push_back(Vec3(-1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (DFHack::isFloorTerrain(tiles[z][y][x+1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SOUTH || tiles[z][y][x+1].ramptype==SW_UP || tiles[z][y][x+1].ramptype==SE_UP || tiles[z][y][x+1].ramptype==HILL) //open cases
         {
-            vertices->push_back(Vec3(x+1,y+1,z+1));
-            vertices->push_back(Vec3(x+1,y+1,z));
-            vertices->push_back(Vec3(x+1,y,z));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
         else if (tiles[z][y][x+1].ramptype==WEST || tiles[z][y][x+1].ramptype==NW_UP || tiles[z][y][x+1].ramptype==NE_DOWN) //intersect cases
         {
-            vertices->push_back(Vec3(x+1,y+1,z+1));
-            vertices->push_back(Vec3(x+1,y+1,z));
-            vertices->push_back(Vec3(x+1,y+.5,z+.5));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
-            normals->push_back(Vec3(1,0,0));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+.5,z+.5));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*normals)[wallmat]->push_back(Vec3(1,0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
-            int s = vertices->size()-1;
+            int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
             face->push_back(s-1);
             face->push_back(s-2);
-            bg->addPrimitiveSet(face.get());
+            (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
     }
 }
-void DwarfGeometry::drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z)
+void DwarfGeometry::drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
 {
     if (y > 0 && DFHack::isWallTerrain(tiles[z][y-1][x].tiletype)) //opposite case
     {
-        vertices->push_back(Vec3(x+1,y,z+1));
-        vertices->push_back(Vec3(x,y,z+1));
-        vertices->push_back(Vec3(x,y,z));
-        vertices->push_back(Vec3(x+1,y,z));
-        normals->push_back(Vec3(0,1,0));
-        normals->push_back(Vec3(0,1,0));
-        normals->push_back(Vec3(0,1,0));
-        normals->push_back(Vec3(0,1,0));
+        (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+        (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+        (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+        (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+        (*normals)[wallmat]->push_back(Vec3(0,1,0));
+        (*normals)[wallmat]->push_back(Vec3(0,1,0));
+        (*normals)[wallmat]->push_back(Vec3(0,1,0));
+        (*normals)[wallmat]->push_back(Vec3(0,1,0));
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-        int s = vertices->size()-1;
+        int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
         face->push_back(s-1);
         face->push_back(s-2);
         face->push_back(s-3);
-        bg->addPrimitiveSet(face.get());
+        (*bg)[wallmat]->addPrimitiveSet(face.get());
     }
 }
 
@@ -1061,59 +1067,62 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                 if (wallStarted && wallmat != northmat)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x,y,z+1));
-                    vertices->push_back(Vec3(x,y,z));
-                    normals->push_back(Vec3(1,0,0));
-                    normals->push_back(Vec3(1,0,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (!wallStarted)
                 {
                     wallStarted = true;
                     wallmat = northmat;
-                    vertices->push_back(Vec3(x,y,z));
-                    vertices->push_back(Vec3(x,y,z+1));
-                    normals->push_back(Vec3(1,0,0));
-                    normals->push_back(Vec3(1,0,0));
+                    if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
+                    if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     length = 1;
                 }
                 else length++;
                 if (y == ymax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x,y+1,z+1));
-                    vertices->push_back(Vec3(x,y+1,z));
-                    normals->push_back(Vec3(1,0,0));
-                    normals->push_back(Vec3(1,0,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
             }
             else if (wallStarted)
             {
                 wallStarted = false;
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x,y,z));
-                normals->push_back(Vec3(1,0,0));
-                normals->push_back(Vec3(1,0,0));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                (*normals)[wallmat]->push_back(Vec3(1,0,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                int s = vertices->size()-1;
+                int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
             }
         }
     }
@@ -1135,59 +1144,62 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
                 if (wallStarted && wallmat != southmat)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y,z+1));
-                    vertices->push_back(Vec3(x+1,y,z));
-                    normals->push_back(Vec3(-1,0,0));
-                    normals->push_back(Vec3(-1,0,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (!wallStarted)
                 {
                     wallStarted = true;
                     wallmat = southmat;
-                    vertices->push_back(Vec3(x+1,y,z));
-                    vertices->push_back(Vec3(x+1,y,z+1));
-                    normals->push_back(Vec3(-1,0,0));
-                    normals->push_back(Vec3(-1,0,0));
+                    if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
+                    if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     length = 1;
                 }
                 else length++;
                 if (y == ymax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y+1,z+1));
-                    vertices->push_back(Vec3(x+1,y+1,z));
-                    normals->push_back(Vec3(-1,0,0));
-                    normals->push_back(Vec3(-1,0,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
             }
             else if (wallStarted)
             {
                 wallStarted = false;
-                vertices->push_back(Vec3(x+1,y,z+1));
-                vertices->push_back(Vec3(x+1,y,z));
-                normals->push_back(Vec3(-1,0,0));
-                normals->push_back(Vec3(-1,0,0));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                int s = vertices->size()-1;
+                int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
             }
         }
     }
@@ -1209,59 +1221,62 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
                 if (wallStarted && wallmat != westmat)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x,y,z+1));
-                    vertices->push_back(Vec3(x,y,z));
-                    normals->push_back(Vec3(0,1,0));
-                    normals->push_back(Vec3(0,1,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (!wallStarted)
                 {
                     wallStarted = true;
                     wallmat = westmat;
-                    vertices->push_back(Vec3(x,y,z));
-                    vertices->push_back(Vec3(x,y,z+1));
-                    normals->push_back(Vec3(0,1,0));
-                    normals->push_back(Vec3(0,1,0));
+                    if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
+                    if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     length = 1;
                 }
                 else length++;
                 if (x == xmax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y,z+1));
-                    vertices->push_back(Vec3(x+1,y,z));
-                    normals->push_back(Vec3(0,1,0));
-                    normals->push_back(Vec3(0,1,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
             }
             else if (wallStarted)
             {
                 wallStarted = false;
-                vertices->push_back(Vec3(x,y,z+1));
-                vertices->push_back(Vec3(x,y,z));
-                normals->push_back(Vec3(0,1,0));
-                normals->push_back(Vec3(0,1,0));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                (*normals)[wallmat]->push_back(Vec3(0,1,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                int s = vertices->size()-1;
+                int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
             }
         }
     }
@@ -1283,59 +1298,62 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                 if (wallStarted && wallmat != eastmat)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x,y+1,z+1));
-                    vertices->push_back(Vec3(x,y+1,z));
-                    normals->push_back(Vec3(0,-1,0));
-                    normals->push_back(Vec3(0,-1,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (!wallStarted)
                 {
                     wallStarted = true;
                     wallmat = eastmat;
-                    vertices->push_back(Vec3(x,y+1,z));
-                    vertices->push_back(Vec3(x,y+1,z+1));
-                    normals->push_back(Vec3(0,-1,0));
-                    normals->push_back(Vec3(0,-1,0));
+                    if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
+                    if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     length = 1;
                 }
                 else length++;
                 if (x == xmax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y+1,z+1));
-                    vertices->push_back(Vec3(x+1,y+1,z));
-                    normals->push_back(Vec3(0,-1,0));
-                    normals->push_back(Vec3(0,-1,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
             }
             else if (wallStarted)
             {
                 wallStarted = false;
-                vertices->push_back(Vec3(x,y+1,z+1));
-                vertices->push_back(Vec3(x,y+1,z));
-                normals->push_back(Vec3(0,-1,0));
-                normals->push_back(Vec3(0,-1,0));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                int s = vertices->size()-1;
+                int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
             }
         }
     }
@@ -1356,59 +1374,62 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 if (wallStarted && wallmat != tiles[z][y][x].material.index)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y,z));
-                    vertices->push_back(Vec3(x,y,z));
-                    normals->push_back(Vec3(0,0,1));
-                    normals->push_back(Vec3(0,0,1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,1));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (!wallStarted)
                 {
                     wallStarted = true;
                     wallmat = tiles[z][y][x].material.index;
-                    vertices->push_back(Vec3(x,y,z));
-                    vertices->push_back(Vec3(x+1,y,z));
-                    normals->push_back(Vec3(0,0,1));
-                    normals->push_back(Vec3(0,0,1));
+                    if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
+                    if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,1));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     length = 1;
                 }
                 else length++;
                 if (y == ymax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y+1,z));
-                    vertices->push_back(Vec3(x,y+1,z));
-                    normals->push_back(Vec3(0,0,1));
-                    normals->push_back(Vec3(0,0,1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,1));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
             }
             else if (wallStarted)
             {
                 wallStarted = false;
-                vertices->push_back(Vec3(x+1,y,z));
-                vertices->push_back(Vec3(x,y,z));
-                normals->push_back(Vec3(0,0,1));
-                normals->push_back(Vec3(0,0,1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*normals)[wallmat]->push_back(Vec3(0,0,1));
+                (*normals)[wallmat]->push_back(Vec3(0,0,1));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                int s = vertices->size()-1;
+                int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
             }
         }
     }
@@ -1430,59 +1451,62 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                 if (wallStarted && wallmat != tiles[z+1][y][x].material.index)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y,z+1-ceilingHeight));
-                    vertices->push_back(Vec3(x,y,z+1-ceilingHeight));
-                    normals->push_back(Vec3(0,0,-1));
-                    normals->push_back(Vec3(0,0,-1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1-ceilingHeight));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,-1));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (!wallStarted)
                 {
                     wallStarted = true;
                     wallmat = tiles[z+1][y][x].material.index;
-                    vertices->push_back(Vec3(x,y,z+1-ceilingHeight));
-                    vertices->push_back(Vec3(x+1,y,z+1-ceilingHeight));
-                    normals->push_back(Vec3(0,0,-1));
-                    normals->push_back(Vec3(0,0,-1));
+                    if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
+                    if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1-ceilingHeight));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,-1));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     length = 1;
                 }
                 else length++;
                 if (y == ymax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    vertices->push_back(Vec3(x+1,y+1,z+1-ceilingHeight));
-                    vertices->push_back(Vec3(x,y+1,z+1-ceilingHeight));
-                    normals->push_back(Vec3(0,0,-1));
-                    normals->push_back(Vec3(0,0,-1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1-ceilingHeight));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1-ceilingHeight));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,-1));
+                    (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
             }
             else if (wallStarted)
             {
                 wallStarted = false;
-                vertices->push_back(Vec3(x+1,y,z+1-ceilingHeight));
-                vertices->push_back(Vec3(x,y,z+1-ceilingHeight));
-                normals->push_back(Vec3(0,0,-1));
-                normals->push_back(Vec3(0,0,-1));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1-ceilingHeight));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
+                (*normals)[wallmat]->push_back(Vec3(0,0,-1));
+                (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                int s = vertices->size()-1;
+                int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
                 face->push_back(s-1);
                 face->push_back(s-2);
                 face->push_back(s-3);
-                bg->addPrimitiveSet(face.get());
+                (*bg)[wallmat]->addPrimitiveSet(face.get());
             }
         }
     }
@@ -1492,83 +1516,89 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
 
 void DwarfGeometry::drawCeilingBorders(uint32_t z)
 {
+    uint32_t wallmat = 0;
     for (uint32_t x = 0; x < xmax; x++)
     {
         for (uint32_t y = 0; y < ymax; y++)
         {
             if (tiles[z][y][x].ceiling)
             {
+                wallmat = tiles[z][y][x].material.index;
+                if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
+                if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
+
                 if (x > 0 && !tiles[z][y][x-1].ceiling && !DFHack::isWallTerrain(tiles[z][y][x-1].tiletype))
                 {
-                    vertices->push_back(Vec3(x,y+1,z+1));
-                    vertices->push_back(Vec3(x,y,z+1));
-                    vertices->push_back(Vec3(x,y,z+1-ceilingHeight));
-                    vertices->push_back(Vec3(x,y+1,z+1-ceilingHeight));
-                    normals->push_back(Vec3(-1,0,0));
-                    normals->push_back(Vec3(-1,0,0));
-                    normals->push_back(Vec3(-1,0,0));
-                    normals->push_back(Vec3(-1,0,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1-ceilingHeight));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (x < xmax-1 && !tiles[z][y][x+1].ceiling && !DFHack::isWallTerrain(tiles[z][y][x+1].tiletype))
                 {
-                    vertices->push_back(Vec3(x+1,y,z+1));
-                    vertices->push_back(Vec3(x+1,y+1,z+1));
-                    vertices->push_back(Vec3(x+1,y+1,z+1-ceilingHeight));
-                    vertices->push_back(Vec3(x+1,y,z+1-ceilingHeight));
-                    normals->push_back(Vec3(1,0,0));
-                    normals->push_back(Vec3(1,0,0));
-                    normals->push_back(Vec3(1,0,0));
-                    normals->push_back(Vec3(1,0,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1-ceilingHeight));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1-ceilingHeight));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (y > 0 && !tiles[z][y-1][x].ceiling && !DFHack::isWallTerrain(tiles[z][y-1][x].tiletype))
                 {
-                    vertices->push_back(Vec3(x,y,z+1));
-                    vertices->push_back(Vec3(x+1,y,z+1));
-                    vertices->push_back(Vec3(x+1,y,z+1-ceilingHeight));
-                    vertices->push_back(Vec3(x,y,z+1-ceilingHeight));
-                    normals->push_back(Vec3(0,-1,0));
-                    normals->push_back(Vec3(0,-1,0));
-                    normals->push_back(Vec3(0,-1,0));
-                    normals->push_back(Vec3(0,-1,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1-ceilingHeight));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
                 if (y < ymax-1 && !tiles[z][y+1][x].ceiling && !DFHack::isWallTerrain(tiles[z][y+1][x].tiletype))
                 {
-                    vertices->push_back(Vec3(x+1,y+1,z+1));
-                    vertices->push_back(Vec3(x,y+1,z+1));
-                    vertices->push_back(Vec3(x,y+1,z+1-ceilingHeight));
-                    vertices->push_back(Vec3(x+1,y+1,z+1-ceilingHeight));
-                    normals->push_back(Vec3(0,1,0));
-                    normals->push_back(Vec3(0,1,0));
-                    normals->push_back(Vec3(0,1,0));
-                    normals->push_back(Vec3(0,1,0));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1-ceilingHeight));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1-ceilingHeight));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
-                    int s = vertices->size()-1;
+                    int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
                     face->push_back(s-1);
                     face->push_back(s-2);
                     face->push_back(s-3);
-                    bg->addPrimitiveSet(face.get());
+                    (*bg)[wallmat]->addPrimitiveSet(face.get());
                 }
             }
         }
@@ -1668,12 +1698,12 @@ bool DwarfGeometry::drawGeometry()
     for (uint32_t z = 0; z < zmax; z++)
     {
         cout << "Drawing z-level " << z << endl;
-        blockGeode = new Geode();
-        bg = new Geometry();
-        blockGeode->addDrawable(bg.get());
-        geometryGroup->addChild(blockGeode.get());
-        vertices = new Vec3Array();
-        normals = new Vec3Array();
+        ref_ptr<Group> zgroup = new Group();
+        bg = new map<uint32_t, ref_ptr<Geometry> >();
+        //blockGeode->addDrawable(bg.get());
+        //geometryGroup->addChild(blockGeode.get());
+        vertices = new map<uint32_t, ref_ptr<Vec3Array> >();
+        normals = new map<uint32_t, ref_ptr<Vec3Array> >();
         drawNorthWalls(z);
         drawSouthWalls(z);
         drawWestWalls(z);
@@ -1681,10 +1711,20 @@ bool DwarfGeometry::drawGeometry()
         drawFloors(z);
         drawCeilings(z);
         drawRamps(z);
-        if (tristrip) tsv.stripify(*bg.get());
-        bg->setVertexArray(vertices.get());
-        bg->setNormalArray(normals.get());
-        bg->setNormalBinding(Geometry::BIND_PER_VERTEX);
+        for (map<uint32_t, ref_ptr<Geometry> >::iterator it = bg->begin(); it != bg->end(); ++it)
+        {
+            blockGeode = new Geode();
+            blockGeode->addDrawable((*bg)[it->first].get());
+            (*bg)[it->first]->setVertexArray((*vertices)[it->first]);
+            (*bg)[it->first]->setNormalArray((*normals)[it->first]);
+            (*bg)[it->first]->setNormalBinding(Geometry::BIND_PER_VERTEX);
+            zgroup->addChild(blockGeode.get());
+        }
+        geometryGroup->addChild(zgroup.get());
+        //if (tristrip) tsv.stripify(*bg.get());
+        //(*bg)[wallmat]->setVertexArray(vertices.get());
+        //(*bg)[wallmat]->setNormalArray(normals.get());
+        //(*bg)[wallmat]->setNormalBinding(Geometry::BIND_PER_VERTEX);
     }
     return true;
 }
@@ -1771,16 +1811,16 @@ bool DwarfGeometry::drawGeometry()
 				drawEastWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[2][1][1],exists[2][1][1]);
                 drawFloors(y*16,x*16,z,&blocks[1][1][1],&blocks[1][1][0],exists[1][1][0]);
                 if (enableRamps) drawRamps(y*16,x*16,z,&blocks[1][1][1],&blocks[0][0][1],&blocks[1][0][1],&blocks[2][0][1],&blocks[0][1][1],&blocks[2][1][1],&blocks[0][2][1],&blocks[1][2][1],&blocks[2][2][1],exists[0][0][1],exists[1][0][1],exists[2][0][1],exists[0][1][1],exists[2][1][1],exists[0][2][1],exists[1][2][1],exists[2][2][1]);
-                bg->setVertexArray(vertices);
-                bg->setNormalArray(normals);
+                (*bg)[wallmat]->setVertexArray(vertices);
+                (*bg)[wallmat]->setNormalArray(normals);
                 if (!enableRamps)
                 {
-                	bg->setTexCoordArray(0,texcoords);
-                	bg->setTexCoordArray(1,texcoords);
+                	(*bg)[wallmat]->setTexCoordArray(0,texcoords);
+                	(*bg)[wallmat]->setTexCoordArray(1,texcoords);
 					blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(1,walltex,StateAttribute::ON);
 					blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,wallnmap,StateAttribute::ON);
                 }
-                bg->setNormalBinding(Geometry::BIND_PER_VERTEX);
+                (*bg)[wallmat]->setNormalBinding(Geometry::BIND_PER_VERTEX);
 				if (tristrip) tri.stripify(*bg);
 				blockGeode = new Geode();
                 bg = new Geometry();
@@ -1790,16 +1830,16 @@ bool DwarfGeometry::drawGeometry()
                 normals = new Vec3Array();
                 texcoords = new Vec2Array();
 
-				bg->setVertexArray(vertices);
-                bg->setNormalArray(normals);
+				(*bg)[wallmat]->setVertexArray(vertices);
+                (*bg)[wallmat]->setNormalArray(normals);
                 if (!enableRamps)
                 {
-					bg->setTexCoordArray(0,texcoords);
-					bg->setTexCoordArray(1,texcoords);
+					(*bg)[wallmat]->setTexCoordArray(0,texcoords);
+					(*bg)[wallmat]->setTexCoordArray(1,texcoords);
 					blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(1,floortex,StateAttribute::ON);
 					blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,floornmap,StateAttribute::ON);
                 }
-                bg->setNormalBinding(Geometry::BIND_PER_VERTEX);
+                (*bg)[wallmat]->setNormalBinding(Geometry::BIND_PER_VERTEX);
                 if (tristrip) tri.stripify(*bg);
             }
         }

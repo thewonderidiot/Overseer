@@ -9,6 +9,7 @@
 #include <osg/Material>
 #include <osg/Texture2D>
 #include <vector>
+#include <map>
 
 enum RampType
 {
@@ -60,21 +61,21 @@ class DwarfGeometry
         bool drawFloors(uint32_t z);
         bool drawCeilings(uint32_t z);
         bool drawRamps(uint32_t z);
-        void drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z);
-        void drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z);
-        void drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
 
-        void drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z);
-        void drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z);
-        void drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
 
-        void drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z);
-        void drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z);
-        void drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
 
-        void drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z);
-        void drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z);
-        void drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z);
+        void drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
 
         void drawCeilingBorders(uint32_t z);
 
@@ -88,12 +89,13 @@ class DwarfGeometry
         osg::ref_ptr<osg::Group> geometryGroup;
         int startz;
         osg::ref_ptr<osg::Geode> blockGeode;
-        osg::ref_ptr<osg::Geometry> bg;
-        osg::ref_ptr<osg::Vec3Array> vertices;
-        osg::ref_ptr<osg::Vec3Array> normals;
-        osg::ref_ptr<osg::Vec2Array> texcoords;
+        std::map<uint32_t, osg::ref_ptr<osg::Geometry> > *bg;
+        std::map<uint32_t, osg::ref_ptr<osg::Vec3Array> > *vertices;
+        std::map<uint32_t, osg::ref_ptr<osg::Vec3Array> > *normals;
+        std::map<uint32_t,osg::ref_ptr<osg::Vec2Array> > *texcoords;
         osg::ref_ptr<osg::DrawElementsUInt> face;
         std::vector<std::vector<std::vector<Tile> > > tiles;
+
         uint32_t xmax,ymax,zmax;
         int geomax;
         float ceilingHeight;
