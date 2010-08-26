@@ -2408,7 +2408,7 @@
 1282027220 c:\openscenegraph\include\osgga\orbitmanipulator
 	<osgGA/StandardManipulator>
 
-1282735009 source:c:\overseer\src\overseer.cpp
+1282823263 source:c:\overseer\src\overseer.cpp
 	<osgViewer/Viewer>
 	<osgViewer/ViewerEventHandlers>
 	<osgGA/StateSetManipulator>
@@ -2422,7 +2422,7 @@
 	"Overseer.h"
 	<windows.h>
 
-1282722487 source:c:\overseer\src\dwarfgeometry.cpp
+1282825742 source:c:\overseer\src\dwarfgeometry.cpp
 	"DwarfGeometry.h"
 
 1282461570 c:\overseer\src\include\simpleini.h
@@ -2441,7 +2441,7 @@
 	<windows.h>
 	<mbstring.h>
 
-1282735009 c:\overseer\src\include\overseer.h
+1282810893 c:\overseer\src\include\overseer.h
 	<DFHack.h>
 	<osgGA/TrackballManipulator>
 	<osgDB/ReadFile>
@@ -2449,7 +2449,7 @@
 	<iostream>
 	"DwarfGeometry.h"
 
-1282740057 c:\overseer\src\include\dwarfgeometry.h
+1282819932 c:\overseer\src\include\dwarfgeometry.h
 	<DFHack.h>
 	<dfhack/DFTileTypes.h>
 	<osg/Drawable>
@@ -2460,6 +2460,7 @@
 	<osgDB/ReadFile>
 	<osg/Material>
 	<osg/Texture2D>
+	<cctype>
 	<vector>
 	<map>
 

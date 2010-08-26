@@ -62,11 +62,19 @@ bool Overseer::connectToDF()
     }
 
     Maps = DF->getMaps();
+    Mats = DF->getMaterials();
+    Cons = DF->getConstructions();
     if(!Maps->Start())
     {
         cerr << "Can't init map." << endl;
         return 1;
     }
+    if (!Mats->ReadInorganicMaterials() || !Mats->ReadOrganicMaterials())
+    {
+        cerr << "Can't init materials." << endl;
+        return 1;
+    }
+
     cout << "Connected to Dwarf Fortress!" << endl;
     return true;
 }
@@ -75,7 +83,7 @@ bool Overseer::go()
 {
     loadSettings();
     connectToDF();
-    dg = new DwarfGeometry(Maps, root, startz, tristrip);
+    dg = new DwarfGeometry(Maps, Mats, Cons, root, startz, tristrip);
     dg->start();
     dg->drawGeometry();
     DF->Detach();
@@ -106,6 +114,9 @@ bool Overseer::go()
     rot.makeRotate(qrot);
     yaw.makeRotate(0,Vec3(0,1,0));
     pitch.makeRotate(0,Vec3(0,0,1));
+    osgViewer::StatsHandler *s = new osgViewer::StatsHandler();
+    s->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F1);
+    viewer.addEventHandler(s);
     while (keepRendering)
     {
         Timer_t startFrameTick = osg::Timer::instance()->tick();

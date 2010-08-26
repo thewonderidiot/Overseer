@@ -5,7 +5,7 @@ using namespace osg;
 DwarfGeometry::DwarfGeometry()
 {
 }
-DwarfGeometry::DwarfGeometry(DFHack::Maps *m, osg::Group *g, int sz, bool ts)
+DwarfGeometry::DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, osg::Group *g, int sz, bool ts)
 {
     tristrip = ts;
     Map = m;
@@ -13,6 +13,8 @@ DwarfGeometry::DwarfGeometry(DFHack::Maps *m, osg::Group *g, int sz, bool ts)
     startz = sz;
     geomax = 0;
     ceilingHeight = 0.01;
+    Mats = mt;
+    Cons = cns;
 }
 
 void DwarfGeometry::processRamps()
@@ -136,12 +138,13 @@ bool DwarfGeometry::drawRamps(uint32_t z)
         for (uint32_t y = 0; y < ymax; y++)
         {
             if (tiles[z][y][x].ramptype == NONE) continue;
+            wallmat = tiles[z][y][x].material.index;
             if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
             if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+            if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
             if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
             int s;
             Vec3 norm;
-            wallmat = tiles[z][y][x].material.index;
             switch (tiles[z][y][x].ramptype)
             {
             case NORTH:
@@ -155,6 +158,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -177,6 +184,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -199,6 +210,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -221,6 +236,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -249,6 +268,12 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -282,6 +307,12 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -315,6 +346,12 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -348,6 +385,12 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -381,6 +424,12 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -412,6 +461,12 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -443,6 +498,12 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -474,6 +535,12 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -521,6 +588,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
                 (*normals)[wallmat]->push_back(norm);
+                (*texcoords)[wallmat]->push_back(Vec2(.5,.7071067812));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(.5,.7071067812));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(.5,.7071067812));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(.5,.7071067812));
+                (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -568,6 +647,9 @@ void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,1));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -583,6 +665,9 @@ void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -598,6 +683,9 @@ void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -614,11 +702,14 @@ void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
         if (DFHack::isWallTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==NE_DOWN || tiles[z][y+1][x].ramptype==SE_DOWN) //wall cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
-            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,1));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -634,6 +725,9 @@ void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -649,6 +743,9 @@ void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -670,6 +767,10 @@ void DwarfGeometry::drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_
         (*normals)[wallmat]->push_back(Vec3(-1,0,0));
         (*normals)[wallmat]->push_back(Vec3(-1,0,0));
         (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+        (*texcoords)[wallmat]->push_back(Vec2(0,1));
+        (*texcoords)[wallmat]->push_back(Vec2(1,1));
+        (*texcoords)[wallmat]->push_back(Vec2(1,0));
+        (*texcoords)[wallmat]->push_back(Vec2(0,0));
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
         int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
@@ -692,6 +793,9 @@ void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,1));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -707,6 +811,9 @@ void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -722,6 +829,9 @@ void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -743,6 +853,9 @@ void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,1));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -758,6 +871,9 @@ void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -773,6 +889,9 @@ void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -794,6 +913,10 @@ void DwarfGeometry::drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_
         (*normals)[wallmat]->push_back(Vec3(1,0,0));
         (*normals)[wallmat]->push_back(Vec3(1,0,0));
         (*normals)[wallmat]->push_back(Vec3(1,0,0));
+        (*texcoords)[wallmat]->push_back(Vec2(0,1));
+        (*texcoords)[wallmat]->push_back(Vec2(1,1));
+        (*texcoords)[wallmat]->push_back(Vec2(1,0));
+        (*texcoords)[wallmat]->push_back(Vec2(0,0));
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
         int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
@@ -816,6 +939,9 @@ void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,1));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -831,6 +957,9 @@ void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -846,6 +975,9 @@ void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -867,6 +999,9 @@ void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,1));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -882,6 +1017,9 @@ void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -897,6 +1035,9 @@ void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -918,6 +1059,10 @@ void DwarfGeometry::drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t 
         (*normals)[wallmat]->push_back(Vec3(0,-1,0));
         (*normals)[wallmat]->push_back(Vec3(0,-1,0));
         (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+        (*texcoords)[wallmat]->push_back(Vec2(0,1));
+        (*texcoords)[wallmat]->push_back(Vec2(1,1));
+        (*texcoords)[wallmat]->push_back(Vec2(1,0));
+        (*texcoords)[wallmat]->push_back(Vec2(0,0));
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
         int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
@@ -940,6 +1085,9 @@ void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,1));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -955,6 +1103,9 @@ void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -970,6 +1121,9 @@ void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -991,6 +1145,9 @@ void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,1));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1006,6 +1163,9 @@ void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(1,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1021,6 +1181,9 @@ void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
             (*normals)[wallmat]->push_back(Vec3(1,0,0));
+            (*texcoords)[wallmat]->push_back(Vec2(0,1));
+            (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
+            (*texcoords)[wallmat]->push_back(Vec2(0,0));
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1042,6 +1205,10 @@ void DwarfGeometry::drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t 
         (*normals)[wallmat]->push_back(Vec3(0,1,0));
         (*normals)[wallmat]->push_back(Vec3(0,1,0));
         (*normals)[wallmat]->push_back(Vec3(0,1,0));
+        (*texcoords)[wallmat]->push_back(Vec2(0,1));
+        (*texcoords)[wallmat]->push_back(Vec2(1,1));
+        (*texcoords)[wallmat]->push_back(Vec2(1,0));
+        (*texcoords)[wallmat]->push_back(Vec2(0,0));
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
         int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
@@ -1071,6 +1238,8 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1085,11 +1254,14 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                     wallmat = northmat;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
                     length = 1;
                 }
                 else length++;
@@ -1100,6 +1272,8 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1116,6 +1290,8 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                 (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                 (*normals)[wallmat]->push_back(Vec3(1,0,0));
                 (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                (*texcoords)[wallmat]->push_back(Vec2(length,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1148,6 +1324,8 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1162,11 +1340,14 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
                     wallmat = southmat;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
                     length = 1;
                 }
                 else length++;
@@ -1177,6 +1358,8 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1193,6 +1376,8 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
                 (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                 (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                 (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                (*texcoords)[wallmat]->push_back(Vec2(length,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1225,6 +1410,8 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1239,11 +1426,14 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
                     wallmat = westmat;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
                     length = 1;
                 }
                 else length++;
@@ -1254,6 +1444,8 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1270,6 +1462,8 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
                 (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                 (*normals)[wallmat]->push_back(Vec3(0,1,0));
                 (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                (*texcoords)[wallmat]->push_back(Vec2(length,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1302,6 +1496,8 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1316,11 +1512,14 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                     wallmat = eastmat;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
                     length = 1;
                 }
                 else length++;
@@ -1331,6 +1530,8 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1347,6 +1548,8 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                 (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                 (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                 (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                (*texcoords)[wallmat]->push_back(Vec2(length,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1378,6 +1581,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1392,11 +1597,14 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                     wallmat = tiles[z][y][x].material.index;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
                     length = 1;
                 }
                 else length++;
@@ -1407,6 +1615,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1423,6 +1633,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                 (*normals)[wallmat]->push_back(Vec3(0,0,1));
                 (*normals)[wallmat]->push_back(Vec3(0,0,1));
+                (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                (*texcoords)[wallmat]->push_back(Vec2(length,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1455,6 +1667,8 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1469,11 +1683,14 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                     wallmat = tiles[z+1][y][x].material.index;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                    if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1-ceilingHeight));
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
                     length = 1;
                 }
                 else length++;
@@ -1484,6 +1701,8 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1-ceilingHeight));
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(length,0));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1500,6 +1719,8 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                 (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
                 (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                 (*normals)[wallmat]->push_back(Vec3(0,0,-1));
+                (*texcoords)[wallmat]->push_back(Vec2(length,1));
+                (*texcoords)[wallmat]->push_back(Vec2(length,0));
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1526,6 +1747,7 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                 wallmat = tiles[z][y][x].material.index;
                 if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                 if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
+                if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
                 if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
 
                 if (x > 0 && !tiles[z][y][x-1].ceiling && !DFHack::isWallTerrain(tiles[z][y][x-1].tiletype))
@@ -1538,6 +1760,10 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(1,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(1,1-ceilingHeight));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1-ceilingHeight));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1556,6 +1782,10 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(1,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(1,1-ceilingHeight));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1-ceilingHeight));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1574,6 +1804,10 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(1,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(1,1-ceilingHeight));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1-ceilingHeight));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1592,6 +1826,10 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(1,1));
+                    (*texcoords)[wallmat]->push_back(Vec2(1,1-ceilingHeight));
+                    (*texcoords)[wallmat]->push_back(Vec2(0,1-ceilingHeight));
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1614,7 +1852,11 @@ bool DwarfGeometry::start()
     vector<DFHack::t_vein> veins;
     vector<DFHack::t_frozenliquidvein> ices;
     vector<DFHack::t_spattervein> splatter;
+    vector<DFHack::t_feature> global_features;
+    map<DFHack::planecoord, vector<DFHack::t_feature*> > local_features;
     Map->getSize(xmax,ymax,zmax);
+    Map->ReadGlobalFeatures(global_features);
+    Map->ReadLocalFeatures(local_features);
     tiles.resize(zmax);
     for (uint32_t z = 0; z < zmax; z++)
     {
@@ -1647,7 +1889,7 @@ bool DwarfGeometry::start()
                         {
                             int geolayer = block.designation[i][j].bits.geolayer_index;
                             int biome = block.designation[i][j].bits.biome;
-                            tiles[z][16*y+j][16*x+i].material.type = DFHack::STONE;
+                            tiles[z][16*y+j][16*x+i].material.type = DFHack::tileTypeTable[block.tiletypes[i][j]].m;
                             tiles[z][16*y+j][16*x+i].material.index = geology[offsets[biome]][geolayer];
                             tiles[z][16*y+j][16*x+i].tiletype = block.tiletypes[i][j];
                             tiles[z][16*y+j][16*x+i].occupancy = block.occupancy[i][j];
@@ -1660,6 +1902,57 @@ bool DwarfGeometry::start()
                                     tiles[z][16*y+j][16*x+i].material.type = DFHack::VEIN;
                                     tiles[z][16*y+j][16*x+i].material.index = veins[v].type;
                                 }
+                            }
+                            if (block.global_feature != -1 && uint16_t(block.global_feature) < global_features.size() && block.designation[i][j].bits.feature_global && global_features[block.global_feature].main_material == 0)
+                            {
+                                tiles[z][16*y+j][16*x+i].material.type = DFHack::STONE;
+                                tiles[z][16*y+j][16*x+i].material.index = global_features[block.global_feature].sub_material;
+                            }
+                            if (block.local_feature != -1)
+                            {
+                                DFHack::planecoord pc;
+                                pc.dim.x = x;
+                                pc.dim.y = y;
+                                map<DFHack::planecoord, vector<DFHack::t_feature*> >::iterator it;
+                                it = local_features.find(pc);
+                                if (it != local_features.end())
+                                {
+                                    vector<DFHack::t_feature *>& vectr = (*it).second;
+                                    if(uint16_t(block.local_feature) < vectr.size() && vectr[block.local_feature]->main_material != -1)
+                                    {
+                                        if (block.designation[i][j].bits.feature_local && vectr[block.local_feature]->main_material == 0)
+                                        {
+                                            tiles[z][16*y+j][16*x+i].material.type = DFHack::VEIN;
+                                            tiles[z][16*y+j][16*x+i].material.index = vectr[block.local_feature]->sub_material;
+                                        }
+                                    }
+                                }
+                            }
+                            switch (DFHack::tileTypeTable[block.tiletypes[i][j]].m)
+                            {
+                            case DFHack::GRASS:
+                                tiles[z][16*y+j][16*x+i].material.index |= MAT_GRASS;
+                                break;
+                            case DFHack::GRASS2:
+                                tiles[z][16*y+j][16*x+i].material.index |= MAT_GRASS2;
+                                break;
+                            case DFHack::GRASS_DEAD:
+                                tiles[z][16*y+j][16*x+i].material.index |= MAT_GRASS_DEAD;
+                                break;
+                            case DFHack::GRASS_DRY:
+                                tiles[z][16*y+j][16*x+i].material.index |= MAT_GRASS_DRY;
+                                break;
+                            case DFHack::MAGMA:
+                                tiles[z][16*y+j][16*x+i].material.index |= MAT_MAGMA;
+                                break;
+                            case DFHack::ICE:
+                                tiles[z][16*y+j][16*x+i].material.index |= MAT_ICE;
+                                break;
+                            case DFHack::OBSIDIAN:
+                                tiles[z][16*y+j][16*x+i].material.index |= MAT_OBSIDIAN;
+                                break;
+                            default:
+                                break;
                             }
                             if (!DFHack::isOpenTerrain(block.tiletypes[i][j])) hasgeo = true;
                         }
@@ -1680,8 +1973,19 @@ bool DwarfGeometry::start()
         }
         if (hasgeo == false && geomax == 0) geomax = z;
     }
+    if (geomax == 0) geomax = zmax;
     xmax*=16;
     ymax*=16;
+    uint32_t numConstr;
+    Cons->Start(numConstr);
+    for (uint32_t i=0; i<numConstr; i++)
+    {
+        DFHack::t_construction c;
+        Cons->Read(i,c);
+        tiles[c.z][c.y][c.x].material.type = c.mat_type;
+        tiles[c.z][c.y][c.x].material.index = c.mat_idx;
+    }
+    Cons->Finish();
     cout << " done." << endl;
     processRamps();
     return true;
@@ -1704,6 +2008,7 @@ bool DwarfGeometry::drawGeometry()
         //geometryGroup->addChild(blockGeode.get());
         vertices = new map<uint32_t, ref_ptr<Vec3Array> >();
         normals = new map<uint32_t, ref_ptr<Vec3Array> >();
+        texcoords = new map<uint32_t, ref_ptr<Vec2Array> >();
         drawNorthWalls(z);
         drawSouthWalls(z);
         drawWestWalls(z);
@@ -1719,6 +2024,31 @@ bool DwarfGeometry::drawGeometry()
             (*bg)[it->first]->setNormalArray((*normals)[it->first]);
             (*bg)[it->first]->setNormalBinding(Geometry::BIND_PER_VERTEX);
             zgroup->addChild(blockGeode.get());
+            //cout << "Geode of " << Mats->inorganic[it->first].id << " created." << endl;
+            string matstring;
+            if (it->first&MAT_GRASS) matstring = "grass";
+            else if (it->first&MAT_GRASS2) matstring = "grass2";
+            else if (it->first&MAT_GRASS_DEAD) matstring = "grass_dead";
+            else if (it->first&MAT_GRASS_DRY) matstring = "grass_dry";
+            else if (it->first&MAT_MAGMA) matstring = "magma";
+            else if (it->first&MAT_ICE) matstring = "ice";
+            else if (it->first&MAT_OBSIDIAN) matstring = "obsidian";
+            else matstring = Mats->inorganic[it->first].id;
+            for (uint32_t i = 0; i < matstring.length(); i++)
+            {
+                if (matstring[i]==' ') matstring[i]='_';
+                else matstring[i] = tolower(matstring[i]);
+            }
+            //cout << matstring << endl;
+            ref_ptr<Image> wallimg = osgDB::readImageFile("materials/images/"+matstring+".bmp");
+            if (wallimg == NULL) continue;
+            (*bg)[it->first]->setTexCoordArray(0,(*texcoords)[it->first].get());
+            ref_ptr<Texture2D> walltex = new Texture2D;
+            walltex->setDataVariance(Object::DYNAMIC);
+            walltex->setImage(wallimg.get());
+            walltex->setWrap(Texture::WRAP_S,Texture::REPEAT);
+            walltex->setWrap(Texture::WRAP_T,Texture::REPEAT);
+            blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,walltex.get(),StateAttribute::ON);
         }
         geometryGroup->addChild(zgroup.get());
         //if (tristrip) tsv.stripify(*bg.get());

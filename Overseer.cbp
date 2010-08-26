@@ -35,6 +35,7 @@
 					<Add library="C:\OpenSceneGraph\lib\libosgVolume.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgWidget.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libOIS.dll.a" />
+					<Add library="C:\MinGW\lib\libcomdlg32.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -54,10 +55,9 @@
 			<Add option="-Wall" />
 			<Add directory="C:\OpenSceneGraph\include" />
 			<Add directory="C:\DFHack\library\include" />
+			<Add directory="C:\Overseer\src\include" />
 		</Compiler>
-		<Unit filename="src\DwarfEvents.cpp" />
 		<Unit filename="src\DwarfGeometry.cpp" />
-		<Unit filename="src\include\DwarfEvents.h" />
 		<Unit filename="src\include\DwarfGeometry.h" />
 		<Unit filename="src\include\Overseer.h" />
 		<Unit filename="src\include\SimpleIni.h" />

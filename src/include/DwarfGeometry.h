@@ -8,8 +8,18 @@
 #include <osgDB/ReadFile>
 #include <osg/Material>
 #include <osg/Texture2D>
+#include <cctype>
 #include <vector>
 #include <map>
+
+
+#define MAT_GRASS (1<<31)
+#define MAT_GRASS2 (1<<30)
+#define MAT_GRASS_DEAD (1<<29)
+#define MAT_GRASS_DRY (1<<28)
+#define MAT_MAGMA (1<<27)
+#define MAT_ICE (1<<26)
+#define MAT_OBSIDIAN (1<<25)
 
 enum RampType
 {
@@ -48,7 +58,7 @@ class DwarfGeometry
 {
     public:
         DwarfGeometry();
-        DwarfGeometry(DFHack::Maps *m, osg::Group *g, int sz, bool ts);
+        DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, osg::Group *g, int sz, bool ts);
         bool drawGeometryOld();
         bool drawGeometry();
         bool start();
@@ -86,6 +96,8 @@ class DwarfGeometry
         }
         bool tristrip;
         DFHack::Maps *Map;
+        DFHack::Materials *Mats;
+        DFHack::Constructions *Cons;
         osg::ref_ptr<osg::Group> geometryGroup;
         int startz;
         osg::ref_ptr<osg::Geode> blockGeode;
