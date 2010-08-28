@@ -31,6 +31,7 @@ class Overseer : public OIS::KeyListener, public OIS::MouseListener
         DFHack::Maps *Maps;
         DFHack::Materials *Mats;
         DFHack::Constructions *Cons;
+        DFHack::Vegetation *Vegs;
 
         DwarfGeometry *dg;
 

@@ -2408,7 +2408,7 @@
 1282027220 c:\openscenegraph\include\osgga\orbitmanipulator
 	<osgGA/StandardManipulator>
 
-1282823263 source:c:\overseer\src\overseer.cpp
+1282915419 source:c:\overseer\src\overseer.cpp
 	<osgViewer/Viewer>
 	<osgViewer/ViewerEventHandlers>
 	<osgGA/StateSetManipulator>
@@ -2422,8 +2422,18 @@
 	"Overseer.h"
 	<windows.h>
 
-1282825742 source:c:\overseer\src\dwarfgeometry.cpp
+1282915106 source:c:\overseer\src\dwarfgeometry.cpp
 	"DwarfGeometry.h"
+	<osg/Node>
+	<osg/PositionAttitudeTransform>
+	<osg/TextureCubeMap>
+	<osg/TexEnv>
+	<osg/TexGen>
+	<osg/TexMat>
+	<osg/Depth>
+	<osg/Drawable>
+	<osg/ShapeDrawable>
+	<osgUtil/CullVisitor>
 
 1282461570 c:\overseer\src\include\simpleini.h
 	<cstring>
@@ -2441,7 +2451,7 @@
 	<windows.h>
 	<mbstring.h>
 
-1282810893 c:\overseer\src\include\overseer.h
+1282901741 c:\overseer\src\include\overseer.h
 	<DFHack.h>
 	<osgGA/TrackballManipulator>
 	<osgDB/ReadFile>
@@ -2449,7 +2459,7 @@
 	<iostream>
 	"DwarfGeometry.h"
 
-1282819932 c:\overseer\src\include\dwarfgeometry.h
+1282913191 c:\overseer\src\include\dwarfgeometry.h
 	<DFHack.h>
 	<dfhack/DFTileTypes.h>
 	<osg/Drawable>
@@ -2466,4 +2476,33 @@
 
 1282735168 source:c:\overseer\src\main.cpp
 	"Overseer.h"
+
+1282027216 c:\openscenegraph\include\osg\positionattitudetransform
+	<osg/Group>
+	<osg/Transform>
+	<osg/AnimationPath>
+	<osg/Vec3d>
+	<osg/Quat>
+
+1282027216 c:\openscenegraph\include\osg\texturecubemap
+	<osg/Texture>
+
+1282027216 c:\openscenegraph\include\osg\texgen
+	<osg/Plane>
+	<osg/StateAttribute>
+
+1282027216 c:\openscenegraph\include\osg\texmat
+	<osg/StateAttribute>
+	<osg/Matrix>
+
+1282027216 c:\openscenegraph\include\osg\depth
+	<osg/StateAttribute>
+
+1282027216 c:\openscenegraph\include\osg\shapedrawable
+	<osg/Drawable>
+	<osg/Vec2>
+	<osg/Vec3>
+	<osg/Vec4>
+	<osg/Array>
+	<osg/PrimitiveSet>
 

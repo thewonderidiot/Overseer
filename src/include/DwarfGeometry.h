@@ -58,9 +58,11 @@ class DwarfGeometry
 {
     public:
         DwarfGeometry();
-        DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, osg::Group *g, int sz, bool ts);
+        DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, DFHack::Vegetation *vgs, osg::Group *g, int sz, bool ts);
         bool drawGeometryOld();
         bool drawGeometry();
+        bool drawVegetation();
+        void drawSkybox();
         bool start();
         int getGeometryMax();
     private:
@@ -98,13 +100,15 @@ class DwarfGeometry
         DFHack::Maps *Map;
         DFHack::Materials *Mats;
         DFHack::Constructions *Cons;
+        DFHack::Vegetation *Vegs;
         osg::ref_ptr<osg::Group> geometryGroup;
         int startz;
         osg::ref_ptr<osg::Geode> blockGeode;
         std::map<uint32_t, osg::ref_ptr<osg::Geometry> > *bg;
         std::map<uint32_t, osg::ref_ptr<osg::Vec3Array> > *vertices;
         std::map<uint32_t, osg::ref_ptr<osg::Vec3Array> > *normals;
-        std::map<uint32_t,osg::ref_ptr<osg::Vec2Array> > *texcoords;
+        std::map<uint32_t, osg::ref_ptr<osg::Vec2Array> > *texcoords;
+        std::map<uint32_t, osg::ref_ptr<osg::Group> > vegNodes;
         osg::ref_ptr<osg::DrawElementsUInt> face;
         std::vector<std::vector<std::vector<Tile> > > tiles;
 

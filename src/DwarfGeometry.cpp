@@ -1,11 +1,80 @@
 #include "DwarfGeometry.h"
+#include <osg/Node>
+#include <osg/PositionAttitudeTransform>
+#include <osg/TextureCubeMap>
+#include <osg/TexEnv>
+#include <osg/TexGen>
+#include <osg/TexMat>
+#include <osg/Depth>
+#include <osg/Drawable>
+#include <osg/ShapeDrawable>
+#include <osgUtil/CullVisitor>
+
 using namespace std;
 using namespace osg;
+
+class MoveEarthySkyWithEyePointTransform : public Transform
+{
+public:
+    /** Get the transformation matrix which moves from local coords to world coords.*/
+    virtual bool computeLocalToWorldMatrix(Matrix& matrix,NodeVisitor* nv) const
+    {
+        osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
+        if (cv)
+        {
+            Vec3 eyePointLocal = cv->getEyeLocal();
+            matrix.preMultTranslate(eyePointLocal);
+        }
+        return true;
+    }
+
+    /** Get the transformation matrix which moves from world coords to local coords.*/
+    virtual bool computeWorldToLocalMatrix(Matrix& matrix,NodeVisitor* nv) const
+    {
+        osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
+        if (cv)
+        {
+            Vec3 eyePointLocal = cv->getEyeLocal();
+            matrix.postMultTranslate(-eyePointLocal);
+        }
+        return true;
+    }
+};
+struct TexMatCallback : public NodeCallback
+{
+public:
+
+    TexMatCallback(TexMat& tm) :
+        _texMat(tm)
+    {
+    }
+
+    virtual void operator()(Node* node, NodeVisitor* nv)
+    {
+        osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
+        if (cv)
+        {
+            const Matrix& MV = *(cv->getModelViewMatrix());
+            const Matrix R = Matrix::rotate(DegreesToRadians(112.0f), 0.0f,0.0f,1.0f)*
+                                  Matrix::rotate(DegreesToRadians(90.0f), 1.0f,0.0f,0.0f);
+
+            Quat q = MV.getRotate();
+            const Matrix C = Matrix::rotate( q.inverse() );
+
+            _texMat.setMatrix( C*R );
+        }
+
+        traverse(node,nv);
+    }
+
+    TexMat& _texMat;
+};
+
 
 DwarfGeometry::DwarfGeometry()
 {
 }
-DwarfGeometry::DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, osg::Group *g, int sz, bool ts)
+DwarfGeometry::DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, DFHack::Vegetation *vgs, osg::Group *g, int sz, bool ts)
 {
     tristrip = ts;
     Map = m;
@@ -15,6 +84,7 @@ DwarfGeometry::DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Con
     ceilingHeight = 0.01;
     Mats = mt;
     Cons = cns;
+    Vegs = vgs;
 }
 
 void DwarfGeometry::processRamps()
@@ -1577,8 +1647,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 if (wallStarted && wallmat != tiles[z][y][x].material.index)
                 {
                     wallStarted = false;
-                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
@@ -1599,8 +1669,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
                     if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
-                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*texcoords)[wallmat]->push_back(Vec2(0,0));
@@ -1611,8 +1681,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 if (y == ymax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
@@ -1629,8 +1699,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
             else if (wallStarted)
             {
                 wallStarted = false;
-                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                 (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                 (*normals)[wallmat]->push_back(Vec3(0,0,1));
                 (*normals)[wallmat]->push_back(Vec3(0,0,1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,1));
@@ -2051,133 +2121,133 @@ bool DwarfGeometry::drawGeometry()
             blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,walltex.get(),StateAttribute::ON);
         }
         geometryGroup->addChild(zgroup.get());
+
         //if (tristrip) tsv.stripify(*bg.get());
         //(*bg)[wallmat]->setVertexArray(vertices.get());
         //(*bg)[wallmat]->setNormalArray(normals.get());
         //(*bg)[wallmat]->setNormalBinding(Geometry::BIND_PER_VERTEX);
     }
+
+        /*ref_ptr<Node> tree = osgDB::readNodeFile("models/test.obj");
+        PositionAttitudeTransform *treeplace = new PositionAttitudeTransform();
+        treeplace->setPosition(Vec3(10,10,geomax));
+        treeplace->addChild(tree.get());
+        geometryGroup->addChild(treeplace);*/
     return true;
+}
+
+bool DwarfGeometry::drawVegetation()
+{
+    uint32_t numVegs = 0;
+    Vegs->Start(numVegs);
+    for (uint32_t i = 0; i < numVegs; i++)
+    {
+        DFHack::t_tree tree;
+        Vegs->Read(i,tree);
+        string matstring = Mats->organic[tree.material].id;
+        for (uint32_t i = 0; i < matstring.length(); i++)
+        {
+            if (matstring[i]==' ') matstring[i]='_';
+            else matstring[i] = tolower(matstring[i]);
+        }
+        switch (tree.type)
+        {
+        case 0:
+        case 1:
+            matstring += "_tree.ive";
+            break;
+        case 2:
+        case 3:
+            matstring += "_shrub.ive";
+            break;
+        default:
+            break;
+        }
+        ref_ptr<Group> treenode = NULL;
+        if (vegNodes[tree.material|(1<<(31-tree.type))] == NULL)
+        {
+            treenode = dynamic_cast<Group*>(osgDB::readNodeFile("models/"+matstring));
+            if (treenode==NULL) continue;
+            vegNodes[tree.material|(1<<(31-tree.type))] = treenode;
+            cout << matstring << endl;
+        }
+        else treenode = vegNodes[tree.material|(1<<(31-tree.type))];
+        //cout << "Acacia model drawn" << endl;
+        ref_ptr<PositionAttitudeTransform> treeplace = new PositionAttitudeTransform();
+        treeplace->setPosition(Vec3(tree.x,tree.y,tree.z));
+        treeplace->setAttitude(Quat(inDegrees(-90.0),Vec3d(1,0,0)));
+        treeplace->setScale(Vec3d(.5,.5,.5));
+        treeplace->addChild(treenode.get());
+        geometryGroup->addChild(treeplace.get());
+    }
+    Vegs->Finish();
+    return true;
+}
+
+void DwarfGeometry::drawSkybox()
+{
+    TextureCubeMap *skybox = new TextureCubeMap;
+    Image *imageUp = osgDB::readImageFile("materials/images/skybox/entropic_up.bmp");
+    Image *imageDown = osgDB::readImageFile("materials/images/skybox/entropic_down.bmp");
+    Image *imageNorth = osgDB::readImageFile("materials/images/skybox/entropic_west.bmp");
+    Image *imageSouth = osgDB::readImageFile("materials/images/skybox/entropic_east.bmp");
+    Image *imageWest = osgDB::readImageFile("materials/images/skybox/entropic_south.bmp");
+    Image *imageEast = osgDB::readImageFile("materials/images/skybox/entropic_north.bmp");
+    if (imageUp && imageDown && imageNorth && imageSouth && imageWest && imageEast)
+    {
+        skybox->setImage(TextureCubeMap::POSITIVE_X,imageNorth);
+        skybox->setImage(TextureCubeMap::NEGATIVE_X,imageSouth);
+        skybox->setImage(TextureCubeMap::POSITIVE_Y,imageDown);
+        skybox->setImage(TextureCubeMap::NEGATIVE_Y,imageUp);
+        skybox->setImage(TextureCubeMap::POSITIVE_Z,imageWest);
+        skybox->setImage(TextureCubeMap::NEGATIVE_Z,imageEast);
+        skybox->setWrap(Texture::WRAP_R, Texture::CLAMP_TO_EDGE);
+        skybox->setWrap(Texture::WRAP_S, Texture::CLAMP_TO_EDGE);
+        skybox->setWrap(Texture::WRAP_T, Texture::CLAMP_TO_EDGE);
+        skybox->setFilter(Texture::MIN_FILTER, Texture::LINEAR_MIPMAP_LINEAR);
+        skybox->setFilter(Texture::MAG_FILTER, Texture::LINEAR);
+    }
+    StateSet *ss = new osg::StateSet();
+    TexEnv *te = new TexEnv;
+    te->setMode(TexEnv::REPLACE);
+
+    TexGen *tg = new TexGen;
+    tg->setMode(TexGen::NORMAL_MAP);
+    ss->setTextureAttributeAndModes(0, tg, StateAttribute::ON);
+
+    TexMat *tm = new TexMat;
+    ss->setTextureAttribute(0, tm);
+
+    ss->setTextureAttributeAndModes(0, skybox, StateAttribute::ON);
+
+    ss->setMode(GL_LIGHTING, StateAttribute::OFF);
+    ss->setMode(GL_CULL_FACE, StateAttribute::OFF);
+
+    Depth* depth = new Depth;
+    depth->setFunction(Depth::ALWAYS);
+    depth->setRange(1.0,1.0);
+    ss->setAttributeAndModes(depth, StateAttribute::ON);
+
+    ss->setRenderBinDetails(-1,"RenderBin");
+
+    Drawable* drawable = new ShapeDrawable(new Sphere(Vec3(0.0f,0.0f,0.0f),1));
+
+    Geode* geode = new osg::Geode;
+    geode->setCullingActive(false);
+    geode->setStateSet(ss);
+    geode->addDrawable(drawable);
+
+    Transform* transform = new MoveEarthySkyWithEyePointTransform;
+    transform->setCullingActive(false);
+    transform->addChild(geode);
+
+    ClearNode* clearNode = new ClearNode;
+//  clearNode->setRequiresClear(false);
+    clearNode->setCullCallback(new TexMatCallback(*tm));
+    clearNode->addChild(transform);
+    geometryGroup->addChild(clearNode);
 }
 
 
 
 
-/*bool DwarfGeometry::drawGeometryOld()
-{
-    uint32_t xmax,ymax,zmax;
-    Map->getSize(xmax,ymax,zmax);
-
-    DFHack::mapblock40d blocks[3][3][3];
-    bool exists[3][3][3] = {{{false,false,false},{false,false,false},{false,false,false}},{{false,false,false},{false,false,false},{false,false,false}},{{false,false,false},{false,false,false},{false,false,false}}};
-
-    Texture2D *walltex = new Texture2D;
-    walltex->setDataVariance(Object::DYNAMIC);
-    Image *wallimg = osgDB::readImageFile("Wall.dds");
-    walltex->setImage(wallimg);
-    walltex->setWrap(Texture::WRAP_S,Texture::REPEAT);
-    walltex->setWrap(Texture::WRAP_T,Texture::REPEAT);
-
-    Texture2D *wallnmap = new Texture2D;
-    wallnmap->setDataVariance(Object::DYNAMIC);
-    Image *wallnimg = osgDB::readImageFile("WallN.dds");
-    wallnmap->setImage(wallnimg);
-    wallnmap->setWrap(Texture::WRAP_S,Texture::REPEAT);
-    wallnmap->setWrap(Texture::WRAP_T,Texture::REPEAT);
-
-    Texture2D *floortex = new Texture2D;
-    floortex->setDataVariance(Object::DYNAMIC);
-    Image *floorimg = osgDB::readImageFile("Floor.dds");
-    floortex->setImage(floorimg);
-    floortex->setWrap(Texture::WRAP_S,Texture::REPEAT);
-    floortex->setWrap(Texture::WRAP_T,Texture::REPEAT);
-
-    Texture2D *floornmap = new Texture2D;
-    floornmap->setDataVariance(Object::DYNAMIC);
-    Image *floornimg = osgDB::readImageFile("FloorN.dds");
-    floornmap->setImage(floornimg);
-    floornmap->setWrap(Texture::WRAP_S,Texture::REPEAT);
-    floornmap->setWrap(Texture::WRAP_T,Texture::REPEAT);
-
-    osgUtil::TriStripVisitor tri(new osgUtil::Optimizer());
-                    blockGeode = new Geode();
-    bg = new Geometry();
-    blockGeode->addDrawable(bg);
-    geometryGroup->addChild(blockGeode);
-    vertices = new Vec3Array();
-    normals = new Vec3Array();
-    texcoords = new Vec2Array();
-    for (uint32_t z = startz; z < zmax; z++)
-    {
-        cout << "Drawing z-level " << z << "..." << endl;
-        for (uint32_t y = 0; y < ymax; y++)
-        {
-            for (uint32_t x = 0; x < xmax; x++)
-            {
-                if (!Map->isValidBlock(y,x,z)) continue;
-
-                for (int k = 0; k <= 2; k++) //load our local 3x3 cube
-                {
-                    for (int i = 0; i <= 2; i++)
-                    {
-                        for (int j = 0; j <= 2; j++)
-                        {
-                            if (Map->isValidBlock(y+j-1,x+i-1,z+k-1))
-                            {
-                                Map->ReadBlock40d(y+j-1,x+i-1,z+k-1,&blocks[j][i][k]);
-                                exists[j][i][k] = true;
-                            }
-                            else
-                            {
-                                exists[j][i][k] = false;
-                            }
-                        }
-                    }
-                }
-
-                // Draw the geometry. x and y are passed in as tile coordinates so they are corrected by a factor of 16
-                drawNorthWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[1][0][1],exists[1][0][1]);
-                drawSouthWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[1][2][1],exists[1][2][1]);
-                drawWestWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[0][1][1],exists[0][1][1]);
-				drawEastWalls(y*16,x*16,z,&blocks[1][1][1],&blocks[2][1][1],exists[2][1][1]);
-                drawFloors(y*16,x*16,z,&blocks[1][1][1],&blocks[1][1][0],exists[1][1][0]);
-                if (enableRamps) drawRamps(y*16,x*16,z,&blocks[1][1][1],&blocks[0][0][1],&blocks[1][0][1],&blocks[2][0][1],&blocks[0][1][1],&blocks[2][1][1],&blocks[0][2][1],&blocks[1][2][1],&blocks[2][2][1],exists[0][0][1],exists[1][0][1],exists[2][0][1],exists[0][1][1],exists[2][1][1],exists[0][2][1],exists[1][2][1],exists[2][2][1]);
-                (*bg)[wallmat]->setVertexArray(vertices);
-                (*bg)[wallmat]->setNormalArray(normals);
-                if (!enableRamps)
-                {
-                	(*bg)[wallmat]->setTexCoordArray(0,texcoords);
-                	(*bg)[wallmat]->setTexCoordArray(1,texcoords);
-					blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(1,walltex,StateAttribute::ON);
-					blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,wallnmap,StateAttribute::ON);
-                }
-                (*bg)[wallmat]->setNormalBinding(Geometry::BIND_PER_VERTEX);
-				if (tristrip) tri.stripify(*bg);
-				blockGeode = new Geode();
-                bg = new Geometry();
-                blockGeode->addDrawable(bg);
-                geometryGroup->addChild(blockGeode);
-                vertices = new Vec3Array();
-                normals = new Vec3Array();
-                texcoords = new Vec2Array();
-
-				(*bg)[wallmat]->setVertexArray(vertices);
-                (*bg)[wallmat]->setNormalArray(normals);
-                if (!enableRamps)
-                {
-					(*bg)[wallmat]->setTexCoordArray(0,texcoords);
-					(*bg)[wallmat]->setTexCoordArray(1,texcoords);
-					blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(1,floortex,StateAttribute::ON);
-					blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,floornmap,StateAttribute::ON);
-                }
-                (*bg)[wallmat]->setNormalBinding(Geometry::BIND_PER_VERTEX);
-                if (tristrip) tri.stripify(*bg);
-            }
-        }
-    }
-    return true;
-}*/
-
-/*void DwarfGeometry::clean()
-{
-
-}*/

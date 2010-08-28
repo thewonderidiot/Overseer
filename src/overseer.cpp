@@ -64,6 +64,7 @@ bool Overseer::connectToDF()
     Maps = DF->getMaps();
     Mats = DF->getMaterials();
     Cons = DF->getConstructions();
+    Vegs = DF->getVegetation();
     if(!Maps->Start())
     {
         cerr << "Can't init map." << endl;
@@ -83,9 +84,11 @@ bool Overseer::go()
 {
     loadSettings();
     connectToDF();
-    dg = new DwarfGeometry(Maps, Mats, Cons, root, startz, tristrip);
+    dg = new DwarfGeometry(Maps, Mats, Cons, Vegs, root, startz, tristrip);
     dg->start();
     dg->drawGeometry();
+    dg->drawVegetation();
+    dg->drawSkybox();
     DF->Detach();
 
     osgViewer::Viewer viewer;
