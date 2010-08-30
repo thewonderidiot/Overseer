@@ -8,6 +8,7 @@
 #include <osgDB/ReadFile>
 #include <osg/Material>
 #include <osg/Texture2D>
+#include <osg/CullFace>
 #include <cctype>
 #include <vector>
 #include <map>
@@ -58,7 +59,7 @@ class DwarfGeometry
 {
     public:
         DwarfGeometry();
-        DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, DFHack::Vegetation *vgs, osg::Group *g, int sz, bool ts);
+        DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, DFHack::Vegetation *vgs, osg::Group *g, int sz, double ch, double tz, bool ts, bool dc);
         bool drawGeometryOld();
         bool drawGeometry();
         bool drawVegetation();
@@ -73,21 +74,21 @@ class DwarfGeometry
         bool drawFloors(uint32_t z);
         bool drawCeilings(uint32_t z);
         bool drawRamps(uint32_t z);
-        void drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
-        void drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
-        void drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
+        void drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
+        void drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
 
-        void drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
-        void drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
-        void drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
+        void drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
+        void drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
 
-        void drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
-        void drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
-        void drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
+        void drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
+        void drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
 
-        void drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
-        void drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
-        void drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat);
+        void drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
+        void drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
+        void drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
 
         void drawCeilingBorders(uint32_t z);
 
@@ -96,6 +97,9 @@ class DwarfGeometry
         {
             return !DFHack::isWallTerrain(t) && (DFHack::isRampTerrain(up) || DFHack::isFloorTerrain(up) || DFHack::isWallTerrain(up));
         }
+
+        bool loadColors();
+
         bool tristrip;
         DFHack::Maps *Map;
         DFHack::Materials *Mats;
@@ -108,11 +112,16 @@ class DwarfGeometry
         std::map<uint32_t, osg::ref_ptr<osg::Vec3Array> > *vertices;
         std::map<uint32_t, osg::ref_ptr<osg::Vec3Array> > *normals;
         std::map<uint32_t, osg::ref_ptr<osg::Vec2Array> > *texcoords;
+        std::map<uint32_t, osg::ref_ptr<osg::Vec4Array> > *colorcoords;
+        std::map<uint32_t, osg::ref_ptr<osg::Image> > textures;
         std::map<uint32_t, osg::ref_ptr<osg::Group> > vegNodes;
+        std::map<std::string, osg::Vec4*> colors;
         osg::ref_ptr<osg::DrawElementsUInt> face;
         std::vector<std::vector<std::vector<Tile> > > tiles;
 
         uint32_t xmax,ymax,zmax;
         int geomax;
-        float ceilingHeight;
+        double ceilingHeight;
+        double treeSize;
+        bool doCulling;
 };

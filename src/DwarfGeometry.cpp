@@ -10,6 +10,9 @@
 #include <osg/ShapeDrawable>
 #include <osgUtil/CullVisitor>
 
+#include "depends/tinyxml.h"
+#include <iostream>
+
 using namespace std;
 using namespace osg;
 
@@ -74,17 +77,20 @@ public:
 DwarfGeometry::DwarfGeometry()
 {
 }
-DwarfGeometry::DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, DFHack::Vegetation *vgs, osg::Group *g, int sz, bool ts)
+DwarfGeometry::DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, DFHack::Vegetation *vgs, Group *g, int sz, double ch, double tz, bool ts, bool dc)
 {
     tristrip = ts;
     Map = m;
     geometryGroup = g;
     startz = sz;
     geomax = 0;
-    ceilingHeight = 0.01;
+    ceilingHeight = ch;
+    doCulling = dc;
     Mats = mt;
     Cons = cns;
     Vegs = vgs;
+    treeSize = tz;
+    if (!loadColors()) cout << "Error loading colors. Make sure the colors directory is intact." << endl;
 }
 
 void DwarfGeometry::processRamps()
@@ -203,15 +209,19 @@ void DwarfGeometry::processRamps()
 bool DwarfGeometry::drawRamps(uint32_t z)
 {
     uint32_t wallmat = 0;
+    uint16_t walltype = 0;
+    Vec4 *color;
     for (uint32_t x = 0; x < xmax; x++)
     {
         for (uint32_t y = 0; y < ymax; y++)
         {
             if (tiles[z][y][x].ramptype == NONE) continue;
             wallmat = tiles[z][y][x].material.index;
+            walltype = tiles[z][y][x].material.type;
             if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
             if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
             if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
+            if ((*colorcoords)[wallmat]==NULL) (*colorcoords)[wallmat] = new Vec4Array();
             if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
             int s;
             Vec3 norm;
@@ -232,6 +242,16 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -239,9 +259,9 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-2);
                 face->push_back(s-3);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawNorthRampEastBoundaries(x,y,z,wallmat);
-                drawNorthRampWestBoundaries(x,y,z,wallmat);
-                drawNorthRampSouthBoundaries(x,y,z,wallmat);
+                drawNorthRampEastBoundaries(x,y,z,wallmat,walltype);
+                drawNorthRampWestBoundaries(x,y,z,wallmat,walltype);
+                drawNorthRampSouthBoundaries(x,y,z,wallmat,walltype);
                 break;
             case SOUTH:
                 (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
@@ -258,6 +278,16 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -265,9 +295,9 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-2);
                 face->push_back(s-3);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawSouthRampWestBoundaries(x,y,z,wallmat);
-                drawSouthRampEastBoundaries(x,y,z,wallmat);
-                drawSouthRampNorthBoundaries(x,y,z,wallmat);
+                drawSouthRampWestBoundaries(x,y,z,wallmat,walltype);
+                drawSouthRampEastBoundaries(x,y,z,wallmat,walltype);
+                drawSouthRampNorthBoundaries(x,y,z,wallmat,walltype);
                 break;
             case WEST:
                 (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
@@ -284,6 +314,16 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -291,9 +331,9 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-2);
                 face->push_back(s-3);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawWestRampNorthBoundaries(x,y,z,wallmat);
-                drawWestRampSouthBoundaries(x,y,z,wallmat);
-                drawWestRampEastBoundaries(x,y,z,wallmat);
+                drawWestRampNorthBoundaries(x,y,z,wallmat,walltype);
+                drawWestRampSouthBoundaries(x,y,z,wallmat,walltype);
+                drawWestRampEastBoundaries(x,y,z,wallmat,walltype);
                 break;
             case EAST:
                 (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
@@ -310,6 +350,16 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -317,9 +367,9 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-2);
                 face->push_back(s-3);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawEastRampNorthBoundaries(x,y,z,wallmat);
-                drawEastRampSouthBoundaries(x,y,z,wallmat);
-                drawEastRampWestBoundaries(x,y,z,wallmat);
+                drawEastRampNorthBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampSouthBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampWestBoundaries(x,y,z,wallmat,walltype);
                 break;
             case NW_UP:
                 (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
@@ -344,6 +394,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -355,10 +417,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-4);
                 face->push_back(s-5);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawWestRampNorthBoundaries(x,y,z,wallmat);
-                drawWestRampEastBoundaries(x,y,z,wallmat);
-                drawNorthRampWestBoundaries(x,y,z,wallmat);
-                drawNorthRampSouthBoundaries(x,y,z,wallmat);
+                drawWestRampNorthBoundaries(x,y,z,wallmat,walltype);
+                drawWestRampEastBoundaries(x,y,z,wallmat,walltype);
+                drawNorthRampWestBoundaries(x,y,z,wallmat,walltype);
+                drawNorthRampSouthBoundaries(x,y,z,wallmat,walltype);
                 break;
             case NE_UP:
                 (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
@@ -383,6 +445,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -394,10 +468,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-4);
                 face->push_back(s-5);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawNorthRampEastBoundaries(x,y,z,wallmat);
-                drawNorthRampSouthBoundaries(x,y,z,wallmat);
-                drawEastRampNorthBoundaries(x,y,z,wallmat);
-                drawEastRampWestBoundaries(x,y,z,wallmat);
+                drawNorthRampEastBoundaries(x,y,z,wallmat,walltype);
+                drawNorthRampSouthBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampNorthBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampWestBoundaries(x,y,z,wallmat,walltype);
                 break;
             case SW_UP:
                 (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
@@ -422,6 +496,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -433,10 +519,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-4);
                 face->push_back(s-5);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawSouthRampWestBoundaries(x,y,z,wallmat);
-                drawSouthRampNorthBoundaries(x,y,z,wallmat);
-                drawWestRampSouthBoundaries(x,y,z,wallmat);
-                drawWestRampEastBoundaries(x,y,z,wallmat);
+                drawSouthRampWestBoundaries(x,y,z,wallmat,walltype);
+                drawSouthRampNorthBoundaries(x,y,z,wallmat,walltype);
+                drawWestRampSouthBoundaries(x,y,z,wallmat,walltype);
+                drawWestRampEastBoundaries(x,y,z,wallmat,walltype);
                 break;
             case SE_UP:
                 (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
@@ -461,6 +547,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -472,10 +570,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-4);
                 face->push_back(s-5);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawSouthRampEastBoundaries(x,y,z,wallmat);
-                drawSouthRampNorthBoundaries(x,y,z,wallmat);
-                drawEastRampSouthBoundaries(x,y,z,wallmat);
-                drawEastRampWestBoundaries(x,y,z,wallmat);
+                drawSouthRampEastBoundaries(x,y,z,wallmat,walltype);
+                drawSouthRampNorthBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampSouthBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampWestBoundaries(x,y,z,wallmat,walltype);
                 break;
             case NW_DOWN:
                 (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
@@ -500,6 +598,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -511,8 +621,8 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-4);
                 face->push_back(s-5);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawSouthRampWestBoundaries(x,y,z,wallmat);
-                drawEastRampNorthBoundaries(x,y,z,wallmat);
+                drawSouthRampWestBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampNorthBoundaries(x,y,z,wallmat,walltype);
                 break;
             case NE_DOWN:
                 (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
@@ -537,6 +647,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -548,8 +670,8 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-4);
                 face->push_back(s-5);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawWestRampNorthBoundaries(x,y,z,wallmat);
-                drawSouthRampEastBoundaries(x,y,z,wallmat);
+                drawWestRampNorthBoundaries(x,y,z,wallmat,walltype);
+                drawSouthRampEastBoundaries(x,y,z,wallmat,walltype);
                 break;
             case SW_DOWN:
                 (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
@@ -574,6 +696,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -585,8 +719,8 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-4);
                 face->push_back(s-5);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawNorthRampWestBoundaries(x,y,z,wallmat);
-                drawEastRampSouthBoundaries(x,y,z,wallmat);
+                drawNorthRampWestBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampSouthBoundaries(x,y,z,wallmat,walltype);
                 break;
             case SE_DOWN:
                 (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
@@ -611,6 +745,18 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(0,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,1.414213562));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -622,8 +768,8 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-4);
                 face->push_back(s-5);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawWestRampSouthBoundaries(x,y,z,wallmat);
-                drawNorthRampEastBoundaries(x,y,z,wallmat);
+                drawWestRampSouthBoundaries(x,y,z,wallmat,walltype);
+                drawNorthRampEastBoundaries(x,y,z,wallmat,walltype);
                 break;
             case HILL:
                 (*vertices)[wallmat]->push_back(Vec3(x+.5,y+.5,z+.5));
@@ -670,6 +816,24 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 (*texcoords)[wallmat]->push_back(Vec2(.5,.7071067812));
                 (*texcoords)[wallmat]->push_back(Vec2(1,0));
                 (*texcoords)[wallmat]->push_back(Vec2(0,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
                 s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -692,10 +856,10 @@ bool DwarfGeometry::drawRamps(uint32_t z)
                 face->push_back(s-10);
                 face->push_back(s-11);
                 (*bg)[wallmat]->addPrimitiveSet(face.get());
-                drawNorthRampSouthBoundaries(x,y,z,wallmat);
-                drawSouthRampNorthBoundaries(x,y,z,wallmat);
-                drawEastRampWestBoundaries(x,y,z,wallmat);
-                drawWestRampEastBoundaries(x,y,z,wallmat);
+                drawNorthRampSouthBoundaries(x,y,z,wallmat,walltype);
+                drawSouthRampNorthBoundaries(x,y,z,wallmat,walltype);
+                drawEastRampWestBoundaries(x,y,z,wallmat,walltype);
+                drawWestRampEastBoundaries(x,y,z,wallmat,walltype);
                 break;
             default:
                 break;
@@ -705,8 +869,9 @@ bool DwarfGeometry::drawRamps(uint32_t z)
     }
     return true;
 }
-void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (y > 0) //west cases
     {
         if (DFHack::isWallTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==NW_DOWN || tiles[z][y-1][x].ramptype==SW_DOWN) //wall cases
@@ -720,6 +885,15 @@ void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,1));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -738,6 +912,15 @@ void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -756,6 +939,15 @@ void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -765,8 +957,9 @@ void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
         }
     }
 }
-void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (y < ymax-1)
     {
         if (DFHack::isWallTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==NE_DOWN || tiles[z][y+1][x].ramptype==SE_DOWN) //wall cases
@@ -780,6 +973,15 @@ void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,1));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -790,14 +992,23 @@ void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
         else if (DFHack::isFloorTerrain(tiles[z][y+1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==EAST || tiles[z][y+1][x].ramptype==NE_UP || tiles[z][y+1][x].ramptype==SE_UP || tiles[z][y+1][x].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
-            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -808,14 +1019,23 @@ void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
         else if (tiles[z][y+1][x].ramptype==SOUTH || tiles[z][y+1][x].ramptype==SW_UP || tiles[z][y+1][x].ramptype==NW_DOWN) //intersect cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
-            (*vertices)[wallmat]->push_back(Vec3(x+.5,y+1,z+.5));
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
+            (*vertices)[wallmat]->push_back(Vec3(x+.5,y+1,z+.5));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*normals)[wallmat]->push_back(Vec3(0,1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -825,8 +1045,9 @@ void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
         }
     }
 }
-void DwarfGeometry::drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (x < xmax-1 && DFHack::isWallTerrain(tiles[z][y][x+1].tiletype)) //opposite case
     {
         (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
@@ -841,6 +1062,16 @@ void DwarfGeometry::drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_
         (*texcoords)[wallmat]->push_back(Vec2(1,1));
         (*texcoords)[wallmat]->push_back(Vec2(1,0));
         (*texcoords)[wallmat]->push_back(Vec2(0,0));
+        if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+        else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+        else color = NULL;
+        if (color != NULL)
+        {
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+        }
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
         int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
@@ -851,8 +1082,9 @@ void DwarfGeometry::drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_
     }
 }
 
-void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (y > 0) //west cases
     {
         if (DFHack::isWallTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==NW_DOWN || tiles[z][y-1][x].ramptype==SW_DOWN) //wall cases
@@ -866,6 +1098,15 @@ void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,1));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -876,14 +1117,23 @@ void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
         else if (DFHack::isFloorTerrain(tiles[z][y-1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==WEST || tiles[z][y-1][x].ramptype==NW_UP || tiles[z][y-1][x].ramptype==SW_UP || tiles[z][y-1][x].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
-            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
             (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y,z));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*normals)[wallmat]->push_back(Vec3(0,-1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -902,6 +1152,15 @@ void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -911,8 +1170,9 @@ void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
         }
     }
 }
-void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (y < ymax-1) //east cases
     {
         if (DFHack::isWallTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==NE_DOWN || tiles[z][y+1][x].ramptype==SE_DOWN) //wall cases
@@ -926,6 +1186,15 @@ void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,1));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -944,6 +1213,15 @@ void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -962,6 +1240,15 @@ void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -971,8 +1258,9 @@ void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
         }
     }
 }
-void DwarfGeometry::drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (x > 0 && DFHack::isWallTerrain(tiles[z][y][x-1].tiletype)) //opposite case
     {
         (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
@@ -987,6 +1275,16 @@ void DwarfGeometry::drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_
         (*texcoords)[wallmat]->push_back(Vec2(1,1));
         (*texcoords)[wallmat]->push_back(Vec2(1,0));
         (*texcoords)[wallmat]->push_back(Vec2(0,0));
+        if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+        else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+        else color = NULL;
+        if (color != NULL)
+        {
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+        }
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
         int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
@@ -997,8 +1295,9 @@ void DwarfGeometry::drawSouthRampNorthBoundaries(uint32_t x, uint32_t y, uint32_
     }
 }
 
-void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (x > 0) //north cases
     {
         if (DFHack::isWallTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NE_DOWN || tiles[z][y][x-1].ramptype==NW_DOWN) //wall cases
@@ -1012,6 +1311,15 @@ void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,1));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1030,6 +1338,15 @@ void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1048,6 +1365,15 @@ void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1057,8 +1383,9 @@ void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
         }
     }
 }
-void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (x < xmax-1) //south cases
     {
         if (DFHack::isWallTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SW_DOWN || tiles[z][y][x+1].ramptype==SE_DOWN) //wall cases
@@ -1072,6 +1399,15 @@ void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,1));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1090,6 +1426,15 @@ void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1108,6 +1453,15 @@ void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1117,8 +1471,9 @@ void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
         }
     }
 }
-void DwarfGeometry::drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (y < ymax-1 && DFHack::isWallTerrain(tiles[z][y+1][x].tiletype)) //opposite case
     {
         (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
@@ -1133,6 +1488,16 @@ void DwarfGeometry::drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t 
         (*texcoords)[wallmat]->push_back(Vec2(1,1));
         (*texcoords)[wallmat]->push_back(Vec2(1,0));
         (*texcoords)[wallmat]->push_back(Vec2(0,0));
+        if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+        else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+        else color = NULL;
+        if (color != NULL)
+        {
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+        }
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
         int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
@@ -1143,8 +1508,9 @@ void DwarfGeometry::drawWestRampEastBoundaries(uint32_t x, uint32_t y, uint32_t 
     }
 }
 
-void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (x > 0) //north cases
     {
         if (DFHack::isWallTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NW_DOWN || tiles[z][y][x-1].ramptype==NE_DOWN) //wall cases
@@ -1158,6 +1524,15 @@ void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,1));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1168,14 +1543,23 @@ void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
         else if (DFHack::isFloorTerrain(tiles[z][y][x-1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NORTH || tiles[z][y][x-1].ramptype==NW_UP || tiles[z][y][x-1].ramptype==NE_UP || tiles[z][y][x-1].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
-            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
             (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+            (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*normals)[wallmat]->push_back(Vec3(-1,0,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1194,6 +1578,15 @@ void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1203,8 +1596,9 @@ void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
         }
     }
 }
-void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (x < xmax-1) //south cases
     {
         if (DFHack::isWallTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SE_DOWN || tiles[z][y][x+1].ramptype==SW_DOWN) //wall cases
@@ -1218,6 +1612,15 @@ void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,1));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1236,6 +1639,15 @@ void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(1,0));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1254,6 +1666,15 @@ void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             (*texcoords)[wallmat]->push_back(Vec2(0,1));
             (*texcoords)[wallmat]->push_back(Vec2(.5,.5));
             (*texcoords)[wallmat]->push_back(Vec2(0,0));
+            if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+            else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+            else color = NULL;
+            if (color != NULL)
+            {
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+                (*colorcoords)[wallmat]->push_back(*color);
+            }
             face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
             int s = (*vertices)[wallmat]->size()-1;
             face->push_back(s);
@@ -1263,8 +1684,9 @@ void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
         }
     }
 }
-void DwarfGeometry::drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat)
+void DwarfGeometry::drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype)
 {
+    Vec4 *color;
     if (y > 0 && DFHack::isWallTerrain(tiles[z][y-1][x].tiletype)) //opposite case
     {
         (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
@@ -1279,6 +1701,16 @@ void DwarfGeometry::drawEastRampWestBoundaries(uint32_t x, uint32_t y, uint32_t 
         (*texcoords)[wallmat]->push_back(Vec2(1,1));
         (*texcoords)[wallmat]->push_back(Vec2(1,0));
         (*texcoords)[wallmat]->push_back(Vec2(0,0));
+        if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+        else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+        else color = NULL;
+        if (color != NULL)
+        {
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+            (*colorcoords)[wallmat]->push_back(*color);
+        }
         face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
         int s = (*vertices)[wallmat]->size()-1;
         face->push_back(s);
@@ -1293,6 +1725,8 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
 {
     bool wallStarted = false;
     uint32_t wallmat = 0;
+    uint16_t walltype = 0;
+    Vec4 *color = NULL;
     short length = 0;
     for (uint32_t x = 0; x < xmax; x++)
     {
@@ -1310,6 +1744,11 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1322,9 +1761,11 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                 {
                     wallStarted = true;
                     wallmat = northmat;
+                    walltype = tiles[z][y][x==0?x:x-1].material.type;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
                     if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
+                    if ((*colorcoords)[wallmat]==NULL) (*colorcoords)[wallmat] = new Vec4Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
@@ -1332,6 +1773,14 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     length = 1;
                 }
                 else length++;
@@ -1344,6 +1793,11 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(1,0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1362,6 +1816,11 @@ bool DwarfGeometry::drawNorthWalls(uint32_t z)
                 (*normals)[wallmat]->push_back(Vec3(1,0,0));
                 (*texcoords)[wallmat]->push_back(Vec2(length,1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1379,6 +1838,8 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
 {
     bool wallStarted = false;
     uint32_t wallmat = 0;
+    uint16_t walltype = 0;
+    Vec4 *color;
     short length = 0;
     for (uint32_t x = 0; x < xmax; x++)
     {
@@ -1390,12 +1851,20 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
                 if (wallStarted && wallmat != southmat)
                 {
                     wallStarted = false;
-                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1408,28 +1877,46 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
                 {
                     wallStarted = true;
                     wallmat = southmat;
+                    walltype = tiles[z][y][x==xmax-1?x:x+1].material.type;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
                     if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
+                    if ((*colorcoords)[wallmat]==NULL) (*colorcoords)[wallmat] = new Vec4Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
-                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     length = 1;
                 }
                 else length++;
                 if (y == ymax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1442,12 +1929,20 @@ bool DwarfGeometry::drawSouthWalls(uint32_t z)
             else if (wallStarted)
             {
                 wallStarted = false;
-                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
                 (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
                 (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                 (*normals)[wallmat]->push_back(Vec3(-1,0,0));
                 (*texcoords)[wallmat]->push_back(Vec2(length,1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1465,6 +1960,8 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
 {
     bool wallStarted = false;
     uint32_t wallmat = 0;
+    uint16_t walltype = 0;
+    Vec4 *color;
     short length = 0;
     for (uint32_t y = 0; y < ymax; y++)
     {
@@ -1476,12 +1973,20 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
                 if (wallStarted && wallmat != westmat)
                 {
                     wallStarted = false;
-                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1494,28 +1999,46 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
                 {
                     wallStarted = true;
                     wallmat = westmat;
+                    walltype = tiles[z][y==0?y:y-1][x].material.type;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
                     if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
+                    if ((*colorcoords)[wallmat]==NULL) (*colorcoords)[wallmat] = new Vec4Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
-                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
+                    (*vertices)[wallmat]->push_back(Vec3(x,y,z));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     length = 1;
                 }
                 else length++;
                 if (x == xmax-1 && wallStarted)
                 {
                     wallStarted = false;
-                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
+                    (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*normals)[wallmat]->push_back(Vec3(0,1,0));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1528,12 +2051,20 @@ bool DwarfGeometry::drawWestWalls(uint32_t z)
             else if (wallStarted)
             {
                 wallStarted = false;
-                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
                 (*vertices)[wallmat]->push_back(Vec3(x,y,z));
+                (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
                 (*normals)[wallmat]->push_back(Vec3(0,1,0));
                 (*normals)[wallmat]->push_back(Vec3(0,1,0));
                 (*texcoords)[wallmat]->push_back(Vec2(length,1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1551,12 +2082,14 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
 {
     bool wallStarted = false;
     uint32_t wallmat = 0;
+    uint16_t walltype = 0;
+    Vec4 *color;
     short length = 0;
     for (uint32_t y = 0; y < ymax; y++)
     {
         for (uint32_t x = 0; x < xmax; x++)
         {
-            uint32_t eastmat = tiles[z][(y==ymax-1?y:y+1)][x].material.index;
+            uint32_t eastmat = tiles[z][y==ymax-1?y:y+1][x].material.index;
             if (!(DFHack::isWallTerrain(tiles[z][y][x].tiletype) || DFHack::isRampTerrain(tiles[z][y][x].tiletype)) && ((y<ymax-1 && DFHack::isWallTerrain(tiles[z][y+1][x].tiletype)) || (y==ymax-1 && tiles[z][y][x].designation.bits.subterranean)))
             {
                 if (wallStarted && wallmat != eastmat)
@@ -1568,6 +2101,14 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1580,9 +2121,11 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                 {
                     wallStarted = true;
                     wallmat = eastmat;
+                    walltype = tiles[z][y==ymax-1?y:y+1][x].material.type;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
                     if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
+                    if ((*colorcoords)[wallmat]==NULL) (*colorcoords)[wallmat] = new Vec4Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
@@ -1590,6 +2133,14 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     length = 1;
                 }
                 else length++;
@@ -1602,6 +2153,14 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1620,6 +2179,14 @@ bool DwarfGeometry::drawEastWalls(uint32_t z)
                 (*normals)[wallmat]->push_back(Vec3(0,-1,0));
                 (*texcoords)[wallmat]->push_back(Vec2(length,1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1637,6 +2204,8 @@ bool DwarfGeometry::drawFloors(uint32_t z)
 {
     bool wallStarted = false;
     uint32_t wallmat = 0;
+    uint16_t walltype = 0;
+    Vec4 *color;
     short length = 0;
     for (uint32_t x = 0; x < xmax; x++)
     {
@@ -1653,6 +2222,14 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1665,9 +2242,11 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 {
                     wallStarted = true;
                     wallmat = tiles[z][y][x].material.index;
+                    walltype = tiles[z][y][x].material.type;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
                     if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
+                    if ((*colorcoords)[wallmat]==NULL) (*colorcoords)[wallmat] = new Vec4Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z));
@@ -1675,6 +2254,14 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*texcoords)[wallmat]->push_back(Vec2(0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     length = 1;
                 }
                 else length++;
@@ -1687,6 +2274,14 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,0,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1705,6 +2300,14 @@ bool DwarfGeometry::drawFloors(uint32_t z)
                 (*normals)[wallmat]->push_back(Vec3(0,0,1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1722,6 +2325,8 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
 {
     bool wallStarted = false;
     uint32_t wallmat = 0;
+    uint16_t walltype = 0;
+    Vec4 *color;
     short length = 0;
     for (uint32_t x = 0; x < xmax; x++)
     {
@@ -1739,6 +2344,14 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1751,9 +2364,11 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                 {
                     wallStarted = true;
                     wallmat = tiles[z+1][y][x].material.index;
+                    walltype = tiles[z+1][y][x].material.type;
                     if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                     if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
                     if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
+                    if ((*colorcoords)[wallmat]==NULL) (*colorcoords)[wallmat] = new Vec4Array();
                     if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
                     (*vertices)[wallmat]->push_back(Vec3(x,y,z+1-ceilingHeight));
                     (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1-ceilingHeight));
@@ -1761,6 +2376,14 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     (*texcoords)[wallmat]->push_back(Vec2(0,0));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     length = 1;
                 }
                 else length++;
@@ -1773,6 +2396,14 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                     (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,1));
                     (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1791,6 +2422,14 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
                 (*normals)[wallmat]->push_back(Vec3(0,0,-1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,1));
                 (*texcoords)[wallmat]->push_back(Vec2(length,0));
+                if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                else color = NULL;
+                if (color != NULL)
+                {
+                    (*colorcoords)[wallmat]->push_back(*color);
+                    (*colorcoords)[wallmat]->push_back(*color);
+                }
                 face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                 int s = (*vertices)[wallmat]->size()-1;
                 face->push_back(s);
@@ -1807,17 +2446,22 @@ bool DwarfGeometry::drawCeilings(uint32_t z)
 
 void DwarfGeometry::drawCeilingBorders(uint32_t z)
 {
+    if (z==zmax) return;
     uint32_t wallmat = 0;
+    uint16_t walltype = 0;
+    Vec4 *color;
     for (uint32_t x = 0; x < xmax; x++)
     {
         for (uint32_t y = 0; y < ymax; y++)
         {
             if (tiles[z][y][x].ceiling)
             {
-                wallmat = tiles[z][y][x].material.index;
+                wallmat = tiles[z+1][y][x].material.index;
+                walltype = tiles[z+1][y][x].material.type;
                 if ((*vertices)[wallmat]==NULL) (*vertices)[wallmat] = new Vec3Array();
                 if ((*normals)[wallmat]==NULL) (*normals)[wallmat] = new Vec3Array();
                 if ((*texcoords)[wallmat]==NULL) (*texcoords)[wallmat] = new Vec2Array();
+                if ((*colorcoords)[wallmat]==NULL) (*colorcoords)[wallmat] = new Vec4Array();
                 if ((*bg)[wallmat]==NULL) (*bg)[wallmat] = new Geometry();
 
                 if (x > 0 && !tiles[z][y][x-1].ceiling && !DFHack::isWallTerrain(tiles[z][y][x-1].tiletype))
@@ -1834,6 +2478,16 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                     (*texcoords)[wallmat]->push_back(Vec2(1,1));
                     (*texcoords)[wallmat]->push_back(Vec2(1,1-ceilingHeight));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1-ceilingHeight));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1856,6 +2510,16 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                     (*texcoords)[wallmat]->push_back(Vec2(1,1));
                     (*texcoords)[wallmat]->push_back(Vec2(1,1-ceilingHeight));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1-ceilingHeight));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1878,6 +2542,16 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                     (*texcoords)[wallmat]->push_back(Vec2(1,1));
                     (*texcoords)[wallmat]->push_back(Vec2(1,1-ceilingHeight));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1-ceilingHeight));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1900,6 +2574,16 @@ void DwarfGeometry::drawCeilingBorders(uint32_t z)
                     (*texcoords)[wallmat]->push_back(Vec2(1,1));
                     (*texcoords)[wallmat]->push_back(Vec2(1,1-ceilingHeight));
                     (*texcoords)[wallmat]->push_back(Vec2(0,1-ceilingHeight));
+                    if (walltype==0 && colors[Mats->inorganic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->inorganic[wallmat&0x1ffffff].id]);
+                    else if (walltype==420 && colors[Mats->organic[wallmat&0x1ffffff].id]!=NULL) color = (colors[Mats->organic[wallmat&0x1ffffff].id]);
+                    else color = NULL;
+                    if (color != NULL)
+                    {
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                        (*colorcoords)[wallmat]->push_back(*color);
+                    }
                     face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
                     int s = (*vertices)[wallmat]->size()-1;
                     face->push_back(s);
@@ -1959,7 +2643,7 @@ bool DwarfGeometry::start()
                         {
                             int geolayer = block.designation[i][j].bits.geolayer_index;
                             int biome = block.designation[i][j].bits.biome;
-                            tiles[z][16*y+j][16*x+i].material.type = DFHack::tileTypeTable[block.tiletypes[i][j]].m;
+                            tiles[z][16*y+j][16*x+i].material.type = 0;
                             tiles[z][16*y+j][16*x+i].material.index = geology[offsets[biome]][geolayer];
                             tiles[z][16*y+j][16*x+i].tiletype = block.tiletypes[i][j];
                             tiles[z][16*y+j][16*x+i].occupancy = block.occupancy[i][j];
@@ -1969,13 +2653,13 @@ bool DwarfGeometry::start()
                             {
                                 if (veins[v].assignment[j] &(1<<i))
                                 {
-                                    tiles[z][16*y+j][16*x+i].material.type = DFHack::VEIN;
+                                    tiles[z][16*y+j][16*x+i].material.type = 0;
                                     tiles[z][16*y+j][16*x+i].material.index = veins[v].type;
                                 }
                             }
                             if (block.global_feature != -1 && uint16_t(block.global_feature) < global_features.size() && block.designation[i][j].bits.feature_global && global_features[block.global_feature].main_material == 0)
                             {
-                                tiles[z][16*y+j][16*x+i].material.type = DFHack::STONE;
+                                tiles[z][16*y+j][16*x+i].material.type = 0;
                                 tiles[z][16*y+j][16*x+i].material.index = global_features[block.global_feature].sub_material;
                             }
                             if (block.local_feature != -1)
@@ -1992,7 +2676,7 @@ bool DwarfGeometry::start()
                                     {
                                         if (block.designation[i][j].bits.feature_local && vectr[block.local_feature]->main_material == 0)
                                         {
-                                            tiles[z][16*y+j][16*x+i].material.type = DFHack::VEIN;
+                                            tiles[z][16*y+j][16*x+i].material.type = 0;
                                             tiles[z][16*y+j][16*x+i].material.index = vectr[block.local_feature]->sub_material;
                                         }
                                     }
@@ -2079,6 +2763,7 @@ bool DwarfGeometry::drawGeometry()
         vertices = new map<uint32_t, ref_ptr<Vec3Array> >();
         normals = new map<uint32_t, ref_ptr<Vec3Array> >();
         texcoords = new map<uint32_t, ref_ptr<Vec2Array> >();
+        colorcoords = new map<uint32_t, ref_ptr<Vec4Array> >();
         drawNorthWalls(z);
         drawSouthWalls(z);
         drawWestWalls(z);
@@ -2093,6 +2778,13 @@ bool DwarfGeometry::drawGeometry()
             (*bg)[it->first]->setVertexArray((*vertices)[it->first]);
             (*bg)[it->first]->setNormalArray((*normals)[it->first]);
             (*bg)[it->first]->setNormalBinding(Geometry::BIND_PER_VERTEX);
+            (*bg)[it->first]->setTexCoordArray(0,(*texcoords)[it->first].get());
+            if (doCulling)
+            {
+                StateSet *ss = blockGeode->getOrCreateStateSet();
+                CullFace *cf = new osg::CullFace(CullFace::BACK);
+                ss->setAttributeAndModes(cf,StateAttribute::ON);
+            }
             zgroup->addChild(blockGeode.get());
             //cout << "Geode of " << Mats->inorganic[it->first].id << " created." << endl;
             string matstring;
@@ -2110,15 +2802,37 @@ bool DwarfGeometry::drawGeometry()
                 else matstring[i] = tolower(matstring[i]);
             }
             //cout << matstring << endl;
-            ref_ptr<Image> wallimg = osgDB::readImageFile("materials/images/"+matstring+".bmp");
-            if (wallimg == NULL) continue;
-            (*bg)[it->first]->setTexCoordArray(0,(*texcoords)[it->first].get());
-            ref_ptr<Texture2D> walltex = new Texture2D;
-            walltex->setDataVariance(Object::DYNAMIC);
-            walltex->setImage(wallimg.get());
-            walltex->setWrap(Texture::WRAP_S,Texture::REPEAT);
-            walltex->setWrap(Texture::WRAP_T,Texture::REPEAT);
-            blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,walltex.get(),StateAttribute::ON);
+            ref_ptr<Image> wallimg;
+            if (textures[it->first]!=NULL) wallimg = textures[it->first];
+            else wallimg = osgDB::readImageFile("materials/images/"+matstring+".bmp");
+           // ref_ptr<Image> wallimg = osgDB::readImageFile("materials/images/"+matstring+".bmp");
+            if (wallimg != NULL)
+            {
+                textures[it->first] = wallimg;
+                ref_ptr<Texture2D> walltex = new Texture2D;
+                walltex->setDataVariance(Object::DYNAMIC);
+                walltex->setImage(wallimg.get());
+                walltex->setWrap(Texture::WRAP_S,Texture::REPEAT);
+                walltex->setWrap(Texture::WRAP_T,Texture::REPEAT);
+                blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,walltex.get(),StateAttribute::ON);
+                ref_ptr<Vec4Array> whitearray = new Vec4Array();
+                whitearray->push_back(Vec4(1,1,1,1));
+                (*bg)[it->first]->setColorArray(whitearray);
+                (*bg)[it->first]->setColorBinding(Geometry::BIND_OVERALL);
+            }
+            else if ((*colorcoords)[it->first]->size()==(*vertices)[it->first]->size())
+            {
+                //cout << "showing" << endl;
+                (*bg)[it->first]->setColorArray((*colorcoords)[it->first].get());
+                (*bg)[it->first]->setColorBinding(Geometry::BIND_PER_VERTEX);
+            }
+            else
+            {
+                ref_ptr<Vec4Array> grayarray = new Vec4Array();
+                grayarray->push_back(Vec4(.5,.5,.5,1));
+                (*bg)[it->first]->setColorArray(grayarray);
+                (*bg)[it->first]->setColorBinding(Geometry::BIND_OVERALL);
+            }
         }
         geometryGroup->addChild(zgroup.get());
 
@@ -2167,16 +2881,16 @@ bool DwarfGeometry::drawVegetation()
         if (vegNodes[tree.material|(1<<(31-tree.type))] == NULL)
         {
             treenode = dynamic_cast<Group*>(osgDB::readNodeFile("models/"+matstring));
+            //cout << matstring << endl;
             if (treenode==NULL) continue;
             vegNodes[tree.material|(1<<(31-tree.type))] = treenode;
-            cout << matstring << endl;
         }
         else treenode = vegNodes[tree.material|(1<<(31-tree.type))];
         //cout << "Acacia model drawn" << endl;
         ref_ptr<PositionAttitudeTransform> treeplace = new PositionAttitudeTransform();
-        treeplace->setPosition(Vec3(tree.x,tree.y,tree.z));
-        treeplace->setAttitude(Quat(inDegrees(-90.0),Vec3d(1,0,0)));
-        treeplace->setScale(Vec3d(.5,.5,.5));
+        treeplace->setPosition(Vec3(tree.x+.5,tree.y+.5,tree.z));
+        //treeplace->setAttitude(Quat(inDegrees(-90.0),Vec3d(1,0,0)));
+        treeplace->setScale(Vec3d(treeSize,treeSize,treeSize));
         treeplace->addChild(treenode.get());
         geometryGroup->addChild(treeplace.get());
     }
@@ -2248,6 +2962,33 @@ void DwarfGeometry::drawSkybox()
     geometryGroup->addChild(clearNode);
 }
 
-
-
-
+//Thanks to Japa for letting me use stonesense stuff for colors!
+bool DwarfGeometry::loadColors()
+{
+    ifstream colorIndex("colors/index.txt");
+    if (!colorIndex.is_open()) return false;
+    string line;
+    while (!colorIndex.eof())
+    {
+        getline(colorIndex,line);
+        line = "colors/"+line;
+        TiXmlDocument *doc = new TiXmlDocument(line.c_str());
+        if (!doc->LoadFile()) return false;
+        TiXmlElement *root = doc->FirstChildElement("colors");
+        int r=0,g=0,b=0;
+        for (TiXmlElement *color = root->FirstChildElement(); color; color = color->NextSiblingElement())
+        {
+            color->QueryIntAttribute("red",&r);
+            color->QueryIntAttribute("green",&g);
+            color->QueryIntAttribute("blue",&b);
+            for (TiXmlElement *type = color->FirstChildElement(); type; type = type->NextSiblingElement())
+            {
+                for (TiXmlElement *mat = type->FirstChildElement(); mat; mat = mat->NextSiblingElement())
+                {
+                    colors[mat->Attribute("value")] = new Vec4(r/255.0,g/255.0,b/255.0,1);
+                }
+            }
+        }
+    }
+    return true;
+}

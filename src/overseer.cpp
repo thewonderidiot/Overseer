@@ -14,6 +14,9 @@
 #include "Overseer.h"
 #include <windows.h>
 
+
+#include <osg/Light>
+
 using namespace std;
 using namespace osg;
 
@@ -40,11 +43,20 @@ void Overseer::loadSettings()
     ini.LoadFile("overseer.ini");
 	fullscreen = ini.GetBoolValue("overseer","fullscreen");
 	tristrip = ini.GetBoolValue("overseer","tristripping");
+    doCulling = ini.GetBoolValue("overseer","culling");
+    doVeggies = ini.GetBoolValue("overseer","vegetation");
+
 	startz = ini.GetLongValue("overseer","zstart",0);
-	long sens = ini.GetLongValue("overseer","mouseSensitivity",200);
-	long mov = ini.GetLongValue("overseer","moveSpeed",5000);
-	moveSpeed = (float)mov/1000000000.0f;
-	mouseSensitivity = (float)sens/1000.0f;
+	string sens = ini.GetValue("overseer","mouseSensitivity",".2");
+	string mov = ini.GetValue("overseer","moveSpeed",".000005");
+	string ch = ini.GetValue("overseer","ceilingHeight",".05");
+	string tz = ini.GetValue("overseer","treeSize","1");
+
+	char *end;
+	moveSpeed = strtod(mov.c_str(),&end);
+	mouseSensitivity = strtod(sens.c_str(),&end);
+    ceilingHeight = strtod(ch.c_str(), &end);
+    treeSize = strtod(tz.c_str(),&end);
 }
 
 bool Overseer::connectToDF()
@@ -84,15 +96,22 @@ bool Overseer::go()
 {
     loadSettings();
     connectToDF();
-    dg = new DwarfGeometry(Maps, Mats, Cons, Vegs, root, startz, tristrip);
+
+    dg = new DwarfGeometry(Maps, Mats, Cons, Vegs, root, startz, ceilingHeight, treeSize, tristrip, doCulling);
     dg->start();
     dg->drawGeometry();
-    dg->drawVegetation();
+    if (doVeggies) dg->drawVegetation();
     dg->drawSkybox();
     DF->Detach();
 
     osgViewer::Viewer viewer;
     viewer.setSceneData(root);
+
+    StateSet *ss = root->getOrCreateStateSet();
+    ss->setMode(GL_LIGHTING, StateAttribute::ON);
+    ss->setMode(GL_LIGHT0, StateAttribute::ON);
+    ss->setMode(GL_LIGHT1, StateAttribute::ON);
+
     if (!fullscreen) viewer.setUpViewInWindow(20, 20, 1044, 788);
     viewer.realize();
     //viewer.addEventHandler( new osgGA::StateSetManipulator(viewer.getCamera()->getOrCreateStateSet()) );
@@ -106,7 +125,37 @@ bool Overseer::go()
     mouse->setEventCallback(this);
     keyboard->setEventCallback(this);
     Camera *c = viewer.getCamera();
+
+    ref_ptr<Light> light = new Light;
+    /*light->setLightNum(0);
+    light->setAmbient(Vec4(.1,.1,.1,1.0));
+    light->setDiffuse(Vec4(1,1,1,1.0));
+    light->setSpecular(Vec4(.8,.8,.8,1.0));
+    light->setPosition(Vec4(0.0,0.0,0.0,1.0));
+    //light->setConstantAttenuation(.05);
+    light->setQuadraticAttenuation(.005);
+    //light->setDirection(Vec3(0.0,0.0,-1.0));
+    //light->setSpotCutoff(25);
+    ls = new LightSource;
+    ls->setLight(light.get());
+    ls->setReferenceFrame(LightSource::ABSOLUTE_RF);
+    //root->addChild(ls.get());
+
+    light = new Light;*/
+    light->setLightNum(0);
+    light->setAmbient(Vec4(.2,.2,.2,1));
+    light->setDiffuse(Vec4(1,1,1,1));
+    light->setSpecular(Vec4(1,1,1,1));
+    light->setDirection(Vec3(1,1,-1));
+    ref_ptr<LightSource> ls = new LightSource;
+    ls->setLight(light.get());
+    ls->setReferenceFrame(LightSource::ABSOLUTE_RF);
+    root->addChild(ls.get());
+
     int camz = dg->getGeometryMax();
+
+    light->setPosition(Vec4(-20,-20,camz+20,1));
+
     c->setViewMatrixAsLookAt(Vec3(0,0,camz),Vec3(1,1,camz),Vec3(0,0,1));
     Matrixd test = c->getViewMatrix();
     Vec3d eye;
@@ -119,6 +168,8 @@ bool Overseer::go()
     pitch.makeRotate(0,Vec3(0,0,1));
     osgViewer::StatsHandler *s = new osgViewer::StatsHandler();
     s->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F1);
+    s->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_F3);
+    s->setKeyEventToggleVSync(osgGA::GUIEventAdapter::KEY_F2);
     viewer.addEventHandler(s);
     while (keepRendering)
     {
@@ -129,6 +180,7 @@ bool Overseer::go()
         Timer_t endFrameTick = osg::Timer::instance()->tick();
         int dt = endFrameTick-startFrameTick;
         eye += yaw*pitch*velocity*dt*shiftspeed;
+        //light->setPosition(Vec4(eye.x(),eye.y(),eye.z(),50.0));
         c->setViewMatrix(rot*Matrixd::translate(eye)*yaw*pitch);
     }
     return true;

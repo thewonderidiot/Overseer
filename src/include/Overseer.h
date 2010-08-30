@@ -3,6 +3,7 @@
 #include <osgDB/ReadFile>
 #include <OIS/OIS.h>
 #include <iostream>
+
 #include "DwarfGeometry.h"
 
 class Overseer : public OIS::KeyListener, public OIS::MouseListener
@@ -38,10 +39,14 @@ class Overseer : public OIS::KeyListener, public OIS::MouseListener
         bool enableRamps;
         bool fullscreen;
         bool tristrip;
+        bool doCulling;
+        bool doVeggies;
         int startz;
         int camz;
         double mouseSensitivity;
         double moveSpeed;
+        double ceilingHeight;
+        double treeSize;
 
         bool keepRendering;
         std::string *fileName;
