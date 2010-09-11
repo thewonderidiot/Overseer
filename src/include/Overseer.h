@@ -1,12 +1,11 @@
 #include <DFHack.h>
 #include <osgGA/TrackballManipulator>
 #include <osgDB/ReadFile>
-#include <OIS/OIS.h>
 #include <iostream>
 
 #include "DwarfGeometry.h"
 
-class Overseer : public OIS::KeyListener, public OIS::MouseListener
+class Overseer
 {
     public:
         Overseer();
@@ -16,14 +15,6 @@ class Overseer : public OIS::KeyListener, public OIS::MouseListener
     private:
         bool connectToDF();
         void loadSettings();
-        virtual bool keyPressed(const OIS::KeyEvent &e);
-        virtual bool keyReleased(const OIS::KeyEvent &e);
-        virtual bool mouseMoved(const OIS::MouseEvent &e);
-        virtual bool mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id);
-        virtual bool mouseReleased(const OIS::MouseEvent &e, OIS::MouseButtonID id);
-        OIS::Mouse *mouse;
-        OIS::Keyboard *keyboard;
-        OIS::InputManager *im;
 
         osg::Group *root;
 
@@ -48,12 +39,5 @@ class Overseer : public OIS::KeyListener, public OIS::MouseListener
         double ceilingHeight;
         double treeSize;
 
-        bool keepRendering;
         std::string *fileName;
-
-        osg::Vec3d velocity;
-        osg::Matrixd rot;
-        osg::Matrixd yaw;
-        osg::Matrixd pitch;
-        int shiftspeed;
 };

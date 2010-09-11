@@ -10,8 +10,16 @@
 #include <osg/ShapeDrawable>
 #include <osgUtil/CullVisitor>
 
+#include <osg/Billboard>
+
 #include "depends/tinyxml.h"
 #include <iostream>
+
+#include <osg/Program>
+#include <osg/Shader>
+#include <osg/Material>
+#include <osgUtil/TangentSpaceGenerator>
+
 
 using namespace std;
 using namespace osg;
@@ -901,7 +909,7 @@ void DwarfGeometry::drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             face->push_back(s-2);
             (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
-        else if (DFHack::isFloorTerrain(tiles[z][y-1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==WEST || tiles[z][y-1][x].ramptype==NW_UP || tiles[z][y-1][x].ramptype==SW_UP || tiles[z][y-1][x].ramptype==HILL) //open cases
+        else if (DFHack::isFloorTerrain(tiles[z][y-1][x].tiletype) || isRampTopOrOpenTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==WEST || tiles[z][y-1][x].ramptype==NW_UP || tiles[z][y-1][x].ramptype==SW_UP || tiles[z][y-1][x].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
@@ -989,7 +997,7 @@ void DwarfGeometry::drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             face->push_back(s-2);
             (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
-        else if (DFHack::isFloorTerrain(tiles[z][y+1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==EAST || tiles[z][y+1][x].ramptype==NE_UP || tiles[z][y+1][x].ramptype==SE_UP || tiles[z][y+1][x].ramptype==HILL) //open cases
+        else if (DFHack::isFloorTerrain(tiles[z][y+1][x].tiletype) || isRampTopOrOpenTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==EAST || tiles[z][y+1][x].ramptype==NE_UP || tiles[z][y+1][x].ramptype==SE_UP || tiles[z][y+1][x].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
@@ -1114,7 +1122,7 @@ void DwarfGeometry::drawSouthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t
             face->push_back(s-2);
             (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
-        else if (DFHack::isFloorTerrain(tiles[z][y-1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==WEST || tiles[z][y-1][x].ramptype==NW_UP || tiles[z][y-1][x].ramptype==SW_UP || tiles[z][y-1][x].ramptype==HILL) //open cases
+        else if (DFHack::isFloorTerrain(tiles[z][y-1][x].tiletype) || isRampTopOrOpenTerrain(tiles[z][y-1][x].tiletype) || tiles[z][y-1][x].ramptype==WEST || tiles[z][y-1][x].ramptype==NW_UP || tiles[z][y-1][x].ramptype==SW_UP || tiles[z][y-1][x].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x+1,y,z));
@@ -1202,7 +1210,7 @@ void DwarfGeometry::drawSouthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t
             face->push_back(s-2);
             (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
-        else if (DFHack::isFloorTerrain(tiles[z][y+1][x].tiletype) || DFHack::isOpenTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==EAST || tiles[z][y+1][x].ramptype==NE_UP || tiles[z][y+1][x].ramptype==SE_UP || tiles[z][y+1][x].ramptype==HILL) //open cases
+        else if (DFHack::isFloorTerrain(tiles[z][y+1][x].tiletype) || isRampTopOrOpenTerrain(tiles[z][y+1][x].tiletype) || tiles[z][y+1][x].ramptype==EAST || tiles[z][y+1][x].ramptype==NE_UP || tiles[z][y+1][x].ramptype==SE_UP || tiles[z][y+1][x].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z));
@@ -1327,7 +1335,7 @@ void DwarfGeometry::drawWestRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             face->push_back(s-2);
             (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
-        else if (DFHack::isFloorTerrain(tiles[z][y][x-1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NORTH || tiles[z][y][x-1].ramptype==NW_UP || tiles[z][y][x-1].ramptype==NE_UP || tiles[z][y][x-1].ramptype==HILL) //open cases
+        else if (DFHack::isFloorTerrain(tiles[z][y][x-1].tiletype) || isRampTopOrOpenTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NORTH || tiles[z][y][x-1].ramptype==NW_UP || tiles[z][y][x-1].ramptype==NE_UP || tiles[z][y][x-1].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x,y,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x,y,z));
@@ -1415,7 +1423,7 @@ void DwarfGeometry::drawWestRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             face->push_back(s-2);
             (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
-        else if (DFHack::isFloorTerrain(tiles[z][y][x+1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SOUTH || tiles[z][y][x+1].ramptype==SW_UP || tiles[z][y][x+1].ramptype==SE_UP || tiles[z][y][x+1].ramptype==HILL) //open cases
+        else if (DFHack::isFloorTerrain(tiles[z][y][x+1].tiletype) || isRampTopOrOpenTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SOUTH || tiles[z][y][x+1].ramptype==SW_UP || tiles[z][y][x+1].ramptype==SE_UP || tiles[z][y][x+1].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x+1,y,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
@@ -1540,7 +1548,7 @@ void DwarfGeometry::drawEastRampNorthBoundaries(uint32_t x, uint32_t y, uint32_t
             face->push_back(s-2);
             (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
-        else if (DFHack::isFloorTerrain(tiles[z][y][x-1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NORTH || tiles[z][y][x-1].ramptype==NW_UP || tiles[z][y][x-1].ramptype==NE_UP || tiles[z][y][x-1].ramptype==HILL) //open cases
+        else if (DFHack::isFloorTerrain(tiles[z][y][x-1].tiletype) || isRampTopOrOpenTerrain(tiles[z][y][x-1].tiletype) || tiles[z][y][x-1].ramptype==NORTH || tiles[z][y][x-1].ramptype==NW_UP || tiles[z][y][x-1].ramptype==NE_UP || tiles[z][y][x-1].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x,y+1,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x,y,z));
@@ -1628,7 +1636,7 @@ void DwarfGeometry::drawEastRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t
             face->push_back(s-2);
             (*bg)[wallmat]->addPrimitiveSet(face.get());
         }
-        else if (DFHack::isFloorTerrain(tiles[z][y][x+1].tiletype) || DFHack::isOpenTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SOUTH || tiles[z][y][x+1].ramptype==SW_UP || tiles[z][y][x+1].ramptype==SE_UP || tiles[z][y][x+1].ramptype==HILL) //open cases
+        else if (DFHack::isFloorTerrain(tiles[z][y][x+1].tiletype) || isRampTopOrOpenTerrain(tiles[z][y][x+1].tiletype) || tiles[z][y][x+1].ramptype==SOUTH || tiles[z][y][x+1].ramptype==SW_UP || tiles[z][y][x+1].ramptype==SE_UP || tiles[z][y][x+1].ramptype==HILL) //open cases
         {
             (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z+1));
             (*vertices)[wallmat]->push_back(Vec3(x+1,y+1,z));
@@ -2625,9 +2633,9 @@ bool DwarfGeometry::start()
     for (uint32_t z=startz; z<zmax; z++)
     {
         hasgeo = false;
-        for (uint32_t y=0; y<ymax; y++)
+        for (uint32_t x=0; x<xmax; x++)
         {
-            for (uint32_t x=0; x<xmax; x++)
+            for (uint32_t y=0; y<ymax; y++)
             {
                 if (Map->isValidBlock(x,y,z))
                 {
@@ -2637,30 +2645,30 @@ bool DwarfGeometry::start()
                     ices.clear();
                     splatter.clear();
                     Map->ReadVeins(x,y,z,&veins,&ices,&splatter);
-                    for (int i=0; i<16; i++)
+                    for (int j=0; j<16; j++)
                     {
-                        for (int j=0; j<16; j++)
+                        for (int i=0; i<16; i++)
                         {
                             int geolayer = block.designation[i][j].bits.geolayer_index;
                             int biome = block.designation[i][j].bits.biome;
-                            tiles[z][16*y+j][16*x+i].material.type = 0;
-                            tiles[z][16*y+j][16*x+i].material.index = geology[offsets[biome]][geolayer];
-                            tiles[z][16*y+j][16*x+i].tiletype = block.tiletypes[i][j];
-                            tiles[z][16*y+j][16*x+i].occupancy = block.occupancy[i][j];
-                            tiles[z][16*y+j][16*x+i].designation = block.designation[i][j];
-                            tiles[z][16*y+j][16*x+i].ceiling = false;
+                            tiles[z][16*x+i][16*y+j].material.type = 0;
+                            tiles[z][16*x+i][16*y+j].material.index = geology[offsets[biome]][geolayer];
+                            tiles[z][16*x+i][16*y+j].tiletype = block.tiletypes[i][j];
+                            tiles[z][16*x+i][16*y+j].occupancy = block.occupancy[i][j];
+                            tiles[z][16*x+i][16*y+j].designation = block.designation[i][j];
+                            tiles[z][16*x+i][16*y+j].ceiling = false;
                             for (uint32_t v = 0; v < veins.size(); v++)
                             {
                                 if (veins[v].assignment[j] &(1<<i))
                                 {
-                                    tiles[z][16*y+j][16*x+i].material.type = 0;
-                                    tiles[z][16*y+j][16*x+i].material.index = veins[v].type;
+                                    tiles[z][16*x+i][16*y+j].material.type = 0;
+                                    tiles[z][16*x+i][16*y+j].material.index = veins[v].type;
                                 }
                             }
                             if (block.global_feature != -1 && uint16_t(block.global_feature) < global_features.size() && block.designation[i][j].bits.feature_global && global_features[block.global_feature].main_material == 0)
                             {
-                                tiles[z][16*y+j][16*x+i].material.type = 0;
-                                tiles[z][16*y+j][16*x+i].material.index = global_features[block.global_feature].sub_material;
+                                tiles[z][16*x+i][16*y+j].material.type = 0;
+                                tiles[z][16*x+i][16*y+j].material.index = global_features[block.global_feature].sub_material;
                             }
                             if (block.local_feature != -1)
                             {
@@ -2676,8 +2684,8 @@ bool DwarfGeometry::start()
                                     {
                                         if (block.designation[i][j].bits.feature_local && vectr[block.local_feature]->main_material == 0)
                                         {
-                                            tiles[z][16*y+j][16*x+i].material.type = 0;
-                                            tiles[z][16*y+j][16*x+i].material.index = vectr[block.local_feature]->sub_material;
+                                            tiles[z][16*x+i][16*y+j].material.type = 0;
+                                            tiles[z][16*x+i][16*y+j].material.index = vectr[block.local_feature]->sub_material;
                                         }
                                     }
                                 }
@@ -2685,30 +2693,30 @@ bool DwarfGeometry::start()
                             switch (DFHack::tileTypeTable[block.tiletypes[i][j]].m)
                             {
                             case DFHack::GRASS:
-                                tiles[z][16*y+j][16*x+i].material.index |= MAT_GRASS;
+                                tiles[z][16*x+i][16*y+j].material.index |= MAT_GRASS;
                                 break;
                             case DFHack::GRASS2:
-                                tiles[z][16*y+j][16*x+i].material.index |= MAT_GRASS2;
+                                tiles[z][16*x+i][16*y+j].material.index |= MAT_GRASS2;
                                 break;
                             case DFHack::GRASS_DEAD:
-                                tiles[z][16*y+j][16*x+i].material.index |= MAT_GRASS_DEAD;
+                                tiles[z][16*x+i][16*y+j].material.index |= MAT_GRASS_DEAD;
                                 break;
                             case DFHack::GRASS_DRY:
-                                tiles[z][16*y+j][16*x+i].material.index |= MAT_GRASS_DRY;
+                                tiles[z][16*x+i][16*y+j].material.index |= MAT_GRASS_DRY;
                                 break;
                             case DFHack::MAGMA:
-                                tiles[z][16*y+j][16*x+i].material.index |= MAT_MAGMA;
+                                tiles[z][16*x+i][16*y+j].material.index |= MAT_MAGMA;
                                 break;
                             case DFHack::ICE:
-                                tiles[z][16*y+j][16*x+i].material.index |= MAT_ICE;
+                                tiles[z][16*x+i][16*y+j].material.index |= MAT_ICE;
                                 break;
                             case DFHack::OBSIDIAN:
-                                tiles[z][16*y+j][16*x+i].material.index |= MAT_OBSIDIAN;
+                                tiles[z][16*x+i][16*y+j].material.index |= MAT_OBSIDIAN;
                                 break;
                             default:
                                 break;
                             }
-                            if (!DFHack::isOpenTerrain(block.tiletypes[i][j])) hasgeo = true;
+                            if (!isRampTopOrOpenTerrain(block.tiletypes[i][j])) hasgeo = true;
                         }
                     }
                 }
@@ -2718,14 +2726,15 @@ bool DwarfGeometry::start()
                     {
                         for (int j=0; j<16; j++)
                         {
-                            tiles[z][16*y+j][16*x+i].tiletype = -1;
-                            tiles[z][16*y+j][16*x+i].ceiling = false;
+                            tiles[z][16*x+i][16*y+j].tiletype = -1;
+                            tiles[z][16*x+i][16*y+j].ceiling = false;
                         }
                     }
                 }
             }
         }
-        if (hasgeo == false && geomax == 0) geomax = z;
+        if (hasgeo && geomax!=0) geomax = 0;
+        if (!hasgeo && geomax == 0) geomax = z;
     }
     if (geomax == 0) geomax = zmax;
     xmax*=16;
@@ -2736,8 +2745,8 @@ bool DwarfGeometry::start()
     {
         DFHack::t_construction c;
         Cons->Read(i,c);
-        tiles[c.z][c.y][c.x].material.type = c.mat_type;
-        tiles[c.z][c.y][c.x].material.index = c.mat_idx;
+        tiles[c.z][c.x][c.y].material.type = c.mat_type;
+        tiles[c.z][c.x][c.y].material.index = c.mat_idx;
     }
     Cons->Finish();
     cout << " done." << endl;
@@ -2753,6 +2762,15 @@ int DwarfGeometry::getGeometryMax()
 bool DwarfGeometry::drawGeometry()
 {
     osgUtil::TriStripVisitor tsv(new osgUtil::Optimizer());
+
+    ref_ptr<Image> crackimg = osgDB::readImageFile("materials/images/default.png");
+    ref_ptr<Texture2D> cracktex = new Texture2D;
+    cracktex->setDataVariance(Object::DYNAMIC);
+    cracktex->setImage(crackimg.get());
+    cracktex->setWrap(Texture::WRAP_S,Texture::REPEAT);
+    cracktex->setWrap(Texture::WRAP_T,Texture::REPEAT);
+    cracktex->setFilter(Texture::MIN_FILTER, Texture::NEAREST_MIPMAP_NEAREST);
+    cracktex->setFilter(Texture::MAG_FILTER, Texture::NEAREST);
     for (uint32_t z = 0; z < zmax; z++)
     {
         cout << "Drawing z-level " << z << endl;
@@ -2779,9 +2797,13 @@ bool DwarfGeometry::drawGeometry()
             (*bg)[it->first]->setNormalArray((*normals)[it->first]);
             (*bg)[it->first]->setNormalBinding(Geometry::BIND_PER_VERTEX);
             (*bg)[it->first]->setTexCoordArray(0,(*texcoords)[it->first].get());
+            StateSet *ss = (*bg)[it->first]->getOrCreateStateSet();
+            ss->setMode(GL_LIGHTING, StateAttribute::ON);
+            ss->setMode(GL_LIGHT0, StateAttribute::ON);
+            //ss->setMode(GL_LIGHT1, StateAttribute::ON);
+
             if (doCulling)
             {
-                StateSet *ss = blockGeode->getOrCreateStateSet();
                 CullFace *cf = new osg::CullFace(CullFace::BACK);
                 ss->setAttributeAndModes(cf,StateAttribute::ON);
             }
@@ -2803,28 +2825,104 @@ bool DwarfGeometry::drawGeometry()
             }
             //cout << matstring << endl;
             ref_ptr<Image> wallimg;
+            ref_ptr<Image> wallnmap;
+            ref_ptr<Program> program=0;
+            ref_ptr<Shader> vs=0,fs=0;
+
             if (textures[it->first]!=NULL) wallimg = textures[it->first];
-            else wallimg = osgDB::readImageFile("materials/images/"+matstring+".bmp");
+            else
+            {
+                wallimg = osgDB::readImageFile("materials/images/"+matstring+".bmp");
+                textures[it->first] = wallimg;
+            }
+
+            if (nmaps[it->first]!=NULL) wallnmap = nmaps[it->first];
+            else
+            {
+                wallnmap = osgDB::readImageFile("materials/normals/"+matstring+"n.bmp");
+                nmaps[it->first] = wallnmap;
+            }
+
+            if (programs[it->first]!=NULL) program = programs[it->first];
+            else
+            {
+                if (osgDB::findDataFile("materials/programs/"+matstring+".vert").length() != 0)
+                {
+                    vs = Shader::readShaderFile(Shader::VERTEX,"materials/programs/"+matstring+".vert");
+                    fs = Shader::readShaderFile(Shader::FRAGMENT,"materials/programs/"+matstring+".frag");
+                }
+                else if (osgDB::findDataFile("materials/programs/bump.vert").length() != 0)
+                {
+                    vs = Shader::readShaderFile(Shader::VERTEX,"materials/programs/bump.vert");
+                    fs = Shader::readShaderFile(Shader::FRAGMENT,"materials/programs/bump.frag");
+                }
+                if (vs && fs)
+                {
+                    program = new Program();
+                    program->addShader(vs);
+                    program->addShader(fs);
+                    programs[it->first] = program;
+                }
+            }
            // ref_ptr<Image> wallimg = osgDB::readImageFile("materials/images/"+matstring+".bmp");
             if (wallimg != NULL)
             {
-                textures[it->first] = wallimg;
                 ref_ptr<Texture2D> walltex = new Texture2D;
                 walltex->setDataVariance(Object::DYNAMIC);
                 walltex->setImage(wallimg.get());
                 walltex->setWrap(Texture::WRAP_S,Texture::REPEAT);
                 walltex->setWrap(Texture::WRAP_T,Texture::REPEAT);
-                blockGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,walltex.get(),StateAttribute::ON);
-                ref_ptr<Vec4Array> whitearray = new Vec4Array();
-                whitearray->push_back(Vec4(1,1,1,1));
-                (*bg)[it->first]->setColorArray(whitearray);
-                (*bg)[it->first]->setColorBinding(Geometry::BIND_OVERALL);
+                walltex->setFilter(Texture::MIN_FILTER, Texture::NEAREST_MIPMAP_NEAREST);
+                walltex->setFilter(Texture::MAG_FILTER, Texture::NEAREST);
+                ss->setTextureAttributeAndModes(0,walltex.get(),StateAttribute::ON);
+
+                if (wallnmap != NULL && program != NULL)
+                {
+                    (*bg)[it->first]->setTexCoordArray(1,(*texcoords)[it->first].get());
+                    ref_ptr<Texture2D> wallntex = new Texture2D;
+                    wallntex->setDataVariance(Object::DYNAMIC);
+                    wallntex->setImage(wallnmap.get());
+                    wallntex->setWrap(Texture::WRAP_S,Texture::REPEAT);
+                    wallntex->setWrap(Texture::WRAP_T,Texture::REPEAT);
+                    wallntex->setFilter(Texture::MIN_FILTER, Texture::NEAREST_MIPMAP_NEAREST);
+                    wallntex->setFilter(Texture::MAG_FILTER, Texture::NEAREST_MIPMAP_NEAREST);
+                    ss->setTextureAttributeAndModes(1,wallntex.get(),StateAttribute::ON);
+                    ref_ptr<Material> m = new Material();
+                    m->setDiffuse(Material::FRONT, Vec4(1,1,1,1));
+                    m->setAmbient(Material::FRONT, Vec4(1,1,1,1));
+                    m->setSpecular(Material::FRONT, Vec4(.2,.2,.2,1));
+                    m->setShininess(Material::FRONT, 60.0f);
+                    m->setColorMode(Material::AMBIENT_AND_DIFFUSE);
+                    ss->setAttributeAndModes(m, StateAttribute::ON);
+                    ref_ptr<osgUtil::TangentSpaceGenerator> tsg = new osgUtil::TangentSpaceGenerator;
+                    tsg->generate((*bg)[it->first],1);
+                    (*bg)[it->first]->setVertexAttribData(Geometry::ATTRIBUTE_6,Geometry::ArrayData(tsg->getTangentArray(),Geometry::BIND_PER_VERTEX,GL_FALSE));
+                    program->addBindAttribLocation("tangent",Geometry::ATTRIBUTE_6);
+                    ss->addUniform(new Uniform("diffuseTexture",0));
+                    ss->addUniform(new Uniform("normalTexture",1));
+                    ss->setAttributeAndModes(program.get(), StateAttribute::ON);
+                }
+                else
+                {
+                    ref_ptr<Vec4Array> whitearray = new Vec4Array();
+                    whitearray->push_back(Vec4(1,1,1,1));
+                    (*bg)[it->first]->setColorArray(whitearray);
+                    (*bg)[it->first]->setColorBinding(Geometry::BIND_OVERALL);
+                }
             }
             else if ((*colorcoords)[it->first]->size()==(*vertices)[it->first]->size())
             {
-                //cout << "showing" << endl;
-                (*bg)[it->first]->setColorArray((*colorcoords)[it->first].get());
-                (*bg)[it->first]->setColorBinding(Geometry::BIND_PER_VERTEX);
+                //(*bg)[it->first]->setColorArray((*colorcoords)[it->first].get());
+                //(*bg)[it->first]->setColorBinding(Geometry::BIND_PER_VERTEX);
+                Material *m = new Material();
+                m->setDiffuse(Material::FRONT, (*((*colorcoords)[it->first]))[0]);
+                m->setAmbient(Material::FRONT, ((*((*colorcoords)[it->first]))[0])*.5);
+                m->setSpecular(Material::FRONT, Vec4(0,0,0,1));
+                ss->setAttribute(m);
+                ss->setTextureAttributeAndModes(0,cracktex.get(),StateAttribute::ON);
+                ref_ptr<TexEnv> blendTexEnv = new TexEnv;
+                blendTexEnv->setMode(TexEnv::DECAL);
+                ss->setTextureAttribute(0,blendTexEnv);
             }
             else
             {
@@ -2835,13 +2933,14 @@ bool DwarfGeometry::drawGeometry()
             }
         }
         geometryGroup->addChild(zgroup.get());
+        //geometryGroup->addChild(zgroup.get());
 
         //if (tristrip) tsv.stripify(*bg.get());
         //(*bg)[wallmat]->setVertexArray(vertices.get());
         //(*bg)[wallmat]->setNormalArray(normals.get());
         //(*bg)[wallmat]->setNormalBinding(Geometry::BIND_PER_VERTEX);
     }
-
+    drawStairs();
         /*ref_ptr<Node> tree = osgDB::readNodeFile("models/test.obj");
         PositionAttitudeTransform *treeplace = new PositionAttitudeTransform();
         treeplace->setPosition(Vec3(10,10,geomax));
@@ -2850,10 +2949,12 @@ bool DwarfGeometry::drawGeometry()
     return true;
 }
 
-bool DwarfGeometry::drawVegetation()
+/*bool DwarfGeometry::drawVegetation()
 {
     uint32_t numVegs = 0;
     Vegs->Start(numVegs);
+    ref_ptr<Group> treeGroup = new Group;
+    geometryGroup->addChild(treeGroup);
     for (uint32_t i = 0; i < numVegs; i++)
     {
         DFHack::t_tree tree;
@@ -2864,11 +2965,13 @@ bool DwarfGeometry::drawVegetation()
             if (matstring[i]==' ') matstring[i]='_';
             else matstring[i] = tolower(matstring[i]);
         }
+        bool usetree = false;
         switch (tree.type)
         {
         case 0:
         case 1:
             matstring += "_tree.ive";
+            usetree = true;
             break;
         case 2:
         case 3:
@@ -2877,26 +2980,125 @@ bool DwarfGeometry::drawVegetation()
         default:
             break;
         }
-        ref_ptr<Group> treenode = NULL;
-        if (vegNodes[tree.material|(1<<(31-tree.type))] == NULL)
+        ref_ptr<Node> treenode = NULL;
+        //if (vegNodes[tree.material|(1<<(31-tree.type))] == NULL && usetree)
+        if (vegNodes[0] == NULL && usetree)
         {
-            treenode = dynamic_cast<Group*>(osgDB::readNodeFile("models/"+matstring));
+            //treenode = dynamic_cast<Group*>(osgDB::readNodeFile("models/"+matstring));
+            treenode = osgDB::readNodeFile("models/tree.ive");
             //cout << matstring << endl;
             if (treenode==NULL) continue;
-            vegNodes[tree.material|(1<<(31-tree.type))] = treenode;
+            //vegNodes[tree.material|(1<<(31-tree.type))] = treenode;
+            vegNodes[0] = treenode;
+
+            osgSim::InsertImpostorsVisitor ov;
+            treenode->accept(ov);
+            ov.insertImpostors();
         }
-        else treenode = vegNodes[tree.material|(1<<(31-tree.type))];
+        //else treenode = vegNodes[tree.material|(1<<(31-tree.type))];
+        else treenode = vegNodes[0];
         //cout << "Acacia model drawn" << endl;
         ref_ptr<PositionAttitudeTransform> treeplace = new PositionAttitudeTransform();
         treeplace->setPosition(Vec3(tree.x+.5,tree.y+.5,tree.z));
-        //treeplace->setAttitude(Quat(inDegrees(-90.0),Vec3d(1,0,0)));
-        treeplace->setScale(Vec3d(treeSize,treeSize,treeSize));
+        //treeplace->setAttitude(Quat(inDegrees(-90.0),Vec3d(0,0,1)));
+        //treeplace->setScale(Vec3d(treeSize,treeSize,treeSize));
+        treeplace->setScale(Vec3d(.1,.1,.1));
+
+        //ref_ptr<osgSim::Impostor> impostor = new osgSim::Impostor;
+        //impostor->addChild(treenode.get());
+        //impostor->setRange(0,0.0,1e7f);
+
         treeplace->addChild(treenode.get());
-        geometryGroup->addChild(treeplace.get());
+        treeGroup->addChild(treeplace.get());
     }
+    //cout << "made it out" << endl;
+    //osgSim::InsertImpostorsVisitor ov;
+    //treeGroup->accept(ov);
+    //cout << "okay" << endl;
+    //ov.insertImpostors();
+    //cout << "dead" << endl;
     Vegs->Finish();
     return true;
+}*/
+
+bool DwarfGeometry::drawVegetation()
+{
+    uint32_t numVegs = 0;
+    Vegs->Start(numVegs);
+    ref_ptr<Group> treeGroup = new Group;
+    geometryGroup->addChild(treeGroup);
+    ref_ptr<Image> img = osgDB::readImageFile("materials/images/plants/tree.png");
+    ref_ptr<Texture2D> tex = new Texture2D;
+    tex->setImage(img.get());
+    for (uint32_t i = 0; i < numVegs; i++)
+    {
+        DFHack::t_tree tree;
+        Vegs->Read(i,tree);
+        string matstring = Mats->organic[tree.material].id;
+        for (uint32_t i = 0; i < matstring.length(); i++)
+        {
+            if (matstring[i]==' ') matstring[i]='_';
+            else matstring[i] = tolower(matstring[i]);
+        }
+        bool usetree = false;
+        switch (tree.type)
+        {
+        case 0:
+        case 1:
+            matstring += "_tree.ive";
+            usetree = true;
+            break;
+        case 2:
+        case 3:
+            matstring += "_shrub.ive";
+            break;
+        default:
+            break;
+        }
+        if (usetree)
+        {
+            //ref_ptr<Billboard> treeboard = new Billboard;
+            //treeboard->setMode(Billboard::AXIAL_ROT);
+            //treeboard->setAxis(Vec3(0,0,1));
+            //treeboard->setNormal(Vec3(0,-1,0));
+            ref_ptr<Geode> treeboard = new Geode;
+            ref_ptr<Geometry> treegeo = new Geometry;
+            ref_ptr<Vec3Array> treev = new Vec3Array();
+            treev->push_back(Vec3(tree.x-1,tree.y,tree.z));
+            treev->push_back(Vec3(tree.x+1,tree.y,tree.z));
+            treev->push_back(Vec3(tree.x+1,tree.y,tree.z+2));
+            treev->push_back(Vec3(tree.x-1,tree.y,tree.z+2));
+            treev->push_back(Vec3(tree.x,tree.y-1,tree.z));
+            treev->push_back(Vec3(tree.x,tree.y+1,tree.z));
+            treev->push_back(Vec3(tree.x,tree.y+1,tree.z+2));
+            treev->push_back(Vec3(tree.x,tree.y-1,tree.z+2));
+            treegeo->setVertexArray(treev.get());
+            ref_ptr<Vec3Array> treen = new Vec3Array();
+            treen->push_back(Vec3(0,-1,0));
+            treegeo->setNormalArray(treen);
+            treegeo->setNormalBinding(Geometry::BIND_OVERALL);
+            ref_ptr<Vec2Array> treet = new Vec2Array();
+            treet->push_back(Vec2(0,0));
+            treet->push_back(Vec2(1,0));
+            treet->push_back(Vec2(1,1));
+            treet->push_back(Vec2(0,1));
+            treet->push_back(Vec2(0,0));
+            treet->push_back(Vec2(1,0));
+            treet->push_back(Vec2(1,1));
+            treet->push_back(Vec2(0,1));
+            treegeo->setTexCoordArray(0,treet.get());
+            treegeo->addPrimitiveSet(new DrawArrays(PrimitiveSet::QUADS,0,8));
+            ref_ptr<StateSet> ss = treegeo->getOrCreateStateSet();
+            ss->setTextureAttributeAndModes(0,tex,StateAttribute::ON);
+            ss->setRenderingHint(StateSet::TRANSPARENT_BIN);
+           // treeboard->addDrawable(treegeo.get(),Vec3(tree.x+.5,tree.y+.5,tree.z));
+            treeboard->addDrawable(treegeo.get());
+            geometryGroup->addChild(treeboard.get());
+        }
+    }
+    return true;
 }
+
 
 void DwarfGeometry::drawSkybox()
 {
@@ -2991,4 +3193,38 @@ bool DwarfGeometry::loadColors()
         }
     }
     return true;
+}
+
+void DwarfGeometry::drawStairs()
+{
+    ref_ptr<Group> stairGroup = new Group();
+    ref_ptr<Group> modelGroup;
+    ref_ptr<Geode> sg;
+    int in;
+    for (uint32_t z=0; z < zmax; z++)
+    {
+        for (uint32_t y=0; y < ymax; y++)
+        {
+            for (uint32_t x=0; x < xmax; x++)
+            {
+                in = stairs[tiles[z][y][x].tiletype | material.index << 20;
+                if (DFHack::isStairTerrain(tiles[z][y][x].tiletype))
+                {
+                    if (stairs[in] == NULL)
+                    {
+                        if (DFHack::tileTypeTable[tiles[z][y][x].tiletype].c==DFHack::STAIR_UP) modelGroup = dynamic_cast<Group*>(osgDB::readNodeFile("models/stairs.ive"));
+                        else continue;
+                        sg = dynamic_cast<Geode*>(modelGroup->getChild(0));
+
+                        sg->getOrCreateState()->
+                    }
+                }
+            }
+        }
+    }
+}
+
+StateSet DwarfGeometry::getMaterial(uint16_t type, uint32_t index)
+{
+
 }

@@ -25,7 +25,6 @@
 					<Add library="C:\OpenSceneGraph\lib\libosgManipulator.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgParticle.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgPresentation.dll.a" />
-					<Add library="C:\OpenSceneGraph\lib\libosgQt.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgShadow.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgSim.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgTerrain.dll.a" />
@@ -34,7 +33,6 @@
 					<Add library="C:\OpenSceneGraph\lib\libosgViewer.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgVolume.dll.a" />
 					<Add library="C:\OpenSceneGraph\lib\libosgWidget.dll.a" />
-					<Add library="C:\OpenSceneGraph\lib\libOIS.a" />
 					<Add library="C:\MinGW\lib\libcomdlg32.a" />
 				</Linker>
 			</Target>
@@ -57,6 +55,7 @@
 			<Add directory="C:\DFHack\library\include" />
 			<Add directory="C:\Overseer\src\include" />
 		</Compiler>
+		<Unit filename="src\DwarfEvents.cpp" />
 		<Unit filename="src\DwarfGeometry.cpp" />
 		<Unit filename="src\depends\tinystr.cpp" />
 		<Unit filename="src\depends\tinystr.h" />
@@ -64,6 +63,7 @@
 		<Unit filename="src\depends\tinyxml.h" />
 		<Unit filename="src\depends\tinyxmlerror.cpp" />
 		<Unit filename="src\depends\tinyxmlparser.cpp" />
+		<Unit filename="src\include\DwarfEvents.h" />
 		<Unit filename="src\include\DwarfGeometry.h" />
 		<Unit filename="src\include\Overseer.h" />
 		<Unit filename="src\include\SimpleIni.h" />

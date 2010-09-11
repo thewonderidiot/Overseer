@@ -6,13 +6,13 @@
 #include <osgUtil/TriStripVisitor>
 #include <osgUtil/Optimizer>
 #include <osgDB/ReadFile>
+#include <osgDB/FileUtils>
 #include <osg/Material>
 #include <osg/Texture2D>
 #include <osg/CullFace>
 #include <cctype>
 #include <vector>
 #include <map>
-
 
 #define MAT_GRASS (1<<31)
 #define MAT_GRASS2 (1<<30)
@@ -92,15 +92,23 @@ class DwarfGeometry
 
         void drawCeilingBorders(uint32_t z);
 
+        void drawStairs();
+
         void processRamps();
         inline bool isCeiling(int16_t t, int16_t up)
         {
             return !DFHack::isWallTerrain(t) && (DFHack::isRampTerrain(up) || DFHack::isFloorTerrain(up) || DFHack::isWallTerrain(up));
         }
+        inline bool isRampTopOrOpenTerrain(int in)
+        {
+            return DFHack::tileTypeTable[in].c==DFHack::RAMP_TOP || DFHack::tileTypeTable[in].c==DFHack::EMPTY;
+        }
 
         bool loadColors();
+        StateSet DwarfGeometry::getMaterial(uint16_t type, uint32_t index);
 
         bool tristrip;
+
         DFHack::Maps *Map;
         DFHack::Materials *Mats;
         DFHack::Constructions *Cons;
@@ -114,7 +122,9 @@ class DwarfGeometry
         std::map<uint32_t, osg::ref_ptr<osg::Vec2Array> > *texcoords;
         std::map<uint32_t, osg::ref_ptr<osg::Vec4Array> > *colorcoords;
         std::map<uint32_t, osg::ref_ptr<osg::Image> > textures;
-        std::map<uint32_t, osg::ref_ptr<osg::Group> > vegNodes;
+        std::map<uint32_t, osg::ref_ptr<osg::Image> > nmaps;
+        std::map<uint32_t, osg::ref_ptr<osg::Program> > programs;
+        std::map<uint32_t, osg::ref_ptr<osg::Geode> > stairs;
         std::map<std::string, osg::Vec4*> colors;
         osg::ref_ptr<osg::DrawElementsUInt> face;
         std::vector<std::vector<std::vector<Tile> > > tiles;
