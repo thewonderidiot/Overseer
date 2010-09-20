@@ -15,12 +15,13 @@
 #include <map>
 
 #define MAT_GRASS (1<<31)
-#define MAT_GRASS2 (1<<30)
-#define MAT_GRASS_DEAD (1<<29)
-#define MAT_GRASS_DRY (1<<28)
-#define MAT_MAGMA (1<<27)
-#define MAT_ICE (1<<26)
-#define MAT_OBSIDIAN (1<<25)
+#define MAT_GRASS2 (2<<30)
+#define MAT_GRASS_DEAD (3<<30)
+#define MAT_GRASS_DRY (4<<29)
+#define MAT_MAGMA (5<<29)
+#define MAT_ICE (6<<29)
+#define MAT_OBSIDIAN (7<<29)
+#define CONSTRUCTED (1<<28)
 
 enum RampType
 {
@@ -59,13 +60,14 @@ class DwarfGeometry
 {
     public:
         DwarfGeometry();
-        DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, DFHack::Vegetation *vgs, osg::Group *g, int sz, double ch, double tz, bool ts, bool dc);
+        DwarfGeometry(DFHack::Maps *m, DFHack::Materials *mt, DFHack::Constructions *cns, DFHack::Vegetation *vgs, osg::Group *g, int sz, double ch, bool ts, bool dc, int is, bool us, bool imgs);
         bool drawGeometryOld();
         bool drawGeometry();
         bool drawVegetation();
         void drawSkybox();
         bool start();
         int getGeometryMax();
+        void clean();
     private:
         bool drawNorthWalls(uint32_t z);
         bool drawSouthWalls(uint32_t z);
@@ -93,6 +95,7 @@ class DwarfGeometry
         void drawCeilingBorders(uint32_t z);
 
         void drawStairs();
+        void drawFortifications();
 
         void processRamps();
         inline bool isCeiling(int16_t t, int16_t up)
@@ -105,7 +108,7 @@ class DwarfGeometry
         }
 
         bool loadColors();
-        StateSet DwarfGeometry::getMaterial(uint16_t type, uint32_t index);
+        void getMaterial(osg::Geometry *g, uint32_t index);
 
         bool tristrip;
 
@@ -115,23 +118,26 @@ class DwarfGeometry
         DFHack::Vegetation *Vegs;
         osg::ref_ptr<osg::Group> geometryGroup;
         int startz;
+        int imageSize;
         osg::ref_ptr<osg::Geode> blockGeode;
         std::map<uint32_t, osg::ref_ptr<osg::Geometry> > *bg;
         std::map<uint32_t, osg::ref_ptr<osg::Vec3Array> > *vertices;
         std::map<uint32_t, osg::ref_ptr<osg::Vec3Array> > *normals;
         std::map<uint32_t, osg::ref_ptr<osg::Vec2Array> > *texcoords;
-        std::map<uint32_t, osg::ref_ptr<osg::Vec4Array> > *colorcoords;
         std::map<uint32_t, osg::ref_ptr<osg::Image> > textures;
         std::map<uint32_t, osg::ref_ptr<osg::Image> > nmaps;
         std::map<uint32_t, osg::ref_ptr<osg::Program> > programs;
         std::map<uint32_t, osg::ref_ptr<osg::Geode> > stairs;
+        std::map<uint32_t, osg::ref_ptr<osg::Geode> > forts;
         std::map<std::string, osg::Vec4*> colors;
         osg::ref_ptr<osg::DrawElementsUInt> face;
         std::vector<std::vector<std::vector<Tile> > > tiles;
-
+        osg::ref_ptr<osg::Texture2D> cracktex, constex;
         uint32_t xmax,ymax,zmax;
         int geomax;
         double ceilingHeight;
-        double treeSize;
         bool doCulling;
+        bool doImageScaling;
+        bool useShaders;
+        osg::ref_ptr<osg::GraphicsContext> gc;
 };

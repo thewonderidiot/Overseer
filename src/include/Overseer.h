@@ -32,12 +32,17 @@ class Overseer
         bool tristrip;
         bool doCulling;
         bool doVeggies;
+        bool useShaders;
+        bool useHeadlight;
+        bool doImageScaling;
         int startz;
         int camz;
+        int imageSize;
         double mouseSensitivity;
         double moveSpeed;
         double ceilingHeight;
-        double treeSize;
+        double ambient;
+        double diffuse;
+        double specular;
 
-        std::string *fileName;
 };

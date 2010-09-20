@@ -1,14 +1,16 @@
 #include "DwarfEvents.h"
 #include <iostream>
+#include <windows.h>
 using namespace std;
 using namespace osg;
 using namespace osgGA;
 
 
-DwarfEvents::DwarfEvents(osgViewer::GraphicsWindow *w, Camera *cam, double movs, double ms)
+DwarfEvents::DwarfEvents(osgViewer::GraphicsWindow *w, Camera *cam, Group *r, double movs, double ms)
 {
     win = w;
     c = cam;
+    root = r;
     moveSpeed = movs;
     mouseSensitivity = ms;
     Matrixd test = c->getViewMatrix();
@@ -63,6 +65,30 @@ bool DwarfEvents::handle(const GUIEventAdapter& ea,GUIActionAdapter& aa)
         case 'f':
         case 'F':
             velocity.set(velocity.x(),velocity.y()<moveSpeed?velocity.y()+moveSpeed:velocity.y(),velocity.z());
+            break;
+        case 'x':
+        case 'X':
+            OPENFILENAME ofn;
+            char szFile[100];
+            ZeroMemory( &ofn , sizeof( ofn));
+            ofn.lStructSize = sizeof ( ofn );
+            ofn.hwndOwner = NULL  ;
+            ofn.lpstrFile = szFile ;
+            ofn.lpstrFile[0] = '\0';
+            ofn.nMaxFile = sizeof( szFile );
+            ofn.lpstrFilter = "Wavefront (*.obj)\0*.obj\0Autodesk 3dsMax (*.3ds)\0*.3ds\0AC3D (*.ac)\0*.ac\0Autodesk DXF (*.dxf)\0*.dxf\0Lightwave (*.lwo)\0*.lwo\0PovRay (*.pov)\0*.pov\0";
+            ofn.nFilterIndex =1;
+            ofn.lpstrFileTitle = NULL ;
+            ofn.nMaxFileTitle = 0 ;
+            ofn.lpstrInitialDir=NULL ;
+            ofn.lpstrDefExt="obj";
+            ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT ;
+
+            if (!GetSaveFileName( &ofn )) break;
+            fileName = new string(ofn.lpstrFile);
+            cout << "Writing " << *fileName << "...";
+            osgDB::writeNodeFile(*root,*fileName);
+            cout << "done." << endl;
             break;
         default:
             break;

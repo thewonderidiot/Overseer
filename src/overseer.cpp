@@ -3,7 +3,6 @@
 #include <osgGA/StateSetManipulator>
 #include <osgGA/TrackballManipulator>
 #include <dfhack/DFTileTypes.h>
-#include <osgDB/WriteFile>
 #include <osgUtil/TriStripVisitor>
 #include <iostream>
 
@@ -13,7 +12,6 @@
 
 #include "Overseer.h"
 #include "DwarfEvents.h"
-#include <windows.h>
 
 
 #include <osg/Light>
@@ -35,22 +33,31 @@ void Overseer::loadSettings()
     CSimpleIniA ini;
     ini.SetUnicode();
     ini.LoadFile("overseer.ini");
-	fullscreen = ini.GetBoolValue("overseer","fullscreen");
-	tristrip = ini.GetBoolValue("overseer","tristripping");
-    doCulling = ini.GetBoolValue("overseer","culling");
-    doVeggies = ini.GetBoolValue("overseer","vegetation");
+	fullscreen = ini.GetBoolValue("overseer","fullscreen",false);
+	tristrip = ini.GetBoolValue("overseer","tristripping",false);
+    doCulling = ini.GetBoolValue("overseer","culling",true);
+    doVeggies = ini.GetBoolValue("overseer","vegetation",true);
+    useHeadlight = ini.GetBoolValue("overseer","headlight",false);
+    useShaders = ini.GetBoolValue("overseer","useShaders",false);
+    doImageScaling = ini.GetBoolValue("overseer","doImageScaling",true);
 
 	startz = ini.GetLongValue("overseer","zstart",0);
+	imageSize = ini.GetLongValue("overseer","imageSize", 512);
 	string sens = ini.GetValue("overseer","mouseSensitivity",".2");
 	string mov = ini.GetValue("overseer","moveSpeed",".000005");
 	string ch = ini.GetValue("overseer","ceilingHeight",".05");
-	string tz = ini.GetValue("overseer","treeSize","1");
+	string amb = ini.GetValue("overseer","ambient",".6");
+	string dif = ini.GetValue("overseer","diffuse","1");
+	string spec = ini.GetValue("overseer","specular",".8");
 
 	char *end;
 	moveSpeed = strtod(mov.c_str(),&end);
 	mouseSensitivity = strtod(sens.c_str(),&end);
     ceilingHeight = strtod(ch.c_str(), &end);
-    treeSize = strtod(tz.c_str(),&end);
+    ambient = strtod(amb.c_str(), &end);
+    diffuse = strtod(dif.c_str(), &end);
+    specular = strtod(spec.c_str(), &end);
+
 }
 
 bool Overseer::connectToDF()
@@ -64,7 +71,7 @@ bool Overseer::connectToDF()
     catch (exception& e)
     {
         cerr << e.what() << endl;
-        return 1;
+        return false;
     }
 
     Maps = DF->getMaps();
@@ -74,12 +81,12 @@ bool Overseer::connectToDF()
     if(!Maps->Start())
     {
         cerr << "Can't init map." << endl;
-        return 1;
+        return false;
     }
     if (!Mats->ReadInorganicMaterials() || !Mats->ReadOrganicMaterials())
     {
         cerr << "Can't init materials." << endl;
-        return 1;
+        return false;
     }
 
     cout << "Connected to Dwarf Fortress!" << endl;
@@ -89,17 +96,25 @@ bool Overseer::connectToDF()
 bool Overseer::go()
 {
     loadSettings();
-    connectToDF();
+    if (!connectToDF())
+    {
+        cout << "DF is not running!";
+        cin.ignore();
+        return false;
+    }
 
-    dg = new DwarfGeometry(Maps, Mats, Cons, Vegs, root, startz, ceilingHeight, treeSize, tristrip, doCulling);
+    dg = new DwarfGeometry(Maps, Mats, Cons, Vegs, root, startz, ceilingHeight, tristrip, doCulling, imageSize, useShaders, doImageScaling);
     dg->start();
     dg->drawGeometry();
-    //if (doVeggies) dg->drawVegetation();
+    if (doVeggies) dg->drawVegetation();
     dg->drawSkybox();
+    dg->clean();
     DF->Detach();
 
     osgViewer::Viewer viewer;
     viewer.setSceneData(root);
+    if (!fullscreen) viewer.setUpViewInWindow(20, 20, 1044, 788);
+    viewer.realize();
 
     /*StateSet *ss = root->getOrCreateStateSet();
     ss->setMode(GL_LIGHTING, StateAttribute::ON);
@@ -129,9 +144,9 @@ bool Overseer::go()
     //root->addChild(ls.get());
 
     //light->setLightNum(1);
-    light->setAmbient(Vec4(.6,.6,.6,1));
-    light->setDiffuse(Vec4(1,1,1,1));
-    light->setSpecular(Vec4(.8,.8,.8,1));
+    light->setAmbient(Vec4(ambient,ambient,ambient,1));
+    light->setDiffuse(Vec4(diffuse,diffuse,diffuse,1));
+    light->setSpecular(Vec4(specular,specular,specular,1));
     viewer.setLight(light);
     light->setDirection(Vec3(1,1,-1));
     //ls->setLight(light.get());
@@ -149,14 +164,15 @@ bool Overseer::go()
     s->setKeyEventPrintsOutStats(osgGA::GUIEventAdapter::KEY_F3);
     s->setKeyEventToggleVSync(osgGA::GUIEventAdapter::KEY_F2);
     //viewer.addEventHandler(s);
-    if (!fullscreen) viewer.setUpViewInWindow(20, 20, 1044, 788);
-    viewer.realize();
+
     osgViewer::Viewer::Windows windows;
     viewer.getWindows(windows);
-    DwarfEvents *de = new DwarfEvents(windows[0],c, moveSpeed, mouseSensitivity);
+    DwarfEvents *de = new DwarfEvents(windows[0],c, root, moveSpeed, mouseSensitivity);
     viewer.addEventHandler(de);
     int dt = 0;
-    viewer.setLightingMode(osgViewer::Viewer::SKY_LIGHT);
+    if (useHeadlight) viewer.setLightingMode(osgViewer::Viewer::HEADLIGHT);
+    else viewer.setLightingMode(osgViewer::Viewer::SKY_LIGHT);
+    cout << "Have fun!" << endl;
     while (de->update(dt) && viewer.isRealized())
     {
         Timer_t startFrameTick = osg::Timer::instance()->tick();
@@ -166,99 +182,3 @@ bool Overseer::go()
     }
     return true;
 }
-
-/*bool Overseer::keyPressed(const OIS::KeyEvent &e)
-{
-    switch (e.key)
-    {
-    case OIS::KC_W:
-        velocity.set(velocity.x(),velocity.y(),velocity.z()+moveSpeed);
-        break;
-    case OIS::KC_S:
-        velocity.set(velocity.x(),velocity.y(),velocity.z()-moveSpeed);
-        break;
-    case OIS::KC_A:
-        velocity.set(velocity.x()+moveSpeed,velocity.y(),velocity.z());
-        break;
-    case OIS::KC_D:
-        velocity.set(velocity.x()-moveSpeed,velocity.y(),velocity.z());
-        break;
-    case OIS::KC_R:
-        velocity.set(velocity.x(),velocity.y()-moveSpeed,velocity.z());
-        break;
-    case OIS::KC_F:
-        velocity.set(velocity.x(),velocity.y()+moveSpeed,velocity.z());
-        break;
-    case OIS::KC_X:
-        OPENFILENAME ofn;
-        char szFile[100];
-    	ZeroMemory( &ofn , sizeof( ofn));
-        ofn.lStructSize = sizeof ( ofn );
-        ofn.hwndOwner = NULL  ;
-        ofn.lpstrFile = szFile ;
-        ofn.lpstrFile[0] = '\0';
-        ofn.nMaxFile = sizeof( szFile );
-        ofn.lpstrFilter = "Wavefront (*.obj)\0*.obj\0Autodesk 3dsMax (*.3ds)\0*.3ds\0AC3D (*.ac)\0*.ac\0Autodesk DXF (*.dxf)\0*.dxf\0Lightwave (*.lwo)\0*.lwo\0PovRay (*.pov)\0*.pov\0";
-        ofn.nFilterIndex =1;
-        ofn.lpstrFileTitle = NULL ;
-        ofn.nMaxFileTitle = 0 ;
-        ofn.lpstrInitialDir=NULL ;
-        ofn.lpstrDefExt="obj";
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT ;
-
-        if (!GetSaveFileName( &ofn )) break;
-        fileName = new string(ofn.lpstrFile);
-        cout << "Writing " << *fileName << "...";
-        osgDB::writeNodeFile(*root,*fileName);
-        cout << "done." << endl;
-        break;
-    case OIS::KC_RSHIFT:
-    case OIS::KC_LSHIFT:
-        shiftspeed = 10;
-        break;
-    case OIS::KC_ESCAPE:
-        keepRendering = false;
-        break;
-    default:
-        break;
-    }
-    return true;
-}*/
-/*bool Overseer::keyReleased(const OIS::KeyEvent &e)
-{
-    switch (e.key)
-    {
-    case OIS::KC_W:
-        velocity.set(velocity.x(),velocity.y(),velocity.z()-moveSpeed);
-        break;
-    case OIS::KC_S:
-        velocity.set(velocity.x(),velocity.y(),velocity.z()+moveSpeed);
-        break;
-    case OIS::KC_A:
-        velocity.set(velocity.x()-moveSpeed,velocity.y(),velocity.z());
-        break;
-    case OIS::KC_D:
-        velocity.set(velocity.x()+moveSpeed,velocity.y(),velocity.z());
-        break;
-    case OIS::KC_R:
-        velocity.set(velocity.x(),velocity.y()+moveSpeed,velocity.z());
-        break;
-    case OIS::KC_F:
-        velocity.set(velocity.x(),velocity.y()-moveSpeed,velocity.z());
-        break;
-    case OIS::KC_RSHIFT:
-    case OIS::KC_LSHIFT:
-        shiftspeed = 1;
-        break;
-    default:
-        break;
-    }
-    return true;
-}*/
-/*bool Overseer::mouseMoved(const OIS::MouseEvent &e)
-{
-    yaw *= Matrixd::rotate(inDegrees(mouseSensitivity*e.state.X.rel), Vec3(0,1,0));
-    pitch *= Matrixd::rotate(inDegrees(mouseSensitivity*e.state.Y.rel), Vec3(1,0,0));
-    //rot *= yaw;
-    return true;
-}*/
