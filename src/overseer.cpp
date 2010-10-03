@@ -50,6 +50,14 @@ void Overseer::loadSettings()
 	string dif = ini.GetValue("overseer","diffuse","1");
 	string spec = ini.GetValue("overseer","specular",".8");
 
+	keys[0] = ini.GetValue("keys","forward","w");
+	keys[1] = ini.GetValue("keys","backward","s");
+	keys[2] = ini.GetValue("keys","left","a");
+	keys[3] = ini.GetValue("keys","right","d");
+	keys[4] = ini.GetValue("keys","up","r");
+	keys[5] = ini.GetValue("keys","down","f");
+	keys[6] = ini.GetValue("keys","export","x");
+
 	char *end;
 	moveSpeed = strtod(mov.c_str(),&end);
 	mouseSensitivity = strtod(sens.c_str(),&end);
@@ -57,7 +65,6 @@ void Overseer::loadSettings()
     ambient = strtod(amb.c_str(), &end);
     diffuse = strtod(dif.c_str(), &end);
     specular = strtod(spec.c_str(), &end);
-
 }
 
 bool Overseer::connectToDF()
@@ -167,7 +174,7 @@ bool Overseer::go()
 
     osgViewer::Viewer::Windows windows;
     viewer.getWindows(windows);
-    DwarfEvents *de = new DwarfEvents(windows[0],c, root, moveSpeed, mouseSensitivity);
+    DwarfEvents *de = new DwarfEvents(windows[0],c, root, moveSpeed, mouseSensitivity, keys);
     viewer.addEventHandler(de);
     int dt = 0;
     if (useHeadlight) viewer.setLightingMode(osgViewer::Viewer::HEADLIGHT);

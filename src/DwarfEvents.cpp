@@ -6,7 +6,7 @@ using namespace osg;
 using namespace osgGA;
 
 
-DwarfEvents::DwarfEvents(osgViewer::GraphicsWindow *w, Camera *cam, Group *r, double movs, double ms)
+DwarfEvents::DwarfEvents(osgViewer::GraphicsWindow *w, Camera *cam, Group *r, double movs, double ms, string *ks)
 {
     win = w;
     c = cam;
@@ -25,49 +25,36 @@ DwarfEvents::DwarfEvents(osgViewer::GraphicsWindow *w, Camera *cam, Group *r, do
     shiftspeed = 1;
     keepRendering = true;
     grabMouse = false;
+    keys = ks;
 }
 
 bool DwarfEvents::handle(const GUIEventAdapter& ea,GUIActionAdapter& aa)
 {
+    int key;
     switch (ea.getEventType())
     {
     case (GUIEventAdapter::KEYDOWN):
         if (!grabMouse) break;
-        switch (ea.getKey())
-        {
-        case GUIEventAdapter::KEY_Escape:
+        key = tolower(ea.getKey());
+
+        if (key == GUIEventAdapter::KEY_Escape)
             keepRendering = false;
-            break;
-        case GUIEventAdapter::KEY_Shift_L:
-        case GUIEventAdapter::KEY_Shift_R:
+        else if (key == GUIEventAdapter::KEY_Shift_L || key == GUIEventAdapter::KEY_Shift_R)
             shiftspeed = 10;
-            break;
-        case 'w':
-        case 'W':
+        else if (key==tolower((keys[0])[0]))
             velocity.set(velocity.x(),velocity.y(),velocity.z()<moveSpeed?velocity.z()+moveSpeed:velocity.z());
-            break;
-        case 's':
-        case 'S':
+        else if (key==tolower((keys[1])[0]))
             velocity.set(velocity.x(),velocity.y(),velocity.z()>-moveSpeed?velocity.z()-moveSpeed:velocity.z());
-            break;
-        case 'a':
-        case 'A':
+        else if (key==tolower((keys[2])[0]))
             velocity.set(velocity.x()<moveSpeed?velocity.x()+moveSpeed:velocity.x(),velocity.y(),velocity.z());
-            break;
-        case 'd':
-        case 'D':
+        else if (key==tolower((keys[3])[0]))
             velocity.set(velocity.x()>-moveSpeed?velocity.x()-moveSpeed:velocity.x(),velocity.y(),velocity.z());
-            break;
-        case 'r':
-        case 'R':
+        else if (key==tolower((keys[4])[0]))
             velocity.set(velocity.x(),velocity.y()>-moveSpeed?velocity.y()-moveSpeed:velocity.y(),velocity.z());
-            break;
-        case 'f':
-        case 'F':
+        else if (key==tolower((keys[5])[0]))
             velocity.set(velocity.x(),velocity.y()<moveSpeed?velocity.y()+moveSpeed:velocity.y(),velocity.z());
-            break;
-        case 'x':
-        case 'X':
+        else if (key==tolower((keys[6])[0]))
+        {
             OPENFILENAME ofn;
             char szFile[100];
             ZeroMemory( &ofn , sizeof( ofn));
@@ -89,46 +76,25 @@ bool DwarfEvents::handle(const GUIEventAdapter& ea,GUIActionAdapter& aa)
             cout << "Writing " << *fileName << "...";
             osgDB::writeNodeFile(*root,*fileName);
             cout << "done." << endl;
-            break;
-        default:
-            break;
         }
         break;
     case (GUIEventAdapter::KEYUP):
         if (!grabMouse) break;
-        switch (ea.getKey())
-        {
-        case GUIEventAdapter::KEY_Shift_L:
-        case GUIEventAdapter::KEY_Shift_R:
+        key = tolower(ea.getKey());
+        if (key==GUIEventAdapter::KEY_Shift_L || key== GUIEventAdapter::KEY_Shift_R)
             shiftspeed = 1;
-            break;
-        case 'w':
-        case 'W':
+        else if (key==tolower((keys[0])[0]))
             velocity.set(velocity.x(),velocity.y(),velocity.z()-moveSpeed);
-            break;
-        case 's':
-        case 'S':
+        else if (key==tolower((keys[1])[0]))
             velocity.set(velocity.x(),velocity.y(),velocity.z()+moveSpeed);
-            break;
-        case 'a':
-        case 'A':
+        else if (key==tolower((keys[2])[0]))
             velocity.set(velocity.x()-moveSpeed,velocity.y(),velocity.z());
-            break;
-        case 'd':
-        case 'D':
+        else if (key==tolower((keys[3])[0]))
             velocity.set(velocity.x()+moveSpeed,velocity.y(),velocity.z());
-            break;
-        case 'r':
-        case 'R':
+        else if (key==tolower((keys[4])[0]))
             velocity.set(velocity.x(),velocity.y()+moveSpeed,velocity.z());
-            break;
-        case 'f':
-        case 'F':
+        else if (key==tolower((keys[5])[0]))
             velocity.set(velocity.x(),velocity.y()-moveSpeed,velocity.z());
-            break;
-        default:
-            break;
-        }
         break;
     case GUIEventAdapter::PUSH:
         switch (ea.getButton())

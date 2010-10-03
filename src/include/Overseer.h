@@ -44,5 +44,5 @@ class Overseer
         double ambient;
         double diffuse;
         double specular;
-
+        std::string keys[7];
 };

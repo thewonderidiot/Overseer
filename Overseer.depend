@@ -2411,7 +2411,7 @@
 1283869503 c:\openscenegraph\include\osgga\orbitmanipulator
 	<osgGA/StandardManipulator>
 
-1284578575 source:c:\overseer\src\overseer.cpp
+1285797060 source:c:\overseer\src\overseer.cpp
 	<osgViewer/Viewer>
 	<osgViewer/ViewerEventHandlers>
 	<osgGA/StateSetManipulator>
@@ -2425,7 +2425,7 @@
 	"DwarfEvents.h"
 	<osg/Light>
 
-1284578605 source:c:\overseer\src\dwarfgeometry.cpp
+1286050892 source:c:\overseer\src\dwarfgeometry.cpp
 	"DwarfGeometry.h"
 	<osg/Node>
 	<osg/PositionAttitudeTransform>
@@ -2461,14 +2461,14 @@
 	<windows.h>
 	<mbstring.h>
 
-1284578575 c:\overseer\src\include\overseer.h
+1285795290 c:\overseer\src\include\overseer.h
 	<DFHack.h>
 	<osgGA/TrackballManipulator>
 	<osgDB/ReadFile>
 	<iostream>
 	"DwarfGeometry.h"
 
-1284578595 c:\overseer\src\include\dwarfgeometry.h
+1286050106 c:\overseer\src\include\dwarfgeometry.h
 	<DFHack.h>
 	<dfhack/DFTileTypes.h>
 	<osg/Drawable>
@@ -2620,12 +2620,12 @@
 	"dfhack/DFExport.h"
 	"dfhack/DFModule.h"
 
-1284387964 source:c:\overseer\src\dwarfevents.cpp
+1285797582 source:c:\overseer\src\dwarfevents.cpp
 	"DwarfEvents.h"
 	<iostream>
 	<windows.h>
 
-1284388221 c:\overseer\src\include\dwarfevents.h
+1285797120 c:\overseer\src\include\dwarfevents.h
 	<osgGA/GUIEventAdapter>
 	<osgGA/GUIEventHandler>
 	<osgViewer/GraphicsWindow>

@@ -6,7 +6,7 @@
 class DwarfEvents : public osgGA::GUIEventHandler
 {
     public:
-        DwarfEvents(osgViewer::GraphicsWindow *w, osg::Camera *cam, osg::Group *r, double movs, double ms);
+        DwarfEvents(osgViewer::GraphicsWindow *w, osg::Camera *cam, osg::Group *r, double movs, double ms, std::string *keys);
         virtual bool handle(const osgGA::GUIEventAdapter& ea,osgGA::GUIActionAdapter& aa);
         virtual void accept(osgGA::GUIEventHandlerVisitor& v);
         bool update(int dt);
@@ -25,4 +25,5 @@ class DwarfEvents : public osgGA::GUIEventHandler
         bool keepRendering;
         bool grabMouse;
         std::string *fileName;
+        std::string *keys;
 };

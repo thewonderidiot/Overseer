@@ -76,6 +76,7 @@ class DwarfGeometry
         bool drawFloors(uint32_t z);
         bool drawCeilings(uint32_t z);
         bool drawRamps(uint32_t z);
+        void drawFluids();
         void drawNorthRampWestBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
         void drawNorthRampEastBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);
         void drawNorthRampSouthBoundaries(uint32_t x, uint32_t y, uint32_t z, uint32_t wallmat, uint16_t walltype);

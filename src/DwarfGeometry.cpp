@@ -2027,14 +2027,14 @@ bool DwarfGeometry::start()
     tiles.resize(zmax);
     for (uint32_t z = 0; z < zmax; z++)
     {
-        tiles[z].resize(16*ymax);
-        for (uint32_t y = 0; y < 16*ymax; y++)
+        tiles[z].resize(16*xmax);
+        for (uint32_t x = 0; x < 16*xmax; x++)
         {
-            tiles[z][y].resize(16*xmax);
+            tiles[z][x].resize(16*ymax);
         }
     }
     bool hasgeo;
-    cout << "Reading embark data:" << endl;
+    cout << "Reading embark data:";
     for (uint32_t z=startz; z<zmax; z++)
     {
         hasgeo = false;
@@ -2155,6 +2155,9 @@ bool DwarfGeometry::start()
     }
     Cons->Finish();
     cout << " done." << endl;
+    uint32_t temp = ymax;
+    ymax = xmax;
+    xmax = temp; //conert to overseer coords
     processRamps();
     return true;
 }
@@ -2210,6 +2213,7 @@ bool DwarfGeometry::drawGeometry()
     }
     drawStairs();
     drawFortifications();
+    drawFluids();
         /*ref_ptr<Node> tree = osgDB::readNodeFile("models/test.obj");
         PositionAttitudeTransform *treeplace = new PositionAttitudeTransform();
         treeplace->setPosition(Vec3(10,10,geomax));
@@ -2702,6 +2706,96 @@ void DwarfGeometry::getMaterial(Geometry *g, uint32_t index)
         g->setColorBinding(Geometry::BIND_OVERALL);
     }
 }
+
+void DwarfGeometry::drawFluids()
+{
+    ref_ptr<Group> fluidGroup = new Group();
+    geometryGroup->addChild(fluidGroup);
+    for (uint32_t z=0; z < zmax; z++)
+    {
+        cout << "Fluids z=" << z << endl;
+        map<DFHack::e_liquidtype, ref_ptr<Geode> > lg;
+        map<DFHack::e_liquidtype, ref_ptr<Geometry> > lgeo;
+        map<DFHack::e_liquidtype, ref_ptr<Vec3Array> > lvert;
+        map<DFHack::e_liquidtype, ref_ptr<Vec3Array> > lnorm;
+        map<DFHack::e_liquidtype, ref_ptr<Vec2Array> > ltex;
+
+        for (uint32_t y=0; y < ymax; y++)
+        {
+            for (uint32_t x=0; x < xmax; x++)
+            {
+                if (tiles[z][y][x].designation.bits.flow_size>0)
+                {
+                    DFHack::e_liquidtype ltype = tiles[z][y][x].designation.bits.liquid_type;
+                    if (lg[ltype]==NULL)
+                    {
+                        lg[ltype] = new Geode();
+                        lgeo[ltype] = new Geometry();
+                        lvert[ltype] = new Vec3Array();
+                        lnorm[ltype] = new Vec3Array();
+                        ltex[ltype] = new Vec2Array();
+                    }
+                    double heights[5];
+                    heights[0] = (tiles[z][y>0?y-1:0][x>0?x-1:0].designation.bits.flow_size + tiles[z][y>0?y-1:0][x].designation.bits.flow_size + tiles[z][y][x>0?x-1:0].designation.bits.flow_size + tiles[z][y][x].designation.bits.flow_size)/(4.0*7.0);
+                    heights[1] = (tiles[z][y>0?y-1:0][x<xmax-1?x+1:xmax-1].designation.bits.flow_size + tiles[z][y>0?y-1:0][x].designation.bits.flow_size + tiles[z][y][x<xmax-1?x+1:xmax-1].designation.bits.flow_size + tiles[z][y][x].designation.bits.flow_size)/(4.0*7.0);
+                    heights[2] = (tiles[z][y<ymax-1?y+1:ymax-1][x>0?x-1:0].designation.bits.flow_size + tiles[z][y<ymax-1?y+1:ymax-1][x].designation.bits.flow_size + tiles[z][y][x>0?x-1:0].designation.bits.flow_size + tiles[z][y][x].designation.bits.flow_size)/(4.0*7.0);
+                    heights[3] = (tiles[z][y<ymax-1?y+1:ymax-1][x<xmax-1?x+1:xmax-1].designation.bits.flow_size + tiles[z][y<ymax-1?y+1:ymax-1][x].designation.bits.flow_size + tiles[z][y][x<xmax-1?x+1:xmax-1].designation.bits.flow_size + tiles[z][y][x].designation.bits.flow_size)/(4.0*7.0);
+                    double havg = (heights[0]+heights[1]+heights[2]+heights[3])/4.0;
+                    heights[4] = (heights[0] == heights[1] && heights[0] == heights[2] && heights[0] == heights[3])? -1 : havg;
+                    lvert[ltype]->push_back(Vec3(x,y,z+heights[0]));
+                    lvert[ltype]->push_back(Vec3(x+1,y,z+heights[1]));
+                    lvert[ltype]->push_back(Vec3(x,y+1,z+heights[2]));
+                    lvert[ltype]->push_back(Vec3(x+1,y+1,z+heights[3]));
+                    if (heights[4]>=0)
+                    {
+                        lvert[ltype]->push_back(Vec3(x+.5,y+.5,z+heights[4]));
+                        int s = lvert[ltype]->size()-1;
+                        face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+                        face->push_back(s);
+                        face->push_back(s-2);
+                        face->push_back(s-1);
+                        lgeo[ltype]->addPrimitiveSet(face);
+                        face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+                        face->push_back(s);
+                        face->push_back(s-4);
+                        face->push_back(s-2);
+                        lgeo[ltype]->addPrimitiveSet(face);
+                        face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+                        face->push_back(s);
+                        face->push_back(s-3);
+                        face->push_back(s-4);
+                        lgeo[ltype]->addPrimitiveSet(face);
+                        face = new DrawElementsUInt(PrimitiveSet::TRIANGLES,0);
+                        face->push_back(s);
+                        face->push_back(s-3);
+                        face->push_back(s-1);
+                        lgeo[ltype]->addPrimitiveSet(face);
+                    }
+                    else
+                    {
+                        int s = lvert[ltype]->size()-1;
+                        face = new DrawElementsUInt(PrimitiveSet::QUADS,0);
+                        face->push_back(s);
+                        face->push_back(s-1);
+                        face->push_back(s-3);
+                        face->push_back(s-2);
+                        lgeo[ltype]->addPrimitiveSet(face);
+                    }
+                }
+            }
+        }
+        for (uint32_t i=0; i<2; i++)
+        {
+            DFHack::e_liquidtype t = (DFHack::e_liquidtype)i;
+            if (lg[t]==NULL) continue;
+            lg[t]->addDrawable(lgeo[t].get());
+            lgeo[t]->setVertexArray(lvert[t].get());
+            fluidGroup->addChild(lg[t].get());
+        }
+    }
+}
+
+
 
 void DwarfGeometry::clean()
 {
